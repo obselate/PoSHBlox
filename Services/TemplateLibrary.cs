@@ -39,6 +39,7 @@ public static class TemplateLibrary
                 new() { Name = "Destination", Type = ParamType.Path, IsMandatory = true, Description = "Destination path" },
                 new() { Name = "Recurse", Type = ParamType.Bool, Description = "Copy subdirectories" },
                 new() { Name = "Force", Type = ParamType.Bool, Description = "Overwrite existing" },
+                new() { Name = "PassThru", Type = ParamType.Bool, DefaultValue = "true", Description = "Output copied items for chaining" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -52,6 +53,7 @@ public static class TemplateLibrary
                 new() { Name = "Path", Type = ParamType.Path, Description = "Source path (or use pipeline)" },
                 new() { Name = "Destination", Type = ParamType.Path, IsMandatory = true, Description = "Destination path" },
                 new() { Name = "Force", Type = ParamType.Bool, Description = "Overwrite existing" },
+                new() { Name = "PassThru", Type = ParamType.Bool, DefaultValue = "true", Description = "Output moved items for chaining" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -60,6 +62,8 @@ public static class TemplateLibrary
             Name = "Remove-Item", CmdletName = "Remove-Item",
             Category = "File / Folder",
             Description = "Delete files or folders",
+            InputCount = 1, OutputCount = 0,
+            OutputNames = [],
             Parameters =
             [
                 new() { Name = "Path", Type = ParamType.Path, Description = "Path to remove (or use pipeline)" },
@@ -117,7 +121,7 @@ public static class TemplateLibrary
             InputNames = [], OutputNames = ["Processes"],
             Parameters =
             [
-                new() { Name = "Name", Type = ParamType.String, Description = "Filter by process name (wildcards ok)" },
+                new() { Name = "Name", Type = ParamType.StringArray, Description = "Filter by process name(s) (wildcards ok)" },
                 new() { Name = "Id", Type = ParamType.Int, Description = "Filter by process ID" },
                 new() { Name = "ComputerName", Type = ParamType.String, Description = "Remote computer" },
             ]
@@ -145,8 +149,8 @@ public static class TemplateLibrary
             InputNames = [], OutputNames = ["Services"],
             Parameters =
             [
-                new() { Name = "Name", Type = ParamType.String, Description = "Service name (wildcards ok)" },
-                new() { Name = "DisplayName", Type = ParamType.String, Description = "Filter by display name" },
+                new() { Name = "Name", Type = ParamType.StringArray, Description = "Service name(s) (wildcards ok)" },
+                new() { Name = "DisplayName", Type = ParamType.StringArray, Description = "Filter by display name(s)" },
                 new() { Name = "ComputerName", Type = ParamType.String, Description = "Remote computer" },
                 new() { Name = "DependentServices", Type = ParamType.Bool, Description = "Include dependent services" },
                 new() { Name = "RequiredServices", Type = ParamType.Bool, Description = "Include required services" },
@@ -160,6 +164,7 @@ public static class TemplateLibrary
             Parameters =
             [
                 new() { Name = "Name", Type = ParamType.String, IsMandatory = true, Description = "Service name" },
+                new() { Name = "PassThru", Type = ParamType.Bool, DefaultValue = "true", Description = "Output service object for chaining" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -172,6 +177,7 @@ public static class TemplateLibrary
             [
                 new() { Name = "Name", Type = ParamType.String, IsMandatory = true, Description = "Service name" },
                 new() { Name = "Force", Type = ParamType.Bool, Description = "Force stop dependent services" },
+                new() { Name = "PassThru", Type = ParamType.Bool, DefaultValue = "true", Description = "Output service object for chaining" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -184,6 +190,7 @@ public static class TemplateLibrary
             [
                 new() { Name = "Name", Type = ParamType.String, IsMandatory = true, Description = "Service name" },
                 new() { Name = "Force", Type = ParamType.Bool, Description = "Force restart dependent services" },
+                new() { Name = "PassThru", Type = ParamType.Bool, DefaultValue = "true", Description = "Output service object for chaining" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -215,6 +222,7 @@ public static class TemplateLibrary
                 new() { Name = "Name", Type = ParamType.String, IsMandatory = true, Description = "Value name" },
                 new() { Name = "Value", Type = ParamType.String, IsMandatory = true, Description = "Value data" },
                 new() { Name = "Type", Type = ParamType.Enum, Description = "Registry value type", ValidValues = ["String", "ExpandString", "DWord", "QWord", "Binary", "MultiString"] },
+                new() { Name = "Force", Type = ParamType.Bool, Description = "Create property if it doesn't exist" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -223,6 +231,8 @@ public static class TemplateLibrary
             Name = "New-Item (Reg Key)", CmdletName = "New-Item",
             Category = "Registry",
             Description = "Create a registry key",
+            InputCount = 0, OutputCount = 1,
+            InputNames = [], OutputNames = ["Key"],
             Parameters =
             [
                 new() { Name = "Path", Type = ParamType.Path, IsMandatory = true, DefaultValue = "HKLM:\\SOFTWARE\\MyApp", Description = "Registry key to create" },
@@ -241,6 +251,7 @@ public static class TemplateLibrary
             [
                 new() { Name = "Path", Type = ParamType.Path, IsMandatory = true, Description = "Registry key path" },
                 new() { Name = "Name", Type = ParamType.String, IsMandatory = true, Description = "Value name to delete" },
+                new() { Name = "Force", Type = ParamType.Bool, Description = "Remove read-only or protected values" },
                 new() { Name = "WhatIf", Type = ParamType.Bool, DefaultValue = "true", Description = "Preview without executing" },
             ]
         },
@@ -255,7 +266,7 @@ public static class TemplateLibrary
             InputNames = [], OutputNames = ["Results"],
             Parameters =
             [
-                new() { Name = "ComputerName", Type = ParamType.String, IsMandatory = true, Description = "Host to ping" },
+                new() { Name = "ComputerName", Type = ParamType.StringArray, IsMandatory = true, Description = "Host(s) to ping, comma-separated" },
                 new() { Name = "Count", Type = ParamType.Int, DefaultValue = "4", Description = "Number of pings" },
                 new() { Name = "Quiet", Type = ParamType.Bool, Description = "Return only True/False" },
             ]
@@ -265,10 +276,11 @@ public static class TemplateLibrary
             Name = "Invoke-Command", CmdletName = "Invoke-Command",
             Category = "Network / Remote",
             Description = "Run script on remote machines",
+            InputCount = 2, OutputCount = 1,
+            InputNames = ["Credential", "ScriptBlock"], OutputNames = ["Results"],
             Parameters =
             [
                 new() { Name = "ComputerName", Type = ParamType.StringArray, IsMandatory = true, Description = "Remote computer(s), comma-separated" },
-                new() { Name = "ScriptBlock", Type = ParamType.ScriptBlock, IsMandatory = true, DefaultValue = "hostname", Description = "Script to run remotely" },
             ]
         },
         new()
@@ -319,10 +331,6 @@ public static class TemplateLibrary
             Category = "String / Data",
             Description = "Filter pipeline objects",
             ScriptBody = "$input | Where-Object {\n    $_.Name -like \"*pattern*\"\n}",
-            Parameters =
-            [
-                new() { Name = "FilterScript", Type = ParamType.ScriptBlock, IsMandatory = true, DefaultValue = "$_.Name -like '*'", Description = "Filter condition" },
-            ]
         },
         new()
         {
@@ -344,7 +352,7 @@ public static class TemplateLibrary
             Description = "Sort pipeline objects",
             Parameters =
             [
-                new() { Name = "Property", Type = ParamType.String, IsMandatory = true, DefaultValue = "Name", Description = "Property to sort by" },
+                new() { Name = "Property", Type = ParamType.StringArray, IsMandatory = true, DefaultValue = "Name", Description = "Property(s) to sort by" },
                 new() { Name = "Descending", Type = ParamType.Bool, Description = "Sort descending" },
                 new() { Name = "Unique", Type = ParamType.Bool, Description = "Remove duplicates" },
             ]
@@ -356,7 +364,7 @@ public static class TemplateLibrary
             Description = "Group by property",
             Parameters =
             [
-                new() { Name = "Property", Type = ParamType.String, IsMandatory = true, DefaultValue = "Status", Description = "Property to group by" },
+                new() { Name = "Property", Type = ParamType.StringArray, IsMandatory = true, DefaultValue = "Status", Description = "Property(s) to group by" },
                 new() { Name = "NoElement", Type = ParamType.Bool, Description = "Omit group members (count only)" },
             ]
         },
@@ -366,10 +374,6 @@ public static class TemplateLibrary
             Category = "String / Data",
             Description = "Transform each object",
             ScriptBody = "$input | ForEach-Object {\n    $_\n}",
-            Parameters =
-            [
-                new() { Name = "Process", Type = ParamType.ScriptBlock, IsMandatory = true, DefaultValue = "$_", Description = "Script to run per object" },
-            ]
         },
         new()
         {
@@ -417,7 +421,7 @@ public static class TemplateLibrary
             Description = "Count, sum, average",
             Parameters =
             [
-                new() { Name = "Property", Type = ParamType.String, Description = "Property to measure" },
+                new() { Name = "Property", Type = ParamType.StringArray, Description = "Property(s) to measure" },
                 new() { Name = "Sum", Type = ParamType.Bool, Description = "Calculate sum" },
                 new() { Name = "Average", Type = ParamType.Bool, Description = "Calculate average" },
                 new() { Name = "Maximum", Type = ParamType.Bool, Description = "Find maximum" },
@@ -432,10 +436,12 @@ public static class TemplateLibrary
             CmdletName = "Write-Host",
             Category = "Output",
             Description = "Write colored text to console (not pipeline)",
+            OutputCount = 0, OutputNames = [],
             Parameters = new List<ParameterDef>
             {
                 new ParameterDef { Name = "Object", Type = ParamType.String, Description = "Text or object to display (leave blank to display pipeline input)" },
-                new ParameterDef { Name = "ForegroundColor", Type = ParamType.String, Description = "Text color (e.g. Green, Red, Yellow)" },
+                new ParameterDef { Name = "ForegroundColor", Type = ParamType.Enum, Description = "Text color", ValidValues = ["Black", "DarkBlue", "DarkGreen", "DarkCyan", "DarkRed", "DarkMagenta", "DarkYellow", "Gray", "DarkGray", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White"] },
+                new ParameterDef { Name = "BackgroundColor", Type = ParamType.Enum, Description = "Background color", ValidValues = ["Black", "DarkBlue", "DarkGreen", "DarkCyan", "DarkRed", "DarkMagenta", "DarkYellow", "Gray", "DarkGray", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White"] },
                 new ParameterDef { Name = "NoNewline", Type = ParamType.Bool, Description = "Don't append newline" },
             },
         },
@@ -456,6 +462,7 @@ public static class TemplateLibrary
             CmdletName = "Write-Warning",
             Category = "Output",
             Description = "Write a warning message",
+            OutputCount = 0, OutputNames = [],
             Parameters = new List<ParameterDef>
             {
                 new ParameterDef { Name = "Message", Type = ParamType.String, IsMandatory = true, Description = "Warning text" },
@@ -467,6 +474,7 @@ public static class TemplateLibrary
             CmdletName = "Write-Error",
             Category = "Output",
             Description = "Write a non-terminating error",
+            OutputCount = 0, OutputNames = [],
             Parameters = new List<ParameterDef>
             {
                 new ParameterDef { Name = "Message", Type = ParamType.String, IsMandatory = true, Description = "Error text" },
@@ -478,6 +486,7 @@ public static class TemplateLibrary
             CmdletName = "Write-Verbose",
             Category = "Output",
             Description = "Write verbose output (requires -Verbose or $VerbosePreference)",
+            OutputCount = 0, OutputNames = [],
             Parameters = new List<ParameterDef>
             {
                 new ParameterDef { Name = "Message", Type = ParamType.String, IsMandatory = true, Description = "Verbose text" },
@@ -489,6 +498,7 @@ public static class TemplateLibrary
             CmdletName = "Out-Host",
             Category = "Output",
             Description = "Send output to the console host",
+            OutputCount = 0, OutputNames = [],
         },
         new()
         {
@@ -496,6 +506,7 @@ public static class TemplateLibrary
             CmdletName = "Out-Null",
             Category = "Output",
             Description = "Suppress output (discard pipeline objects)",
+            OutputCount = 0, OutputNames = [],
         },
         new()
         {
@@ -505,7 +516,7 @@ public static class TemplateLibrary
             Description = "Format output as a table",
             Parameters = new List<ParameterDef>
             {
-                new ParameterDef { Name = "Property", Type = ParamType.String, Description = "Properties to display (comma-separated)" },
+                new ParameterDef { Name = "Property", Type = ParamType.StringArray, Description = "Properties to display (comma-separated)" },
                 new ParameterDef { Name = "AutoSize", Type = ParamType.Bool, Description = "Auto-size columns" },
                 new ParameterDef { Name = "Wrap", Type = ParamType.Bool, Description = "Wrap long text" },
             },
@@ -518,7 +529,7 @@ public static class TemplateLibrary
             Description = "Format output as property list",
             Parameters = new List<ParameterDef>
             {
-                new ParameterDef { Name = "Property", Type = ParamType.String, Description = "Properties to display (comma-separated or *)" },
+                new ParameterDef { Name = "Property", Type = ParamType.StringArray, Description = "Properties to display (comma-separated or *)" },
             },
         },
 
@@ -532,9 +543,9 @@ public static class TemplateLibrary
         },
         new()
         {
-            Name = "ForEach-Object",
+            Name = "ForEach Loop",
             Category = "Control Flow",
-            Description = "Loop over pipeline items - drop nodes into Body zone",
+            Description = "Loop over a collection - drop nodes into Body zone",
             ContainerType = ContainerType.ForEach,
         },
         new()
