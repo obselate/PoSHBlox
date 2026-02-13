@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a2332"/><stop offset="100%" stop-color="#2D3748"/>
+    </linearGradient>
+    <linearGradient id="bl" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0%" stop-color="#3286E8"/><stop offset="100%" stop-color="#1E5BA0"/>
+    </linearGradient>
+    <linearGradient id="gr" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0%" stop-color="#45B560"/><stop offset="100%" stop-color="#28803C"/>
+    </linearGradient>
+    <linearGradient id="or" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0%" stop-color="#F8A438"/><stop offset="100%" stop-color="#C07010"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="320" rx="16" fill="url(#bg)"/>
+
+  <g transform="translate(40, 38) scale(0.475)">
+    <rect width="512" height="512" rx="64" fill="#2D3748" opacity="0.6"/>
+    <path d="M244 176 H264 V158 H296" stroke="#3DAA58" stroke-width="14" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M244 264 H280 V354 H296" stroke="#F09830" stroke-width="14" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="72" y="130" width="178" height="180" rx="24" fill="url(#bl)"/>
+    <text x="104" y="256" font-family="Consolas,'Courier New',monospace" font-size="88" font-weight="bold" fill="#fff" opacity="0.95">&gt;_</text>
+    <rect x="296" y="82" width="144" height="144" rx="22" fill="url(#gr)"/>
+    <rect x="296" y="284" width="144" height="144" rx="22" fill="url(#or)"/>
+  </g>
+
+  <text y="180" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="96" font-weight="800" letter-spacing="-2">
+    <tspan x="370" fill="#E2E8F0">PoSH</tspan><tspan fill="#2B7DE0">Blox</tspan>
+  </text>
+  <text x="374" y="224" font-family="'Segoe UI',system-ui,-apple-system,sans-serif" font-size="24" fill="#7B8BA3" letter-spacing="1">PowerShell Visual Scripting</text>
+  <rect x="374" y="240" width="140" height="3" rx="1.5" fill="#2B7DE0" opacity="0.6"/>
+</svg>
