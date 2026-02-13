@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="PoshNodeGraph/Assets/poshblox-banner.svg" alt="PoSHBlox" width="720" />
+  <img src="Assets/poshblox-banner.svg" alt="PoSHBlox" width="720" />
 </p>
 
 <p align="center">
