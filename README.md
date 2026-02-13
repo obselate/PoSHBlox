@@ -43,7 +43,7 @@ dotnet run
 
 ## How It Works
 
-1. **Add nodes** from the palette or toolbar
+1. **Add nodes** from the palette
 2. **Connect** output ports to input ports by dragging wires
 3. **Configure** parameters in the right-side properties panel
 4. **Preview** the generated script, then **Run** or **Save** as `.ps1`
