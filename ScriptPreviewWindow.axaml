@@ -1,0 +1,32 @@
+<ui:AppWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:FluentAvalonia.UI.Windowing"
+        x:Class="PoSHBlox.ScriptPreviewWindow"
+        Title="Script Preview"
+        Width="750" Height="600"
+        Background="#1e1e24"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="0">
+        <!-- Top bar -->
+        <Border DockPanel.Dock="Top" Background="#252530" Padding="12,8" BorderBrush="#333340" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <TextBlock Text="Generated PowerShell" FontSize="14" FontWeight="SemiBold"
+                           Foreground="#ccc" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                    <Button Content="&#x1F4CB; Copy" Click="OnCopyClicked"
+                            Background="#3a3a4a" Foreground="#ddd" Padding="10,5" CornerRadius="4" FontSize="12" />
+                    <Button Content="Close" Click="OnCloseClicked"
+                            Background="#3a3a4a" Foreground="#aaa" Padding="10,5" CornerRadius="4" FontSize="12" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Script content -->
+        <TextBox Name="ScriptTextBox"
+                 IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                 Background="#1a1a24" Foreground="#7ec87e" BorderThickness="0"
+                 Padding="16,12" CornerRadius="0"
+                 FontFamily="Cascadia Code, Consolas, monospace" FontSize="12" />
+    </DockPanel>
+</ui:AppWindow>

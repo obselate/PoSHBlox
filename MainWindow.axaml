@@ -1,0 +1,198 @@
+<ui:AppWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:FluentAvalonia.UI.Windowing"
+        xmlns:vm="using:PoSHBlox.ViewModels"
+        xmlns:ctrl="using:PoSHBlox.Controls"
+        x:Class="PoSHBlox.MainWindow"
+        x:Name="RootWindow"
+        Title="PoSHBlox - PowerShell Visual Scripting"
+        Width="1500" Height="900"
+        Background="#1e1e24"
+        WindowStartupLocation="CenterScreen">
+
+    <ui:AppWindow.DataContext>
+        <vm:GraphCanvasViewModel />
+    </ui:AppWindow.DataContext>
+
+    <DockPanel>
+        <!-- Top Toolbar -->
+        <Border DockPanel.Dock="Top" Background="#252530" Padding="8,6" BorderBrush="#333340" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <ToggleButton x:Name="PaletteToggle" IsChecked="True" Click="OnPaletteToggleClicked"
+                              Background="#3a3a4a" Foreground="#aac" Padding="10,6" CornerRadius="4"
+                              FontSize="12" Content="Palette" />
+                <Border Width="1" Background="#444" Margin="4,2" />
+                <Button Content="Add Node" Command="{Binding AddNodeCommand}"
+                        Background="#3a3a4a" Foreground="#ddd" Padding="12,6" CornerRadius="4"
+                        FontSize="12" FontWeight="SemiBold" />
+                <Button Content="Delete Selected" Command="{Binding DeleteSelectedCommand}"
+                        Background="#4a2a2a" Foreground="#f88" Padding="12,6" CornerRadius="4"
+                        FontSize="12" />
+                <Border Width="1" Background="#444" Margin="4,2" />
+                <Button Content="Run" Click="OnRunClicked"
+                        Background="#2a4a2a" Foreground="#8f8" Padding="12,6" CornerRadius="4"
+                        FontSize="12" FontWeight="SemiBold" />
+                <Button Content="Save .ps1" Click="OnSaveClicked"
+                        Background="#2a3a5a" Foreground="#8af" Padding="12,6" CornerRadius="4"
+                        FontSize="12" FontWeight="SemiBold" />
+                <Button Content="Preview" Click="OnPreviewClicked"
+                        Background="#3a3a4a" Foreground="#ddd" Padding="12,6" CornerRadius="4"
+                        FontSize="12" />
+                <Button Content="Reset View" Command="{Binding ResetViewCommand}"
+                        Background="#3a3a4a" Foreground="#aaa" Padding="12,6" CornerRadius="4"
+                        FontSize="12" />
+            </StackPanel>
+        </Border>
+
+        <!-- Left Panel: Node Palette (collapsible) -->
+        <Border x:Name="PalettePanel" DockPanel.Dock="Left" MinWidth="260"
+                Background="#222230" BorderBrush="#333340" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Padding="12,10" BorderBrush="#333340" BorderThickness="0,0,0,1">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Node Palette" FontSize="15" FontWeight="Bold" Foreground="#ccc" />
+                        <TextBox Watermark="Search commands..."
+                                 Text="{Binding Palette.SearchText, Mode=TwoWay}"
+                                 Background="#1a1a24" Foreground="#ddd" BorderBrush="#444"
+                                 Padding="8,6" CornerRadius="3" FontSize="12" />
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Palette.FilteredCategories}" Margin="0,4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,2">
+                                    <!-- Category Header -->
+                                    <Border Background="#2a2a38" Padding="12,6" Margin="4,2">
+                                        <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#8899aa" />
+                                    </Border>
+
+                                    <!-- Templates in category -->
+                                    <ItemsControl ItemsSource="{Binding Templates}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="OnTemplateClicked"
+                                                        Tag="{Binding}"
+                                                        Background="Transparent"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Left"
+                                                        Padding="16,5,8,5" Margin="4,0" CornerRadius="3"
+                                                        Cursor="Hand">
+                                                    <StackPanel Spacing="1">
+                                                        <TextBlock Text="{Binding Name}" FontSize="12"
+                                                                   Foreground="#ccddee" TextWrapping="NoWrap" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="10"
+                                                                   Foreground="#667788" TextWrapping="NoWrap" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Right Side Panel -->
+        <Border DockPanel.Dock="Right" Width="360" Background="#222230" BorderBrush="#333340" BorderThickness="1,0,0,0">
+            <DockPanel>
+                <!-- No selection message -->
+                <Border DockPanel.Dock="Top" Padding="12"
+                        IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNull}}"
+                        BorderBrush="#333340" BorderThickness="0,0,0,1">
+                    <TextBlock Text="Click a node to edit its properties" FontSize="12"
+                               Foreground="#666" FontStyle="Italic" />
+                </Border>
+
+                <!-- Node Properties + Parameters (scrollable, fills panel) -->
+                <Border IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="6" Margin="12,10">
+                            <!-- Header: node name + category -->
+                            <TextBlock Text="{Binding SelectedNode.Title}" FontSize="16" FontWeight="Bold" Foreground="#ddd" />
+                            <TextBlock Text="{Binding SelectedNode.Category}" FontSize="11" Foreground="#778899" Margin="0,0,0,4" />
+
+                            <!-- Title edit -->
+                            <TextBlock Text="Title" FontSize="11" Foreground="#888" />
+                            <TextBox Text="{Binding SelectedNode.Title, Mode=TwoWay}"
+                                     Background="#2a2a38" Foreground="#ddd" BorderBrush="#444"
+                                     Padding="8,5" CornerRadius="3" FontSize="12" />
+
+                            <!-- Output Variable -->
+                            <TextBlock Text="Output Variable" FontSize="11" Foreground="#888" Margin="0,4,0,0" />
+                            <TextBox Text="{Binding SelectedNode.OutputVariable, Mode=TwoWay}"
+                                     Watermark="(auto)"
+                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
+                                     Padding="8,5" CornerRadius="3"
+                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="12" />
+
+                            <!-- Separator -->
+                            <Border Height="1" Background="#333340" Margin="0,6" />
+
+                            <!-- Parameters Section -->
+                            <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold" Foreground="#8899aa"
+                                       Margin="0,2,0,4" />
+
+                            <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Spacing="3" Margin="0,0,0,8">
+                                            <!-- Param name + mandatory indicator -->
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="#ccddee" />
+                                                <TextBlock Text="*" FontSize="12" FontWeight="Bold"
+                                                           Foreground="#ff6666"
+                                                           IsVisible="{Binding IsMandatory}" />
+                                                <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
+                                                           Foreground="#556677" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <!-- Description -->
+                                            <TextBlock Text="{Binding Description}" FontSize="10"
+                                                       Foreground="#667788" TextWrapping="Wrap" />
+                                            <!-- Value input -->
+                                            <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="{Binding DefaultValue}"
+                                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
+                                                     Padding="8,5" CornerRadius="3"
+                                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="12" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- No params message for custom nodes -->
+                            <TextBlock Text="No parameters - edit script directly below"
+                                       FontSize="11" Foreground="#556" FontStyle="Italic"
+                                       IsVisible="False"
+                                       Name="NoParamsMsg" />
+
+                            <!-- Separator -->
+                            <Border Height="1" Background="#333340" Margin="0,4" />
+
+                            <!-- Script body (for custom nodes or advanced editing) -->
+                            <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold" Foreground="#8899aa"
+                                       Margin="0,2,0,4" />
+                            <TextBox Text="{Binding SelectedNode.ScriptBody, Mode=TwoWay}"
+                                     AcceptsReturn="True" TextWrapping="Wrap"
+                                     Height="120"
+                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
+                                     Padding="8,6" CornerRadius="3"
+                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="11" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+            </DockPanel>
+        </Border>
+
+        <!-- Main Canvas (fills remaining space) -->
+        <ctrl:NodeGraphCanvas DataContext="{Binding}" />
+
+    </DockPanel>
+</ui:AppWindow>

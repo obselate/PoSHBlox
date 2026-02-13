@@ -1,0 +1,9 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             x:Class="PoSHBlox.App"
+             RequestedThemeVariant="Dark">
+    <Application.Styles>
+        <sty:FluentAvaloniaTheme CustomAccentColor="#3c3c48" />
+    </Application.Styles>
+</Application>
