@@ -40,7 +40,7 @@ PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes o
 ### Build & Run
 
 ```bash
-git clone https://github.com/yourname/PoSHBlox.git
+git clone https://github.com/obselate/PoSHBlox.git
 cd PoSHBlox/PoshNodeGraph
 dotnet run
 ```
