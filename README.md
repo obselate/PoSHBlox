@@ -63,4 +63,4 @@ dotnet run
 
 ## License
 
-MIT
+GNU AGPL v3 — see [LICENSE](LICENSE)
