@@ -8,12 +8,12 @@ namespace PoSHBlox.Models;
 
 public partial class GraphNode : ObservableObject
 {
-    public string Id { get; } = Guid.NewGuid().ToString("N")[..8];
+    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
 
     // ── Core identity ──────────────────────────────────────────
     [ObservableProperty] private string _title = "New Node";
     [ObservableProperty] private string _category = "Custom";
-    [ObservableProperty] private string _scriptBody = "# PowerShell 5.1\n$input | ForEach-Object {\n    $_\n}";
+    [ObservableProperty] private string _scriptBody = "# Your script here";
     public string CmdletName { get; set; } = "";
     public bool IsCmdletNode => !string.IsNullOrEmpty(CmdletName);
 

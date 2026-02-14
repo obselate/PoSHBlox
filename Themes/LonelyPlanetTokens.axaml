@@ -1,0 +1,198 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════════════════════
+         Tier 1A — Core Tokens (raw color values)
+         ══════════════════════════════════════════════════════════ -->
+    <Color x:Key="CoreBlueDeep">#FF0B1929</Color>
+    <Color x:Key="CoreBlueMid">#FF1A3A5C</Color>
+    <Color x:Key="CoreBlueSky">#FF7FBFEF</Color>
+    <Color x:Key="CoreBlueIce">#FFB8D9F2</Color>
+    <Color x:Key="CoreTealLight">#FF72BFB0</Color>
+    <Color x:Key="CoreTealSubtle">#1F5BA89A</Color>
+    <Color x:Key="CoreCream">#FFE0EAF2</Color>
+    <Color x:Key="CoreWhite">#FFF0F5FA</Color>
+
+    <!-- ══════════════════════════════════════════════════════════
+         Tier 1B — Weighted Color Scales
+         Generated via values.js tint/shade algorithm.
+         50=lightest → 500=base → 950=darkest
+         tint(w) = channel + (255-channel) * w/100
+         shade(w) = channel * (1 - w/100)
+         ══════════════════════════════════════════════════════════ -->
+
+    <!-- BlueSteel (#2C5A8A) — brand, file operations -->
+    <Color x:Key="CoreBlueSteel50">#FFF4F7F9</Color>
+    <Color x:Key="CoreBlueSteel100">#FFDFE6ED</Color>
+    <Color x:Key="CoreBlueSteel200">#FFC0CEDC</Color>
+    <Color x:Key="CoreBlueSteel300">#FF96ACC4</Color>
+    <Color x:Key="CoreBlueSteel400">#FF6183A7</Color>
+    <Color x:Key="CoreBlueSteel">#FF2C5A8A</Color>
+    <Color x:Key="CoreBlueSteel500">#FF2C5A8A</Color>
+    <Color x:Key="CoreBlueSteel600">#FF254C75</Color>
+    <Color x:Key="CoreBlueSteel700">#FF1F3F61</Color>
+    <Color x:Key="CoreBlueSteel800">#FF162D45</Color>
+    <Color x:Key="CoreBlueSteel900">#FF0D1B29</Color>
+    <Color x:Key="CoreBlueSteel950">#FF070E15</Color>
+
+    <!-- Teal (#5BA89A) — action, selection, run -->
+    <Color x:Key="CoreTealAccent50">#FFF7FBFA</Color>
+    <Color x:Key="CoreTealAccent100">#FFE6F2F0</Color>
+    <Color x:Key="CoreTealAccent200">#FFCEE5E1</Color>
+    <Color x:Key="CoreTealAccent300">#FFADD4CC</Color>
+    <Color x:Key="CoreTealAccent400">#FF84BEB3</Color>
+    <Color x:Key="CoreTealAccent">#FF5BA89A</Color>
+    <Color x:Key="CoreTealAccent500">#FF5BA89A</Color>
+    <Color x:Key="CoreTealAccent600">#FF4D8F83</Color>
+    <Color x:Key="CoreTealAccent700">#FF40766C</Color>
+    <Color x:Key="CoreTealAccent800">#FF2E544D</Color>
+    <Color x:Key="CoreTealAccent900">#FF1B322E</Color>
+    <Color x:Key="CoreTealAccent950">#FF0E1917</Color>
+
+    <!-- Amber (#D4943A) — pending, output -->
+    <Color x:Key="CoreAmberAction50">#FFFDFAF5</Color>
+    <Color x:Key="CoreAmberAction100">#FFF9EFE1</Color>
+    <Color x:Key="CoreAmberAction200">#FFF2DFC4</Color>
+    <Color x:Key="CoreAmberAction300">#FFEACA9C</Color>
+    <Color x:Key="CoreAmberAction400">#FFDFAF6B</Color>
+    <Color x:Key="CoreAmberAction">#FFD4943A</Color>
+    <Color x:Key="CoreAmberAction500">#FFD4943A</Color>
+    <Color x:Key="CoreAmberAction600">#FFB47E31</Color>
+    <Color x:Key="CoreAmberAction700">#FF946829</Color>
+    <Color x:Key="CoreAmberAction800">#FF6A4A1D</Color>
+    <Color x:Key="CoreAmberAction900">#FF402C11</Color>
+    <Color x:Key="CoreAmberAction950">#FF201609</Color>
+
+    <!-- Red (#D05050) — delete, warning, error -->
+    <Color x:Key="CoreRedWarning50">#FFFDF6F6</Color>
+    <Color x:Key="CoreRedWarning100">#FFF8E5E5</Color>
+    <Color x:Key="CoreRedWarning200">#FFF1CACA</Color>
+    <Color x:Key="CoreRedWarning300">#FFE8A8A8</Color>
+    <Color x:Key="CoreRedWarning400">#FFDC7C7C</Color>
+    <Color x:Key="CoreRedWarning">#FFD05050</Color>
+    <Color x:Key="CoreRedWarning500">#FFD05050</Color>
+    <Color x:Key="CoreRedWarning600">#FFB14444</Color>
+    <Color x:Key="CoreRedWarning700">#FF923838</Color>
+    <Color x:Key="CoreRedWarning800">#FF682828</Color>
+    <Color x:Key="CoreRedWarning900">#FF3E1818</Color>
+    <Color x:Key="CoreRedWarning950">#FF1F0C0C</Color>
+
+    <!-- GreenMoss (#4C9E74) — process, service -->
+    <Color x:Key="CoreGreenMoss50">#FFF6FAF8</Color>
+    <Color x:Key="CoreGreenMoss100">#FFE4F0EA</Color>
+    <Color x:Key="CoreGreenMoss200">#FFC9E2D5</Color>
+    <Color x:Key="CoreGreenMoss300">#FFA6CEBA</Color>
+    <Color x:Key="CoreGreenMoss400">#FF79B697</Color>
+    <Color x:Key="CoreGreenMoss">#FF4C9E74</Color>
+    <Color x:Key="CoreGreenMoss500">#FF4C9E74</Color>
+    <Color x:Key="CoreGreenMoss600">#FF418663</Color>
+    <Color x:Key="CoreGreenMoss700">#FF356F51</Color>
+    <Color x:Key="CoreGreenMoss800">#FF264F3A</Color>
+    <Color x:Key="CoreGreenMoss900">#FF172F23</Color>
+    <Color x:Key="CoreGreenMoss950">#FF0B1811</Color>
+
+    <!-- BlueBright (#4B8FD4) — accent, network -->
+    <Color x:Key="CoreBlueBright50">#FFF6F9FD</Color>
+    <Color x:Key="CoreBlueBright100">#FFE4EEF9</Color>
+    <Color x:Key="CoreBlueBright200">#FFC9DDF2</Color>
+    <Color x:Key="CoreBlueBright300">#FFA5C7EA</Color>
+    <Color x:Key="CoreBlueBright400">#FF78ABDF</Color>
+    <Color x:Key="CoreBlueBright">#FF4B8FD4</Color>
+    <Color x:Key="CoreBlueBright500">#FF4B8FD4</Color>
+    <Color x:Key="CoreBlueBright600">#FF407AB4</Color>
+    <Color x:Key="CoreBlueBright700">#FF346494</Color>
+    <Color x:Key="CoreBlueBright800">#FF26486A</Color>
+    <Color x:Key="CoreBlueBright900">#FF172B40</Color>
+    <Color x:Key="CoreBlueBright950">#FF0B1520</Color>
+
+    <!-- Slate (#708DA3) — data, muted -->
+    <Color x:Key="CoreSlateMid50">#FFF8F9FA</Color>
+    <Color x:Key="CoreSlateMid100">#FFEAEEF1</Color>
+    <Color x:Key="CoreSlateMid200">#FFD4DDE3</Color>
+    <Color x:Key="CoreSlateMid300">#FFB8C6D1</Color>
+    <Color x:Key="CoreSlateMid400">#FF94AABA</Color>
+    <Color x:Key="CoreSlateMid">#FF708DA3</Color>
+    <Color x:Key="CoreSlateMid500">#FF708DA3</Color>
+    <Color x:Key="CoreSlateMid600">#FF5F788B</Color>
+    <Color x:Key="CoreSlateMid700">#FF4E6372</Color>
+    <Color x:Key="CoreSlateMid800">#FF384652</Color>
+    <Color x:Key="CoreSlateMid900">#FF222A31</Color>
+    <Color x:Key="CoreSlateMid950">#FF111518</Color>
+
+    <!-- Purple (#7060A8) — control flow -->
+    <Color x:Key="CorePurple50">#FFF8F7FB</Color>
+    <Color x:Key="CorePurple100">#FFEAE7F2</Color>
+    <Color x:Key="CorePurple200">#FFD4CFE5</Color>
+    <Color x:Key="CorePurple300">#FFB8B0D4</Color>
+    <Color x:Key="CorePurple400">#FF9488BE</Color>
+    <Color x:Key="CorePurple">#FF7060A8</Color>
+    <Color x:Key="CorePurple500">#FF7060A8</Color>
+    <Color x:Key="CorePurple600">#FF5F528F</Color>
+    <Color x:Key="CorePurple700">#FF4E4376</Color>
+    <Color x:Key="CorePurple800">#FF383054</Color>
+    <Color x:Key="CorePurple900">#FF221D32</Color>
+    <Color x:Key="CorePurple950">#FF110E19</Color>
+
+    <!-- ══════════════════════════════════════════════════════════
+         Tier 2 — Semantic Tokens (SolidColorBrush)
+         ══════════════════════════════════════════════════════════ -->
+
+    <!-- Canvas tokens -->
+    <SolidColorBrush x:Key="BgPrimaryBrush" Color="{StaticResource CoreBlueDeep}" />
+    <SolidColorBrush x:Key="BgSecondaryBrush" Color="#FF0F2236" />
+    <SolidColorBrush x:Key="BgTertiaryBrush" Color="{StaticResource CoreBlueMid}" />
+    <SolidColorBrush x:Key="BgSurfaceBrush" Color="#FF0D1E30" />
+    <SolidColorBrush x:Key="BgCanvasBrush" Color="#FF060D16" />
+
+    <!-- Text tokens -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource CoreCream}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource CoreSlateMid}" />
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource CoreBlueIce}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource CoreSlateMid}" />
+
+    <!-- Paint tokens -->
+    <SolidColorBrush x:Key="BgBrandBrush" Color="{StaticResource CoreBlueSteel}" />
+    <SolidColorBrush x:Key="BgActionBrush" Color="{StaticResource CoreTealAccent}" />
+    <SolidColorBrush x:Key="BgAccentBrush" Color="{StaticResource CoreBlueBright}" />
+    <SolidColorBrush x:Key="TextActionBrush" Color="{StaticResource CoreWhite}" />
+
+    <!-- Border tokens -->
+    <SolidColorBrush x:Key="BorderPrimaryBrush" Color="#FF1C3450" />
+    <SolidColorBrush x:Key="BorderSecondaryBrush" Color="#FF264A6E" />
+    <SolidColorBrush x:Key="BorderAccentBrush" Color="{StaticResource CoreTealAccent}" />
+
+    <!-- Node category header colors -->
+    <SolidColorBrush x:Key="NodeHeaderFileBrush" Color="{StaticResource CoreBlueSteel}" />
+    <SolidColorBrush x:Key="NodeHeaderProcessBrush" Color="{StaticResource CoreGreenMoss}" />
+    <SolidColorBrush x:Key="NodeHeaderOutputBrush" Color="{StaticResource CoreAmberAction}" />
+    <SolidColorBrush x:Key="NodeHeaderFlowBrush" Color="{StaticResource CorePurple}" />
+    <SolidColorBrush x:Key="NodeHeaderNetworkBrush" Color="{StaticResource CoreBlueBright}" />
+
+    <!-- Tinted button backgrounds (rest / hover / pressed) -->
+    <SolidColorBrush x:Key="BgSaveTintBrush" Color="{StaticResource CoreBlueSteel800}" />
+    <SolidColorBrush x:Key="BgSaveTintHoverBrush" Color="{StaticResource CoreBlueSteel700}" />
+    <SolidColorBrush x:Key="BgSaveTintPressedBrush" Color="{StaticResource CoreBlueSteel900}" />
+
+    <SolidColorBrush x:Key="BgRunTintBrush" Color="{StaticResource CoreTealAccent800}" />
+    <SolidColorBrush x:Key="BgRunTintHoverBrush" Color="{StaticResource CoreTealAccent700}" />
+    <SolidColorBrush x:Key="BgRunTintPressedBrush" Color="{StaticResource CoreTealAccent900}" />
+
+    <SolidColorBrush x:Key="BgDeleteTintBrush" Color="{StaticResource CoreRedWarning800}" />
+    <SolidColorBrush x:Key="BgDeleteTintHoverBrush" Color="{StaticResource CoreRedWarning700}" />
+    <SolidColorBrush x:Key="BgDeleteTintPressedBrush" Color="{StaticResource CoreRedWarning900}" />
+
+    <SolidColorBrush x:Key="TextDeleteBrush" Color="{StaticResource CoreRedWarning}" />
+
+    <!-- Toolbar button text (lighter hues for pop) -->
+    <SolidColorBrush x:Key="TextFileBrush" Color="{StaticResource CoreBlueBright300}" />
+    <SolidColorBrush x:Key="TextRunBrush" Color="{StaticResource CoreTealAccent300}" />
+    <SolidColorBrush x:Key="TextDeleteLightBrush" Color="{StaticResource CoreRedWarning300}" />
+
+    <!-- Font families -->
+    <FontFamily x:Key="FontSans">Inter, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="FontMono">avares://PoSHBlox/Assets/Fonts#JetBrains Mono, Cascadia Code, Consolas, monospace</FontFamily>
+
+    <!-- Override FluentAvalonia's default content font so all controls use JetBrains Mono -->
+    <FontFamily x:Key="ContentControlThemeFontFamily">avares://PoSHBlox/Assets/Fonts#JetBrains Mono, Cascadia Code, Consolas, monospace</FontFamily>
+
+</ResourceDictionary>

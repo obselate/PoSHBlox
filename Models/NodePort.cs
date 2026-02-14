@@ -5,7 +5,7 @@ namespace PoSHBlox.Models;
 
 public partial class NodePort : ObservableObject
 {
-    public string Id { get; } = Guid.NewGuid().ToString("N")[..8];
+    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
     public string Name { get; set; } = "";
     public PortDirection Direction { get; set; }
     public PortType Type { get; set; } = PortType.Pipeline;

@@ -22,6 +22,9 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\poshblox-icon-512.png" />
     <AvaloniaResource Include="Assets\poshblox.ico" />
+    <AvaloniaResource Include="Assets\Fonts\JetBrainsMono-Regular.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\JetBrainsMono-Bold.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\JetBrainsMono-SemiBold.ttf" />
   </ItemGroup>
 
 </Project>

@@ -1,198 +1,392 @@
-<ui:AppWindow xmlns="https://github.com/avaloniaui"
+<uiw:AppWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ui="using:FluentAvalonia.UI.Windowing"
+        xmlns:uiw="using:FluentAvalonia.UI.Windowing"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
         xmlns:vm="using:PoSHBlox.ViewModels"
         xmlns:ctrl="using:PoSHBlox.Controls"
         x:Class="PoSHBlox.MainWindow"
         x:Name="RootWindow"
-        Title="PoSHBlox - PowerShell Visual Scripting"
+        Title="{Binding WindowTitle, FallbackValue='PoSHBlox'}"
         Width="1500" Height="900"
-        Background="#1e1e24"
+        Background="{DynamicResource BgPrimaryBrush}"
+        FontFamily="{DynamicResource FontMono}"
         WindowStartupLocation="CenterScreen">
 
-    <ui:AppWindow.DataContext>
+    <uiw:AppWindow.DataContext>
         <vm:GraphCanvasViewModel />
-    </ui:AppWindow.DataContext>
+    </uiw:AppWindow.DataContext>
 
     <DockPanel>
-        <!-- Top Toolbar -->
-        <Border DockPanel.Dock="Top" Background="#252530" Padding="8,6" BorderBrush="#333340" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-                <ToggleButton x:Name="PaletteToggle" IsChecked="True" Click="OnPaletteToggleClicked"
-                              Background="#3a3a4a" Foreground="#aac" Padding="10,6" CornerRadius="4"
-                              FontSize="12" Content="Palette" />
-                <Border Width="1" Background="#444" Margin="4,2" />
-                <Button Content="Add Node" Command="{Binding AddNodeCommand}"
-                        Background="#3a3a4a" Foreground="#ddd" Padding="12,6" CornerRadius="4"
-                        FontSize="12" FontWeight="SemiBold" />
-                <Button Content="Delete Selected" Command="{Binding DeleteSelectedCommand}"
-                        Background="#4a2a2a" Foreground="#f88" Padding="12,6" CornerRadius="4"
-                        FontSize="12" />
-                <Border Width="1" Background="#444" Margin="4,2" />
-                <Button Content="Run" Click="OnRunClicked"
-                        Background="#2a4a2a" Foreground="#8f8" Padding="12,6" CornerRadius="4"
-                        FontSize="12" FontWeight="SemiBold" />
-                <Button Content="Save .ps1" Click="OnSaveClicked"
-                        Background="#2a3a5a" Foreground="#8af" Padding="12,6" CornerRadius="4"
-                        FontSize="12" FontWeight="SemiBold" />
-                <Button Content="Preview" Click="OnPreviewClicked"
-                        Background="#3a3a4a" Foreground="#ddd" Padding="12,6" CornerRadius="4"
-                        FontSize="12" />
-                <Button Content="Reset View" Command="{Binding ResetViewCommand}"
-                        Background="#3a3a4a" Foreground="#aaa" Padding="12,6" CornerRadius="4"
-                        FontSize="12" />
+        <!-- ══════ Title bar separator ══════ -->
+        <Border DockPanel.Dock="Top" Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
+
+        <!-- ══════ Top: CommandBar Toolbar ══════ -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource BgPrimaryBrush}"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="4,3">
+            <StackPanel Orientation="Horizontal" Spacing="3">
+                <Button Click="OnOpenClicked" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgSaveTintBrush}"
+                        Foreground="{DynamicResource TextFileBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Open" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="OpenFile" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Click="OnSavePblxClicked" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgSaveTintBrush}"
+                        Foreground="{DynamicResource TextFileBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Save" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Save" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Click="OnExportPs1Clicked" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgSaveTintBrush}"
+                        Foreground="{DynamicResource TextFileBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Export" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Document" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Click="OnRunClicked" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgRunTintBrush}"
+                        Foreground="{DynamicResource TextRunBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreTealAccent700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreTealAccent900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreTealAccent200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreTealAccent300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Run" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Play" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding DeleteSelectedCommand}" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgDeleteTintBrush}"
+                        Foreground="{DynamicResource TextDeleteLightBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreRedWarning700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreRedWarning900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreRedWarning200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreRedWarning300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Delete" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Delete" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Border Width="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="4,2" />
+                <ToggleButton IsChecked="{Binding IsPreviewOpen, Mode=TwoWay}" Padding="10,6" CornerRadius="4"
+                              Background="{DynamicResource BgSaveTintBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}">
+                    <ToggleButton.Resources>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{StaticResource CoreBlueSteel600}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                    </ToggleButton.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Script Panel" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Code" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ToggleButton>
+                <Button Command="{Binding ResetViewCommand}" Padding="10,6" CornerRadius="4"
+                        Background="{DynamicResource BgSaveTintBrush}"
+                        Foreground="{DynamicResource TextPrimaryBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                    </Button.Resources>
+                    <TextBlock Text="Reset View" VerticalAlignment="Center" />
+                </Button>
             </StackPanel>
         </Border>
 
-        <!-- Left Panel: Node Palette (collapsible) -->
-        <Border x:Name="PalettePanel" DockPanel.Dock="Left" MinWidth="260"
-                Background="#222230" BorderBrush="#333340" BorderThickness="0,0,1,0">
-            <DockPanel>
-                <Border DockPanel.Dock="Top" Padding="12,10" BorderBrush="#333340" BorderThickness="0,0,0,1">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Node Palette" FontSize="15" FontWeight="Bold" Foreground="#ccc" />
-                        <TextBox Watermark="Search commands..."
-                                 Text="{Binding Palette.SearchText, Mode=TwoWay}"
-                                 Background="#1a1a24" Foreground="#ddd" BorderBrush="#444"
-                                 Padding="8,6" CornerRadius="3" FontSize="12" />
-                    </StackPanel>
-                </Border>
+        <!-- ══════ Main content: Graph area + resizable Script Panel ══════ -->
+        <Grid x:Name="MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="200" />
+            </Grid.RowDefinitions>
 
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Palette.FilteredCategories}" Margin="0,4">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,2">
-                                    <!-- Category Header -->
-                                    <Border Background="#2a2a38" Padding="12,6" Margin="4,2">
-                                        <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
-                                                   Foreground="#8899aa" />
-                                    </Border>
+            <!-- ── Row 0: SplitView (palette pane) + canvas + properties ── -->
+            <SplitView Grid.Row="0"
+                       IsPaneOpen="{Binding IsPaletteOpen, Mode=TwoWay}"
+                       DisplayMode="CompactInline"
+                       OpenPaneLength="320"
+                       CompactPaneLength="0"
+                       PaneBackground="{DynamicResource BgSurfaceBrush}">
 
-                                    <!-- Templates in category -->
-                                    <ItemsControl ItemsSource="{Binding Templates}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Click="OnTemplateClicked"
-                                                        Tag="{Binding}"
-                                                        Background="Transparent"
-                                                        HorizontalAlignment="Stretch"
-                                                        HorizontalContentAlignment="Left"
-                                                        Padding="16,5,8,5" Margin="4,0" CornerRadius="3"
-                                                        Cursor="Hand">
-                                                    <StackPanel Spacing="1">
-                                                        <TextBlock Text="{Binding Name}" FontSize="12"
-                                                                   Foreground="#ccddee" TextWrapping="NoWrap" />
-                                                        <TextBlock Text="{Binding Description}" FontSize="10"
-                                                                   Foreground="#667788" TextWrapping="NoWrap" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                <!-- Left Pane: Node Palette -->
+                <SplitView.Pane>
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Padding="12,10"
+                                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="0,0,0,1">
+                            <StackPanel Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="Node Palette" FontSize="15" FontWeight="Bold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Text="(P)" FontSize="12"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </DockPanel>
-        </Border>
+                                <TextBox x:Name="PaletteSearchBox" Watermark="Search commands... (/)"
+                                         Text="{Binding Palette.SearchText, Mode=TwoWay}"
+                                         Background="{DynamicResource BgPrimaryBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                         Padding="8,6" CornerRadius="3" FontSize="12" />
+                            </StackPanel>
+                        </Border>
 
-        <!-- Right Side Panel -->
-        <Border DockPanel.Dock="Right" Width="360" Background="#222230" BorderBrush="#333340" BorderThickness="1,0,0,0">
-            <DockPanel>
-                <!-- No selection message -->
-                <Border DockPanel.Dock="Top" Padding="12"
-                        IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNull}}"
-                        BorderBrush="#333340" BorderThickness="0,0,0,1">
-                    <TextBlock Text="Click a node to edit its properties" FontSize="12"
-                               Foreground="#666" FontStyle="Italic" />
-                </Border>
-
-                <!-- Node Properties + Parameters (scrollable, fills panel) -->
-                <Border IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Spacing="6" Margin="12,10">
-                            <!-- Header: node name + category -->
-                            <TextBlock Text="{Binding SelectedNode.Title}" FontSize="16" FontWeight="Bold" Foreground="#ddd" />
-                            <TextBlock Text="{Binding SelectedNode.Category}" FontSize="11" Foreground="#778899" Margin="0,0,0,4" />
-
-                            <!-- Title edit -->
-                            <TextBlock Text="Title" FontSize="11" Foreground="#888" />
-                            <TextBox Text="{Binding SelectedNode.Title, Mode=TwoWay}"
-                                     Background="#2a2a38" Foreground="#ddd" BorderBrush="#444"
-                                     Padding="8,5" CornerRadius="3" FontSize="12" />
-
-                            <!-- Output Variable -->
-                            <TextBlock Text="Output Variable" FontSize="11" Foreground="#888" Margin="0,4,0,0" />
-                            <TextBox Text="{Binding SelectedNode.OutputVariable, Mode=TwoWay}"
-                                     Watermark="(auto)"
-                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
-                                     Padding="8,5" CornerRadius="3"
-                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="12" />
-
-                            <!-- Separator -->
-                            <Border Height="1" Background="#333340" Margin="0,6" />
-
-                            <!-- Parameters Section -->
-                            <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold" Foreground="#8899aa"
-                                       Margin="0,2,0,4" />
-
-                            <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding Palette.FilteredCategories}" Margin="0,4">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Spacing="3" Margin="0,0,0,8">
-                                            <!-- Param name + mandatory indicator -->
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
-                                                           Foreground="#ccddee" />
-                                                <TextBlock Text="*" FontSize="12" FontWeight="Bold"
-                                                           Foreground="#ff6666"
-                                                           IsVisible="{Binding IsMandatory}" />
-                                                <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
-                                                           Foreground="#556677" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                            <!-- Description -->
-                                            <TextBlock Text="{Binding Description}" FontSize="10"
-                                                       Foreground="#667788" TextWrapping="Wrap" />
-                                            <!-- Value input -->
-                                            <TextBox Text="{Binding Value, Mode=TwoWay}"
-                                                     Watermark="{Binding DefaultValue}"
-                                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
-                                                     Padding="8,5" CornerRadius="3"
-                                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="12" />
+                                        <StackPanel Margin="0,2">
+                                            <!-- Clickable category header -->
+                                            <Button Click="OnCategoryHeaderClicked" Tag="{Binding}"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Left"
+                                                    Padding="8,6" Margin="4,4,4,2" CornerRadius="3" Cursor="Hand">
+                                                <Button.Resources>
+                                                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                                                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                                                </Button.Resources>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border Width="3" CornerRadius="1.5"
+                                                            Background="{Binding CategoryBrush}"
+                                                            VerticalAlignment="Stretch" />
+                                                    <TextBlock Text="&#x25BC;" FontSize="9"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               VerticalAlignment="Center"
+                                                               IsVisible="{Binding IsExpanded}" />
+                                                    <TextBlock Text="&#x25B6;" FontSize="9"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               VerticalAlignment="Center"
+                                                               IsVisible="{Binding !IsExpanded}" />
+                                                    <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource TextMutedBrush}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <!-- Collapsible template list -->
+                                            <ItemsControl ItemsSource="{Binding Templates}"
+                                                          IsVisible="{Binding IsExpanded}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Click="OnTemplateClicked"
+                                                                Tag="{Binding}"
+                                                                Background="Transparent"
+                                                                HorizontalAlignment="Stretch"
+                                                                HorizontalContentAlignment="Left"
+                                                                Padding="16,5,8,5" Margin="4,2" CornerRadius="3"
+                                                                Cursor="Hand">
+                                                            <Button.Resources>
+                                                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                                                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                                                            </Button.Resources>
+                                                            <StackPanel Spacing="1">
+                                                                <TextBlock Text="{Binding Name}" FontSize="12"
+                                                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                                <TextBlock Text="{Binding Description}" FontSize="10"
+                                                                           Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </SplitView.Pane>
 
-                            <!-- No params message for custom nodes -->
-                            <TextBlock Text="No parameters - edit script directly below"
-                                       FontSize="11" Foreground="#556" FontStyle="Italic"
-                                       IsVisible="False"
-                                       Name="NoParamsMsg" />
+                <!-- Content: Canvas + Right Properties -->
+                <SplitView.Content>
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Width="360"
+                                Background="{DynamicResource BgSurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1,0,0,0"
+                                IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" Padding="12"
+                                        IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNull}}"
+                                        BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="Click a node to edit its properties" FontSize="12"
+                                               Foreground="{DynamicResource TextMutedBrush}" FontStyle="Italic" />
+                                </Border>
 
-                            <!-- Separator -->
-                            <Border Height="1" Background="#333340" Margin="0,4" />
+                                <Border IsVisible="{Binding SelectedNode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                        <StackPanel Spacing="6" Margin="12,10">
+                                            <TextBlock Text="{Binding SelectedNode.Title}" FontSize="16" FontWeight="Bold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBlock Text="{Binding SelectedNode.Category}" FontSize="11"
+                                                       Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4" />
 
-                            <!-- Script body (for custom nodes or advanced editing) -->
-                            <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold" Foreground="#8899aa"
-                                       Margin="0,2,0,4" />
-                            <TextBox Text="{Binding SelectedNode.ScriptBody, Mode=TwoWay}"
-                                     AcceptsReturn="True" TextWrapping="Wrap"
-                                     Height="120"
-                                     Background="#1a1a24" Foreground="#b0c4de" BorderBrush="#444"
-                                     Padding="8,6" CornerRadius="3"
-                                     FontFamily="Cascadia Code, Consolas, monospace" FontSize="11" />
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
+                                            <TextBlock Text="Title" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                            <TextBox Text="{Binding SelectedNode.Title, Mode=TwoWay}"
+                                                     Background="{DynamicResource BgSecondaryBrush}"
+                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                     Padding="8,5" CornerRadius="3" FontSize="12" />
 
-            </DockPanel>
-        </Border>
+                                            <TextBlock Text="Output Variable" FontSize="11"
+                                                       Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0" />
+                                            <TextBox Text="{Binding SelectedNode.OutputVariable, Mode=TwoWay}"
+                                                     Watermark="(auto)"
+                                                     Background="{DynamicResource BgPrimaryBrush}"
+                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                     Padding="8,5" CornerRadius="3"
+                                                     FontFamily="{DynamicResource FontMono}" FontSize="12" />
 
-        <!-- Main Canvas (fills remaining space) -->
-        <ctrl:NodeGraphCanvas DataContext="{Binding}" />
+                                            <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
+
+                                            <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       Margin="0,2,0,4" />
+
+                                            <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Spacing="3" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                                <TextBlock Text="*" FontSize="12" FontWeight="Bold"
+                                                                           Foreground="{DynamicResource TextDeleteBrush}"
+                                                                           IsVisible="{Binding IsMandatory}" />
+                                                                <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
+                                                                           Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Description}" FontSize="10"
+                                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                                                            <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                                     Watermark="{Binding DefaultValue}"
+                                                                     Background="{DynamicResource BgPrimaryBrush}"
+                                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                     Padding="8,5" CornerRadius="3"
+                                                                     FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <TextBlock Text="No parameters - edit script directly below"
+                                                       FontSize="11" Foreground="{DynamicResource TextMutedBrush}" FontStyle="Italic"
+                                                       IsVisible="False"
+                                                       Name="NoParamsMsg" />
+
+                                            <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
+
+                                            <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       Margin="0,2,0,4" />
+                                            <TextBox Text="{Binding SelectedNode.ScriptBody, Mode=TwoWay}"
+                                                     AcceptsReturn="True" TextWrapping="Wrap"
+                                                     Height="120"
+                                                     Background="{DynamicResource BgPrimaryBrush}"
+                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                     Padding="8,6" CornerRadius="3"
+                                                     FontFamily="{DynamicResource FontMono}" FontSize="11" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Border>
+                            </DockPanel>
+                        </Border>
+
+                        <ctrl:NodeGraphCanvas DataContext="{Binding}" />
+                    </DockPanel>
+                </SplitView.Content>
+            </SplitView>
+
+            <!-- ── Row 1: GridSplitter ── -->
+            <GridSplitter x:Name="PreviewSplitter" Grid.Row="1"
+                          Height="5" HorizontalAlignment="Stretch"
+                          Background="{DynamicResource BorderPrimaryBrush}"
+                          IsVisible="False" />
+
+            <!-- ── Row 2: Script Panel (resizable) ── -->
+            <Border x:Name="PreviewPanel" Grid.Row="2"
+                    Background="{DynamicResource BgPrimaryBrush}"
+                    BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                    BorderThickness="0,1,0,0"
+                    IsVisible="False">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="12,6"
+                            Background="{DynamicResource BgSecondaryBrush}"
+                            BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                            <TextBlock Text="Script Preview" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                                <Button Content="Copy" Click="OnCopyPreviewClicked"
+                                        Background="{DynamicResource BgSecondaryBrush}"
+                                        Foreground="{DynamicResource TextSecondaryBrush}"
+                                        Padding="8,3" CornerRadius="3" FontSize="11">
+                                    <Button.Resources>
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                                    </Button.Resources>
+                                </Button>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <TextBox x:Name="PreviewTextBox"
+                             IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                             Background="{DynamicResource BgPrimaryBrush}"
+                             Foreground="#FF72BFB0"
+                             BorderThickness="0"
+                             Padding="12,8"
+                             FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                </DockPanel>
+            </Border>
+        </Grid>
 
     </DockPanel>
-</ui:AppWindow>
+</uiw:AppWindow>

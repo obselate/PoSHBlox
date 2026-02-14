@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "Running Services Report",
+    "createdUtc": "2026-02-13T12:00:00Z",
+    "modifiedUtc": "2026-02-13T12:00:00Z"
+  },
+  "view": {
+    "panX": -20,
+    "panY": -10,
+    "zoom": 1.0
+  },
+  "nodes": [
+    {
+      "id": "getsvc01",
+      "title": "Get-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Service",
+      "outputVariable": "allServices",
+      "x": 80,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "where001",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 360,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Filter condition",
+          "validValues": [],
+          "value": "$_.Status -eq 'Running'"
+        }
+      ]
+    },
+    {
+      "id": "sort0002",
+      "title": "Sort-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Sort-Object",
+      "outputVariable": "",
+      "x": 640,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Property to sort by",
+          "validValues": [],
+          "value": "DisplayName"
+        }
+      ]
+    },
+    {
+      "id": "fmttbl01",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 920,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display",
+          "validValues": [],
+          "value": "DisplayName, Status, StartType"
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Auto-size columns",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "getsvc01",
+      "targetNodeId": "where001"
+    },
+    {
+      "sourceNodeId": "where001",
+      "targetNodeId": "sort0002"
+    },
+    {
+      "sourceNodeId": "sort0002",
+      "targetNodeId": "fmttbl01"
+    }
+  ]
+}

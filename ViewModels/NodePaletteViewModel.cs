@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PoSHBlox.Rendering;
 using PoSHBlox.Services;
 
 namespace PoSHBlox.ViewModels;
@@ -71,8 +73,12 @@ public partial class NodePaletteViewModel : ObservableObject
 /// <summary>
 /// Grouping container for the palette sidebar.
 /// </summary>
-public class TemplateCategory
+public partial class TemplateCategory : ObservableObject
 {
     public string Name { get; set; } = "";
     public ObservableCollection<NodeTemplate> Templates { get; set; } = new();
+    [ObservableProperty] private bool _isExpanded = true;
+
+    public ISolidColorBrush CategoryBrush =>
+        new SolidColorBrush(GraphTheme.GetCategoryColor(Name));
 }

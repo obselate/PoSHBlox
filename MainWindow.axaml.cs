@@ -1,21 +1,32 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.Animation;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using FluentAvalonia.UI.Windowing;
 using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
+
+using TemplateCategory = PoSHBlox.ViewModels.TemplateCategory;
 
 namespace PoSHBlox;
 
 public partial class MainWindow : AppWindow
 {
+    private DispatcherTimer? _previewTimer;
+    private GridLength _savedPreviewHeight = new(200);
+
     public MainWindow()
     {
         InitializeComponent();
@@ -27,8 +38,140 @@ public partial class MainWindow : AppWindow
 
         Opened += (_, _) =>
         {
-            PlatformFeatures?.SetWindowBorderColor(Color.Parse("#3c3c48"));
+            PlatformFeatures?.SetWindowBorderColor(Color.Parse("#0B1929"));
+            StripCommandBarTransitions();
         };
+
+        // Start with the preview panel collapsed
+        MainGrid.RowDefinitions[2].Height = new GridLength(0);
+
+        // Subscribe to VM changes — DataContext may already be set from XAML
+        if (DataContext is GraphCanvasViewModel vm)
+            vm.PropertyChanged += OnViewModelPropertyChanged;
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is GraphCanvasViewModel v)
+                v.PropertyChanged += OnViewModelPropertyChanged;
+        };
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        // Don't intercept keys when user is typing in a TextBox
+        bool inTextBox = TopLevel.GetTopLevel(this) is { FocusManager: { } fm }
+                         && fm.GetFocusedElement() is TextBox;
+
+        if (DataContext is GraphCanvasViewModel vm)
+        {
+            switch (e.Key)
+            {
+                // P — toggle palette (only when not typing)
+                case Key.P when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    vm.IsPaletteOpen = !vm.IsPaletteOpen;
+                    e.Handled = true;
+                    break;
+
+                // F5 — run script
+                case Key.F5:
+                    OnRunClicked(this, e);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+O — open project
+                case Key.O when e.KeyModifiers == KeyModifiers.Control:
+                    OnOpenClicked(this, e);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+S — save project (.pblx)
+                case Key.S when e.KeyModifiers == KeyModifiers.Control:
+                    OnSavePblxClicked(this, e);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+E — export script (.ps1)
+                case Key.E when e.KeyModifiers == KeyModifiers.Control:
+                    OnExportPs1Clicked(this, e);
+                    e.Handled = true;
+                    break;
+
+                // Alt+S — toggle script panel
+                case Key.S when e.KeyModifiers == KeyModifiers.Alt:
+                    vm.IsPreviewOpen = !vm.IsPreviewOpen;
+                    e.Handled = true;
+                    break;
+
+                // Del — delete selected node (only when not typing)
+                case Key.Delete when !inTextBox:
+                    vm.DeleteSelected();
+                    e.Handled = true;
+                    break;
+
+                // / — focus palette search (only when not typing)
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.None:  // '/' key
+                    vm.IsPaletteOpen = true;
+                    PaletteSearchBox.Focus();
+                    PaletteSearchBox.SelectAll();
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        if (!e.Handled)
+            base.OnKeyDown(e);
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GraphCanvasViewModel.IsPreviewOpen))
+        {
+            var vm = (GraphCanvasViewModel)sender!;
+            if (vm.IsPreviewOpen)
+                OpenPreviewPanel(vm);
+            else
+                ClosePreviewPanel();
+        }
+    }
+
+    private void OpenPreviewPanel(GraphCanvasViewModel vm)
+    {
+        MainGrid.RowDefinitions[2].Height = _savedPreviewHeight;
+        PreviewPanel.IsVisible = true;
+        PreviewSplitter.IsVisible = true;
+
+        RefreshPreview(vm);
+
+        _previewTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _previewTimer.Tick += OnPreviewTimerTick;
+        _previewTimer.Start();
+    }
+
+    private void ClosePreviewPanel()
+    {
+        // Save current height so re-opening restores it
+        if (MainGrid.RowDefinitions[2].Height.Value > 0)
+            _savedPreviewHeight = MainGrid.RowDefinitions[2].Height;
+
+        if (_previewTimer != null)
+        {
+            _previewTimer.Tick -= OnPreviewTimerTick;
+            _previewTimer.Stop();
+        }
+
+        PreviewPanel.IsVisible = false;
+        PreviewSplitter.IsVisible = false;
+        MainGrid.RowDefinitions[2].Height = new GridLength(0);
+    }
+
+    private void OnPreviewTimerTick(object? sender, EventArgs e)
+    {
+        if (DataContext is GraphCanvasViewModel vm)
+            RefreshPreview(vm);
+    }
+
+    private void RefreshPreview(GraphCanvasViewModel vm)
+    {
+        PreviewTextBox.Text = GenerateScript(vm);
     }
 
     private void LoadIcon()
@@ -37,11 +180,9 @@ public partial class MainWindow : AppWindow
         {
             var uri = new Uri("avares://PoSHBlox/Assets/poshblox-icon-512.png");
 
-            // FluentAvalonia AppWindow.Icon (title bar image)
             using var stream1 = AssetLoader.Open(uri);
             Icon = new Bitmap(stream1);
 
-            // Base Window.Icon (taskbar icon)
             using var stream2 = AssetLoader.Open(uri);
             ((Window)this).Icon = new WindowIcon(stream2);
         }
@@ -51,9 +192,26 @@ public partial class MainWindow : AppWindow
         }
     }
 
-    private void OnPaletteToggleClicked(object? sender, RoutedEventArgs e)
+    /// <summary>
+    /// Removes BrushTransitions from FluentAvalonia's CommandBar button templates.
+    /// The 83 ms transition animates from transparent to our dark per-control resource
+    /// overrides, briefly interpolating through a bright intermediate (the "white flash").
+    /// XAML Style setters cannot override template-inline Transitions (lower priority),
+    /// so we set them at LocalValue priority here after the template is applied.
+    /// </summary>
+    private void StripCommandBarTransitions()
     {
-        PalettePanel.IsVisible = PaletteToggle.IsChecked == true;
+        foreach (var border in this.GetVisualDescendants().OfType<Border>())
+        {
+            if (border.Name == "AppBarButtonInnerBorder")
+                border.Transitions = new Transitions();
+        }
+    }
+
+    private void OnCategoryHeaderClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is TemplateCategory cat)
+            cat.IsExpanded = !cat.IsExpanded;
     }
 
     private void OnTemplateClicked(object? sender, RoutedEventArgs e)
@@ -90,16 +248,76 @@ public partial class MainWindow : AppWindow
         }
     }
 
-    private void OnPreviewClicked(object? sender, RoutedEventArgs e)
+    private async void OnOpenClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
 
-        var script = GenerateScript(vm);
-        var preview = new ScriptPreviewWindow(script) { WindowStartupLocation = WindowStartupLocation.CenterOwner };
-        preview.Show(this);
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Open PoSHBlox Project",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("PoSHBlox Project") { Patterns = new[] { "*.pblx" } },
+                new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+            }
+        });
+
+        if (files.Count == 0) return;
+        var file = files[0];
+
+        try
+        {
+            await using var stream = await file.OpenReadAsync();
+            using var reader = new StreamReader(stream);
+            var json = await reader.ReadToEndAsync();
+            ProjectSerializer.Deserialize(json, vm);
+            vm.CurrentFilePath = file.TryGetLocalPath();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to open project: {ex.Message}");
+        }
     }
 
-    private async void OnSaveClicked(object? sender, RoutedEventArgs e)
+    private async void OnSavePblxClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+
+        string? path = vm.CurrentFilePath;
+
+        if (path == null)
+        {
+            var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Save PoSHBlox Project",
+                DefaultExtension = "pblx",
+                SuggestedFileName = "MyProject",
+                FileTypeChoices = new[]
+                {
+                    new FilePickerFileType("PoSHBlox Project") { Patterns = new[] { "*.pblx" } },
+                    new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+                }
+            });
+
+            if (file == null) return;
+            path = file.TryGetLocalPath();
+            if (path == null) return;
+        }
+
+        try
+        {
+            var json = ProjectSerializer.Serialize(vm, vm.ProjectCreatedUtc);
+            await File.WriteAllTextAsync(path, json);
+            vm.CurrentFilePath = path;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to save project: {ex.Message}");
+        }
+    }
+
+    private async void OnExportPs1Clicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
 
@@ -108,7 +326,7 @@ public partial class MainWindow : AppWindow
 
         var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save PowerShell Script",
+            Title = "Export PowerShell Script",
             DefaultExtension = "ps1",
             SuggestedFileName = "PoSHBlox-Script",
             FileTypeChoices = new[]
@@ -123,6 +341,12 @@ public partial class MainWindow : AppWindow
         await using var stream = await file.OpenWriteAsync();
         await using var writer = new StreamWriter(stream);
         await writer.WriteAsync(script);
+    }
+
+    private async void OnCopyPreviewClicked(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+            await clipboard.SetTextAsync(PreviewTextBox.Text ?? "");
     }
 
     private static string GenerateScript(GraphCanvasViewModel vm)

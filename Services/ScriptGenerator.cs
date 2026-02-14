@@ -132,40 +132,45 @@ public class ScriptGenerator
             }
         }
 
-        // Second pass: emit chains
+        // Build a lookup: node ID → chain it belongs to
+        var chainByNodeId = new Dictionary<string, List<GraphNode>>();
         foreach (var chain in chains)
-        {
-            if (chain.Any(n => emitted.Contains(n.Id))) continue;
-            foreach (var n in chain) emitted.Add(n.Id);
+            foreach (var n in chain)
+                chainByNodeId[n.Id] = chain;
 
-            var firstNode = chain[0];
-            var lastNode = chain[^1];
-
-            // Resolve upstream: check local var map, global var map, or implicit input
-            string? upstreamExpr = ResolveUpstream(firstNode, scopeIds, localVarMap)
-                                ?? (CountIncoming(firstNode, scopeIds) == 0 ? inputVar : null);
-
-            string pipeline = BuildPipelineExpression(chain, upstreamExpr);
-
-            if (localVarMap.TryGetValue(lastNode.Id, out var assignVar))
-                sb.AppendLine($"{pad}${assignVar} = {pipeline}");
-            else
-                sb.AppendLine($"{pad}{pipeline}");
-
-            sb.AppendLine();
-        }
-
-        // Third pass: emit control flow containers
+        // Second pass: emit in topological order (chains and containers interleaved)
+        // This ensures nodes connected to a container's output are emitted AFTER
+        // the container, not before.
         foreach (var node in sorted)
         {
             if (emitted.Contains(node.Id)) continue;
-            emitted.Add(node.Id);
 
-            if (node.IsContainer)
+            if (node.IsContainer && node.ContainerType != ContainerType.Function)
             {
-                // Resolve the container's input: what's wired to its In port?
+                emitted.Add(node.Id);
                 string? containerInput = ResolveContainerInput(node, scopeIds, localVarMap, inputVar);
                 EmitContainer(sb, node, indent, containerInput);
+                sb.AppendLine();
+            }
+            else if (chainByNodeId.TryGetValue(node.Id, out var chain))
+            {
+                if (chain.Any(n => emitted.Contains(n.Id))) continue;
+                foreach (var n in chain) emitted.Add(n.Id);
+
+                var firstNode = chain[0];
+                var lastNode = chain[^1];
+
+                // Resolve upstream: check local var map, global var map, or implicit input
+                string? upstreamExpr = ResolveUpstream(firstNode, scopeIds, localVarMap)
+                                    ?? (CountIncoming(firstNode, scopeIds) == 0 ? inputVar : null);
+
+                string pipeline = BuildPipelineExpression(chain, upstreamExpr);
+
+                if (localVarMap.TryGetValue(lastNode.Id, out var assignVar))
+                    sb.AppendLine($"{pad}${assignVar} = {pipeline}");
+                else
+                    sb.AppendLine($"{pad}{pipeline}");
+
                 sb.AppendLine();
             }
         }
@@ -286,11 +291,7 @@ public class ScriptGenerator
             return string.IsNullOrEmpty(args) ? node.CmdletName : $"{node.CmdletName} {args}";
         }
 
-        var script = node.ScriptBody.Trim();
-        if (!script.Contains('\n'))
-            return script;
-
-        return $"ForEach-Object {{ {script} }}";
+        return node.ScriptBody.Trim();
     }
 
     // ── Function container emission ────────────────────────────
@@ -381,27 +382,25 @@ public class ScriptGenerator
         else
             sb.AppendLine($"{pad}ForEach-Object {{");
 
-        // Inside ForEach-Object, $_ is the current item
-        EmitZoneAsScope(sb, bodyZone, indent + 1, "$_");
+        // Inside ForEach-Object, $_ is already available as a scope variable.
+        // Don't pipe it as implicit input — nodes reference it directly in
+        // their parameters (e.g. "$($_.Name)"). Piping $_ to cmdlets that
+        // also have explicit parameters causes parameter binding conflicts.
+        EmitZoneAsScope(sb, bodyZone, indent + 1, null);
         sb.AppendLine($"{pad}}}");
     }
 
     private void EmitTryCatch(StringBuilder sb, GraphNode container, string pad, int indent, string? containerInput)
     {
-        var errorAction = GetParamValue(container, "ErrorAction", "Stop");
         var tryZone = FindZone(container, "Try");
         var catchZone = FindZone(container, "Catch");
 
         sb.AppendLine($"{pad}try {{");
-        sb.AppendLine($"{pad}    $ErrorActionPreference = '{errorAction}'");
         EmitZoneAsScope(sb, tryZone, indent + 1, containerInput);
         sb.AppendLine($"{pad}}}");
 
         sb.AppendLine($"{pad}catch {{");
-        if (catchZone != null && catchZone.Children.Count > 0)
-            EmitZoneAsScope(sb, catchZone, indent + 1, "$_"); // $_ is the ErrorRecord in catch
-        else
-            sb.AppendLine($"{pad}    Write-Error $_.Exception.Message");
+        EmitZoneAsScope(sb, catchZone, indent + 1, null);
         sb.AppendLine($"{pad}}}");
     }
 

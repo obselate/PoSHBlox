@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,6 +25,20 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     // ── Selection ──────────────────────────────────────────────
     [ObservableProperty] private GraphNode? _selectedNode;
+
+    // ── Panel visibility ─────────────────────────────────────
+    [ObservableProperty] private bool _isPaletteOpen = true;
+    [ObservableProperty] private bool _isPreviewOpen;
+
+    // ── Project state ─────────────────────────────────────────
+    [ObservableProperty] private string? _currentFilePath;
+    private DateTime? _projectCreatedUtc;
+
+    public string WindowTitle => CurrentFilePath != null
+        ? $"PoSHBlox \u2014 {Path.GetFileName(CurrentFilePath)}"
+        : "PoSHBlox \u2014 PowerShell Visual Scripting";
+
+    partial void OnCurrentFilePathChanged(string? value) => OnPropertyChanged(nameof(WindowTitle));
 
     // ── Pending connection state (exposed for canvas) ──────────
     [ObservableProperty] private bool _isDraggingConnection;
@@ -123,6 +138,16 @@ public partial class GraphCanvasViewModel : ObservableObject
     public void ClampZoom()
     {
         Zoom = Math.Clamp(Zoom, 0.1, 3.0);
+    }
+
+    // ── Project load ───────────────────────────────────────────
+
+    public DateTime? ProjectCreatedUtc => _projectCreatedUtc;
+
+    public void LoadFromDocument(PblxDocument doc)
+    {
+        _projectCreatedUtc = doc.Metadata.CreatedUtc;
+        ProjectSerializer.RebuildGraph(doc, this);
     }
 
     // ── Example graph seed ─────────────────────────────────────

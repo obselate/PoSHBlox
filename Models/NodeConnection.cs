@@ -5,7 +5,7 @@ namespace PoSHBlox.Models;
 
 public partial class NodeConnection : ObservableObject
 {
-    public string Id { get; } = Guid.NewGuid().ToString("N")[..8];
+    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
     public NodePort Source { get; set; } = null!;
     public NodePort Target { get; set; } = null!;
 

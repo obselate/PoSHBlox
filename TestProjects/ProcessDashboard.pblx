@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "Top CPU Process Dashboard",
+    "createdUtc": "2026-02-13T18:00:00Z",
+    "modifiedUtc": "2026-02-13T18:00:00Z"
+  },
+  "view": {
+    "panX": 20,
+    "panY": -30,
+    "zoom": 0.85
+  },
+  "nodes": [
+    {
+      "id": "getproc1",
+      "title": "Get-Process",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "outputVariable": "",
+      "x": 60,
+      "y": 200,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "whereob1",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 320,
+      "y": 200,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Filter condition",
+          "validValues": [],
+          "value": "$_.CPU -gt 0"
+        }
+      ]
+    },
+    {
+      "id": "sortobj1",
+      "title": "Sort-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Sort-Object",
+      "outputVariable": "",
+      "x": 580,
+      "y": 200,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Property to sort by",
+          "validValues": [],
+          "value": "CPU"
+        },
+        {
+          "name": "Descending",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sort in descending order",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "selobj01",
+      "title": "Select-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-Object",
+      "outputVariable": "",
+      "x": 840,
+      "y": 200,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "First",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Number of objects to select",
+          "validValues": [],
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "id": "foreach1",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 1120,
+      "y": 70,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 520,
+      "containerHeight": 540,
+      "zones": [
+        { "name": "Body" }
+      ],
+      "inputs": [
+        { "name": "In", "type": "Pipeline" }
+      ],
+      "outputs": [
+        { "name": "Out", "type": "Pipeline" }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "wrhead01",
+      "title": "Separator",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 140,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "foreach1",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text to display",
+          "validValues": [],
+          "value": "========================================"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "value": "White"
+        }
+      ]
+    },
+    {
+      "id": "wrname01",
+      "title": "Process Name",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 220,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "foreach1",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text to display",
+          "validValues": [],
+          "value": "  $($_.Name) (PID: $($_.Id))"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "value": "Cyan"
+        }
+      ]
+    },
+    {
+      "id": "wrcpu01",
+      "title": "CPU Info",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 300,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "foreach1",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text to display",
+          "validValues": [],
+          "value": "  CPU: $([math]::Round($_.CPU, 2))s | Threads: $($_.Threads.Count)"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "value": "Yellow"
+        }
+      ]
+    },
+    {
+      "id": "wrmem01",
+      "title": "Memory Info",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 380,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "foreach1",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text to display",
+          "validValues": [],
+          "value": "  Memory: $([math]::Round($_.WorkingSet64/1MB, 1)) MB | Handles: $($_.HandleCount)"
+        }
+      ]
+    },
+    {
+      "id": "wrpath01",
+      "title": "Process Path",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 460,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "foreach1",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text to display",
+          "validValues": [],
+          "value": "  Path: $($_.Path)"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "value": "Green"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "getproc1",
+      "targetNodeId": "whereob1"
+    },
+    {
+      "sourceNodeId": "whereob1",
+      "targetNodeId": "sortobj1"
+    },
+    {
+      "sourceNodeId": "sortobj1",
+      "targetNodeId": "selobj01"
+    },
+    {
+      "sourceNodeId": "selobj01",
+      "targetNodeId": "foreach1"
+    }
+  ]
+}

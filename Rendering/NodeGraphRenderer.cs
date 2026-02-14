@@ -16,10 +16,14 @@ public class NodeGraphRenderer
 {
     // Reusable pen/brush instances to reduce allocations in the render loop
     private readonly SolidColorBrush _bgBrush = new(GraphTheme.Background);
-    private readonly Pen _gridPen = new(new SolidColorBrush(GraphTheme.GridMinor), 1);
-    private readonly Pen _gridMajorPen = new(new SolidColorBrush(GraphTheme.GridMajor), 1);
+    private readonly SolidColorBrush _gridDotBrush = new(GraphTheme.GridMinor);
+    private readonly SolidColorBrush _gridDotMajorBrush = new(GraphTheme.GridMajor);
     private readonly Pen _wirePen = new(new SolidColorBrush(GraphTheme.Wire), GraphTheme.WireThickness);
     private readonly Pen _wirePendingPen = new(new SolidColorBrush(GraphTheme.WirePending), GraphTheme.WireThickness) { DashStyle = DashStyle.Dash };
+
+    // Margin added to the viewport for culling (world-space units).
+    // Covers port labels (~80px), shadows, selection borders, and breathing room.
+    private const double CullMargin = 100;
 
     /// <summary>
     /// Render the entire graph: background, grid, wires, containers, nodes, and HUD.
@@ -30,26 +34,76 @@ public class NodeGraphRenderer
         ctx.DrawRectangle(_bgBrush, null, bounds);
         DrawGrid(ctx, bounds, vm);
 
+        // Compute the visible viewport in world-space coordinates, with generous margin
+        var viewport = GetWorldViewport(bounds, vm);
+
         using (ctx.PushTransform(Matrix.CreateTranslation(vm.PanX, vm.PanY)))
         using (ctx.PushTransform(Matrix.CreateScale(vm.Zoom, vm.Zoom)))
         {
             // Wires behind everything
             foreach (var conn in vm.Connections)
-                DrawWire(ctx, conn);
+            {
+                if (IsWireVisible(conn, viewport))
+                    DrawWire(ctx, conn);
+            }
 
             if (isDraggingWire && wireStartPort != null)
                 DrawPendingWire(ctx, wireStartPort, wireEndPoint);
 
             // Containers behind regular nodes
             foreach (var node in vm.Nodes.Where(n => n.IsContainer))
-                DrawContainer(ctx, node);
+            {
+                if (IsNodeVisible(node, viewport))
+                    DrawContainer(ctx, node);
+            }
 
             // Regular nodes on top
             foreach (var node in vm.Nodes.Where(n => !n.IsContainer))
-                DrawNode(ctx, node);
+            {
+                if (IsNodeVisible(node, viewport))
+                    DrawNode(ctx, node);
+            }
         }
 
         DrawHud(ctx, bounds, vm);
+    }
+
+    // ── Viewport culling helpers ─────────────────────────────
+
+    private static Rect GetWorldViewport(Rect screenBounds, GraphCanvasViewModel vm)
+    {
+        double x = -vm.PanX / vm.Zoom - CullMargin;
+        double y = -vm.PanY / vm.Zoom - CullMargin;
+        double w = screenBounds.Width / vm.Zoom + CullMargin * 2;
+        double h = screenBounds.Height / vm.Zoom + CullMargin * 2;
+        return new Rect(x, y, w, h);
+    }
+
+    private static bool IsNodeVisible(GraphNode node, Rect viewport)
+    {
+        double w = node.IsContainer ? node.ContainerWidth : node.Width;
+        double h = node.IsContainer ? node.ContainerHeight : node.Height;
+        var nodeRect = new Rect(node.X, node.Y, w, h);
+        return viewport.Intersects(nodeRect);
+    }
+
+    private static bool IsWireVisible(NodeConnection conn, Rect viewport)
+    {
+        var start = GetPortPosition(conn.Source.Owner!, conn.Source);
+        var end = GetPortPosition(conn.Target.Owner!, conn.Target);
+
+        // Build the bounding box of all four Bézier control points
+        double dx = Math.Max(Math.Abs(end.X - start.X) * 0.5, 50);
+        double cp1X = start.X + dx;
+        double cp2X = end.X - dx;
+
+        double minX = Math.Min(Math.Min(start.X, end.X), Math.Min(cp1X, cp2X));
+        double maxX = Math.Max(Math.Max(start.X, end.X), Math.Max(cp1X, cp2X));
+        double minY = Math.Min(start.Y, end.Y);
+        double maxY = Math.Max(start.Y, end.Y);
+
+        var wireBounds = new Rect(minX, minY, maxX - minX, maxY - minY);
+        return viewport.Intersects(wireBounds);
     }
 
     // ── Grid ───────────────────────────────────────────────────
@@ -59,22 +113,26 @@ public class NodeGraphRenderer
         double sg = GraphTheme.GridSize * vm.Zoom;
         if (sg < 8) return; // Don't draw grid when zoomed way out
 
-        double ox = vm.PanX % sg;
-        double oy = vm.PanY % sg;
-        int gcx = (int)Math.Floor(vm.PanX / sg);
-        int gcy = (int)Math.Floor(vm.PanY / sg);
+        // Use integer grid indices to avoid floating-point drift
+        int firstCol = (int)Math.Floor(-vm.PanX / sg);
+        int lastCol  = (int)Math.Ceiling((bounds.Width - vm.PanX) / sg);
+        int firstRow = (int)Math.Floor(-vm.PanY / sg);
+        int lastRow  = (int)Math.Ceiling((bounds.Height - vm.PanY) / sg);
 
-        for (double x = ox; x < bounds.Width; x += sg)
+        for (int col = firstCol; col <= lastCol; col++)
         {
-            int gi = (int)Math.Floor((x - ox) / sg) - gcx;
-            ctx.DrawLine(gi % GraphTheme.GridMajorEvery == 0 ? _gridMajorPen : _gridPen,
-                new Point(x, 0), new Point(x, bounds.Height));
-        }
-        for (double y = oy; y < bounds.Height; y += sg)
-        {
-            int gi = (int)Math.Floor((y - oy) / sg) - gcy;
-            ctx.DrawLine(gi % GraphTheme.GridMajorEvery == 0 ? _gridMajorPen : _gridPen,
-                new Point(0, y), new Point(bounds.Width, y));
+            double x = col * sg + vm.PanX;
+            bool majorCol = col % GraphTheme.GridMajorEvery == 0;
+
+            for (int row = firstRow; row <= lastRow; row++)
+            {
+                double y = row * sg + vm.PanY;
+                bool major = majorCol && row % GraphTheme.GridMajorEvery == 0;
+
+                var brush = major ? _gridDotMajorBrush : _gridDotBrush;
+                double r = major ? GraphTheme.GridDotMajorRadius : GraphTheme.GridDotRadius;
+                ctx.DrawEllipse(brush, null, new Point(x, y), r, r);
+            }
         }
     }
 
@@ -111,9 +169,6 @@ public class NodeGraphRenderer
         // Title + category badge
         var title = MakeText(node.Title, 13, FontWeight.Bold, GraphTheme.TextPrimary);
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
-
-        var badge = MakeText(node.Category, 8, FontWeight.Normal, GraphTheme.TextSecondary);
-        ctx.DrawText(badge, new Point(node.X + node.Width - badge.Width - 10, node.Y + (hh - badge.Height) / 2));
 
         // Ports
         foreach (var port in node.Inputs) DrawPort(ctx, node, port);
@@ -152,10 +207,6 @@ public class NodeGraphRenderer
         // Title + badge
         var title = MakeText(node.Title, 14, FontWeight.Bold, GraphTheme.TextPrimary);
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
-
-        var badgeText = node.ContainerType == ContainerType.Function ? "FUNCTION" : "CONTAINER";
-        var badge = MakeText(badgeText, 8, FontWeight.Normal, GraphTheme.TextSecondary);
-        ctx.DrawText(badge, new Point(node.X + node.ContainerWidth - badge.Width - 12, node.Y + (hh - badge.Height) / 2));
 
         // Zones
         foreach (var zone in node.Zones)

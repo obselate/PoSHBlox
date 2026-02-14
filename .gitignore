@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.claude/
+lonelyplanet-poshblox-1.html

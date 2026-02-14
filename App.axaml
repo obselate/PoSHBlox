@@ -1,9 +1,43 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
              x:Class="PoSHBlox.App"
              RequestedThemeVariant="Dark">
     <Application.Styles>
-        <sty:FluentAvaloniaTheme CustomAccentColor="#3c3c48" />
+        <sty:FluentAvaloniaTheme CustomAccentColor="#5BA89A" />
+
+        <!-- Kill BrushTransitions inside button templates to prevent hover flash.
+             FluentAvalonia's 83 ms BrushTransition animates from the default
+             (transparent) to our dark per-control resource overrides, briefly
+             interpolating through a bright intermediate — the "white flash." -->
+        <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="ui|CommandBarButton /template/ Border#AppBarButtonInnerBorder">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="ui|CommandBarToggleButton /template/ Border#AppBarButtonInnerBorder">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions />
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Styles>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Themes/LonelyPlanetTokens.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>
