@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "category": "Custom",
+  "templates": [
+    {
+      "name": "Custom Script",
+      "cmdletName": "",
+      "description": "Empty script block - write anything",
+      "scriptBody": "# Your PowerShell 5.1 code here\n$input | ForEach-Object {\n    $_\n}",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    },
+    {
+      "name": "Variable Source",
+      "cmdletName": "",
+      "description": "Define a variable or data source",
+      "scriptBody": "@(\n    \"Server01\",\n    \"Server02\",\n    \"Server03\"\n)",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Data"],
+      "parameters": []
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "category": "Process / Service",
+  "templates": [
+    {
+      "name": "Get-Process",
+      "cmdletName": "Get-Process",
+      "description": "List running processes",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Processes"],
+      "parameters": [
+        { "name": "Name", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Filter by process name(s) (wildcards ok)", "validValues": [] },
+        { "name": "Id", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Filter by process ID", "validValues": [] },
+        { "name": "ComputerName", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Remote computer", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Stop-Process",
+      "cmdletName": "Stop-Process",
+      "description": "Kill processes",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Name", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Process name to stop", "validValues": [] },
+        { "name": "Id", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Process ID to stop", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Force termination", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Get-Service",
+      "cmdletName": "Get-Service",
+      "description": "List services",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Services"],
+      "parameters": [
+        { "name": "Name", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Service name(s) (wildcards ok)", "validValues": [] },
+        { "name": "DisplayName", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Filter by display name(s)", "validValues": [] },
+        { "name": "ComputerName", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Remote computer", "validValues": [] },
+        { "name": "DependentServices", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Include dependent services", "validValues": [] },
+        { "name": "RequiredServices", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Include required services", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Start-Service",
+      "cmdletName": "Start-Service",
+      "description": "Start a service",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Name", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Service name", "validValues": [] },
+        { "name": "PassThru", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Output service object for chaining", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Stop-Service",
+      "cmdletName": "Stop-Service",
+      "description": "Stop a service",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Name", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Service name", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Force stop dependent services", "validValues": [] },
+        { "name": "PassThru", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Output service object for chaining", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Restart-Service",
+      "cmdletName": "Restart-Service",
+      "description": "Restart a service",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Name", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Service name", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Force restart dependent services", "validValues": [] },
+        { "name": "PassThru", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Output service object for chaining", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "category": "String / Data",
+  "templates": [
+    {
+      "name": "Where-Object",
+      "cmdletName": "Where-Object",
+      "description": "Filter pipeline objects",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "FilterScript", "type": "ScriptBlock", "isMandatory": true, "defaultValue": "$_.Name -like \"*pattern*\"", "description": "Condition to filter objects", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Select-Object",
+      "cmdletName": "Select-Object",
+      "description": "Pick specific properties",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": true, "defaultValue": "Name, Status", "description": "Property names, comma-separated", "validValues": [] },
+        { "name": "First", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Take first N objects", "validValues": [] },
+        { "name": "Last", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Take last N objects", "validValues": [] },
+        { "name": "Unique", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Remove duplicates", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Sort-Object",
+      "cmdletName": "Sort-Object",
+      "description": "Sort pipeline objects",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": true, "defaultValue": "Name", "description": "Property(s) to sort by", "validValues": [] },
+        { "name": "Descending", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Sort descending", "validValues": [] },
+        { "name": "Unique", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Remove duplicates", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Group-Object",
+      "cmdletName": "Group-Object",
+      "description": "Group by property",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": true, "defaultValue": "Status", "description": "Property(s) to group by", "validValues": [] },
+        { "name": "NoElement", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Omit group members (count only)", "validValues": [] }
+      ]
+    },
+    {
+      "name": "ForEach-Object",
+      "cmdletName": "ForEach-Object",
+      "description": "Transform each object",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Process", "type": "ScriptBlock", "isMandatory": true, "defaultValue": "$_", "description": "Script block to run for each object", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Export-Csv",
+      "cmdletName": "Export-Csv",
+      "description": "Export to CSV file",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": ".\\output.csv", "description": "Output file path", "validValues": [] },
+        { "name": "NoTypeInformation", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Omit type header", "validValues": [] },
+        { "name": "Delimiter", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Field delimiter (default comma)", "validValues": [] },
+        { "name": "Append", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Append to existing file", "validValues": [] },
+        { "name": "Encoding", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "File encoding", "validValues": ["UTF8", "ASCII", "Unicode", "Default"] }
+      ]
+    },
+    {
+      "name": "ConvertTo-Json",
+      "cmdletName": "ConvertTo-Json",
+      "description": "Convert objects to JSON",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Depth", "type": "Int", "isMandatory": false, "defaultValue": "3", "description": "Serialization depth", "validValues": [] },
+        { "name": "Compress", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Minified output", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Select-String",
+      "cmdletName": "Select-String",
+      "description": "Regex match in text",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Pattern", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Regex pattern to match", "validValues": [] },
+        { "name": "Path", "type": "Path", "isMandatory": false, "defaultValue": "", "description": "File(s) to search (or use pipeline)", "validValues": [] },
+        { "name": "CaseSensitive", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Case-sensitive matching", "validValues": [] },
+        { "name": "SimpleMatch", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Literal string match (not regex)", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Measure-Object",
+      "cmdletName": "Measure-Object",
+      "description": "Count, sum, average",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Property(s) to measure", "validValues": [] },
+        { "name": "Sum", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Calculate sum", "validValues": [] },
+        { "name": "Average", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Calculate average", "validValues": [] },
+        { "name": "Maximum", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Find maximum", "validValues": [] },
+        { "name": "Minimum", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Find minimum", "validValues": [] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+<uiw:AppWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:uiw="using:FluentAvalonia.UI.Windowing"
+        xmlns:vm="using:PoSHBlox.ViewModels"
+        x:Class="PoSHBlox.Views.ImportModuleWindow"
+        Title="PoSHBlox — Import"
+        Width="520" Height="620"
+        Background="{DynamicResource BgPrimaryBrush}"
+        FontFamily="{DynamicResource FontMono}"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <uiw:AppWindow.DataContext>
+        <vm:ImportModuleViewModel />
+    </uiw:AppWindow.DataContext>
+
+    <DockPanel Margin="16">
+
+        <!-- Module name + Scan -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Button DockPanel.Dock="Right" Content="Scan" Margin="8,0,0,0"
+                    Command="{Binding ScanModuleCommand}"
+                    IsEnabled="{Binding !IsScanning}"
+                    ToolTip.Tip="Scan module for available cmdlets"
+                    Padding="14,7" CornerRadius="4"
+                    Background="{DynamicResource BgRunTintBrush}"
+                    Foreground="{DynamicResource TextRunBrush}">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreTealAccent700}" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreTealAccent900}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreTealAccent200}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreTealAccent300}" />
+                </Button.Resources>
+            </Button>
+            <TextBox Text="{Binding ModuleName, Mode=TwoWay}" Watermark="Module name (e.g. ActiveDirectory)"
+                     Background="{DynamicResource BgSecondaryBrush}"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
+                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                     Padding="8,7" CornerRadius="3" FontSize="12" />
+        </DockPanel>
+
+        <!-- Status line -->
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding StatusMessage}" FontSize="11"
+                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0" />
+
+        <!-- Save button -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <TextBox DockPanel.Dock="Left" Width="220"
+                     Text="{Binding CategoryName, Mode=TwoWay}" Watermark="Category name"
+                     Background="{DynamicResource BgSecondaryBrush}"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
+                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                     Padding="8,7" CornerRadius="3" FontSize="12" />
+            <Button DockPanel.Dock="Right" Content="Save Selected" HorizontalAlignment="Right"
+                    Command="{Binding SaveSelectedCommand}"
+                    ToolTip.Tip="Save selected cmdlets as node templates"
+                    Padding="14,7" CornerRadius="4"
+                    Background="{DynamicResource BgSaveTintBrush}"
+                    Foreground="{DynamicResource TextFileBrush}">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                </Button.Resources>
+            </Button>
+        </DockPanel>
+
+        <!-- Separator -->
+        <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
+
+        <!-- Label -->
+        <TextBlock DockPanel.Dock="Top" Text="DISCOVERED CMDLETS" FontSize="11" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,6" />
+
+        <!-- Cmdlet list with checkboxes -->
+        <Border Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding DiscoveredCmdlets}" Margin="4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="6,4" Margin="0,1" CornerRadius="3"
+                                    Background="Transparent">
+                                <DockPanel>
+                                    <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <StackPanel Spacing="1">
+                                        <TextBlock Text="{Binding Name}" FontSize="12"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="{Binding Description}" FontSize="10"
+                                                   Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+    </DockPanel>
+</uiw:AppWindow>

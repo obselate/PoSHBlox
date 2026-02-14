@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "category": "File / Folder",
+  "templates": [
+    {
+      "name": "Get-ChildItem",
+      "cmdletName": "Get-ChildItem",
+      "description": "List files and folders",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Files"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "C:\\", "description": "Directory to list", "validValues": [] },
+        { "name": "Filter", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Wildcard filter (e.g. *.txt)", "validValues": [] },
+        { "name": "Recurse", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Include subdirectories", "validValues": [] },
+        { "name": "Depth", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Recursion depth limit", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Include hidden/system items", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Copy-Item",
+      "cmdletName": "Copy-Item",
+      "description": "Copy files or folders",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": false, "defaultValue": "", "description": "Source path (or use pipeline)", "validValues": [] },
+        { "name": "Destination", "type": "Path", "isMandatory": true, "defaultValue": "", "description": "Destination path", "validValues": [] },
+        { "name": "Recurse", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Copy subdirectories", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Overwrite existing", "validValues": [] },
+        { "name": "PassThru", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Output copied items for chaining", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Move-Item",
+      "cmdletName": "Move-Item",
+      "description": "Move files or folders",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": false, "defaultValue": "", "description": "Source path (or use pipeline)", "validValues": [] },
+        { "name": "Destination", "type": "Path", "isMandatory": true, "defaultValue": "", "description": "Destination path", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Overwrite existing", "validValues": [] },
+        { "name": "PassThru", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Output moved items for chaining", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Remove-Item",
+      "cmdletName": "Remove-Item",
+      "description": "Delete files or folders",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": false, "defaultValue": "", "description": "Path to remove (or use pipeline)", "validValues": [] },
+        { "name": "Recurse", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Remove subdirectories", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Remove hidden/read-only items", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Get-Content",
+      "cmdletName": "Get-Content",
+      "description": "Read file contents",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Lines"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "", "description": "File to read", "validValues": [] },
+        { "name": "TotalCount", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Read only first N lines", "validValues": [] },
+        { "name": "Tail", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "Read only last N lines", "validValues": [] },
+        { "name": "Encoding", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "File encoding", "validValues": ["UTF8", "ASCII", "Unicode", "Default"] }
+      ]
+    },
+    {
+      "name": "Set-Content",
+      "cmdletName": "Set-Content",
+      "description": "Write to a file",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "", "description": "File to write", "validValues": [] },
+        { "name": "Encoding", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "File encoding", "validValues": ["UTF8", "ASCII", "Unicode", "Default"] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Create path if needed", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Get-Acl",
+      "cmdletName": "Get-Acl",
+      "description": "Get file/folder permissions",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": false, "defaultValue": "", "description": "Path (or use pipeline)", "validValues": [] }
+      ]
+    }
+  ]
+}

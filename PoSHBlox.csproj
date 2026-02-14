@@ -20,6 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Templates\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Scripts\*.ps1" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AvaloniaResource Include="Assets\poshblox-icon-512.png" />
     <AvaloniaResource Include="Assets\poshblox.ico" />
     <AvaloniaResource Include="Assets\Fonts\JetBrainsMono-Regular.ttf" />

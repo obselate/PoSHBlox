@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "category": "Control Flow",
+  "templates": [
+    {
+      "name": "If / Else",
+      "cmdletName": "",
+      "description": "Conditional branch - drop nodes into Then/Else zones",
+      "scriptBody": "",
+      "containerType": "IfElse",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    },
+    {
+      "name": "ForEach Loop",
+      "cmdletName": "",
+      "description": "Loop over a collection - drop nodes into Body zone",
+      "scriptBody": "",
+      "containerType": "ForEach",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    },
+    {
+      "name": "Try / Catch",
+      "cmdletName": "",
+      "description": "Error handling - drop nodes into Try/Catch zones",
+      "scriptBody": "",
+      "containerType": "TryCatch",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    },
+    {
+      "name": "While Loop",
+      "cmdletName": "",
+      "description": "Loop while condition is true - drop nodes into Body zone",
+      "scriptBody": "",
+      "containerType": "While",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    },
+    {
+      "name": "Function",
+      "cmdletName": "",
+      "description": "Named function - chain nodes inside as a pipeline with clear input/output",
+      "scriptBody": "",
+      "containerType": "Function",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": []
+    }
+  ]
+}

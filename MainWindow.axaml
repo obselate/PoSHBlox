@@ -27,7 +27,23 @@
                 BorderThickness="0,0,0,1"
                 Padding="4,3">
             <StackPanel Orientation="Horizontal" Spacing="3">
+                <Button Click="OnNewClicked" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="New blank graph (Ctrl+N)"
+                        Background="{DynamicResource BgSaveTintBrush}"
+                        Foreground="{DynamicResource TextFileBrush}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                    </Button.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="New" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Add" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button Click="OnOpenClicked" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Open a .pblx project (Ctrl+O)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
                     <Button.Resources>
@@ -42,6 +58,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnSavePblxClicked" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Save as .pblx project (Ctrl+S)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
                     <Button.Resources>
@@ -56,6 +73,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnExportPs1Clicked" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Export as .ps1 script (Ctrl+E)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
                     <Button.Resources>
@@ -70,6 +88,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnRunClicked" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Run generated script in a new PowerShell window (F5)"
                         Background="{DynamicResource BgRunTintBrush}"
                         Foreground="{DynamicResource TextRunBrush}">
                     <Button.Resources>
@@ -84,6 +103,7 @@
                     </StackPanel>
                 </Button>
                 <Button Command="{Binding DeleteSelectedCommand}" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Delete selected node (Del)"
                         Background="{DynamicResource BgDeleteTintBrush}"
                         Foreground="{DynamicResource TextDeleteLightBrush}">
                     <Button.Resources>
@@ -98,7 +118,29 @@
                     </StackPanel>
                 </Button>
                 <Border Width="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="4,2" />
+                <ToggleButton IsChecked="{Binding IsPaletteOpen, Mode=TwoWay}" Padding="10,6" CornerRadius="4"
+                              ToolTip.Tip="Toggle the node palette sidebar (P)"
+                              Background="{DynamicResource BgSaveTintBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}">
+                    <ToggleButton.Resources>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{StaticResource CoreBlueSteel600}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundPointerOver" Color="{StaticResource CoreCream}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundPressed" Color="{StaticResource CoreCream}" />
+                    </ToggleButton.Resources>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Palette" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="List" FontSize="16" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ToggleButton>
                 <ToggleButton IsChecked="{Binding IsPreviewOpen, Mode=TwoWay}" Padding="10,6" CornerRadius="4"
+                              ToolTip.Tip="View PowerShell script generated from the node graph (Alt+S)"
                               Background="{DynamicResource BgSaveTintBrush}"
                               Foreground="{DynamicResource TextPrimaryBrush}">
                     <ToggleButton.Resources>
@@ -119,6 +161,7 @@
                     </StackPanel>
                 </ToggleButton>
                 <Button Command="{Binding ResetViewCommand}" Padding="10,6" CornerRadius="4"
+                        ToolTip.Tip="Reset pan and zoom to default"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextPrimaryBrush}">
                     <Button.Resources>
@@ -154,13 +197,28 @@
                         <Border DockPanel.Dock="Top" Padding="12,10"
                                 BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="0,0,0,1">
                             <StackPanel Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <TextBlock Text="Node Palette" FontSize="15" FontWeight="Bold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <TextBlock Text="(P)" FontSize="12"
-                                               Foreground="{DynamicResource TextMutedBrush}"
-                                               VerticalAlignment="Center" />
-                                </StackPanel>
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="+ Import" Click="OnImportModuleClicked"
+                                            ToolTip.Tip="Import cmdlets from an installed PowerShell module"
+                                            Padding="8,4" CornerRadius="3" FontSize="11"
+                                            Background="{DynamicResource BgSaveTintBrush}"
+                                            Foreground="{DynamicResource TextFileBrush}"
+                                            VerticalAlignment="Center">
+                                        <Button.Resources>
+                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                                        </Button.Resources>
+                                    </Button>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="Node Palette" FontSize="15" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="(P)" FontSize="12"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DockPanel>
                                 <TextBox x:Name="PaletteSearchBox" Watermark="Search commands... (/)"
                                          Text="{Binding Palette.SearchText, Mode=TwoWay}"
                                          Background="{DynamicResource BgPrimaryBrush}"
@@ -313,24 +371,21 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <TextBlock Text="No parameters - edit script directly below"
-                                                       FontSize="11" Foreground="{DynamicResource TextMutedBrush}" FontStyle="Italic"
-                                                       IsVisible="False"
-                                                       Name="NoParamsMsg" />
+                                            <StackPanel IsVisible="{Binding !SelectedNode.IsCmdletNode}">
+                                                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
 
-                                            <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
-
-                                            <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextMutedBrush}"
-                                                       Margin="0,2,0,4" />
-                                            <TextBox Text="{Binding SelectedNode.ScriptBody, Mode=TwoWay}"
-                                                     AcceptsReturn="True" TextWrapping="Wrap"
-                                                     Height="120"
-                                                     Background="{DynamicResource BgPrimaryBrush}"
-                                                     Foreground="{DynamicResource TextTertiaryBrush}"
-                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                     Padding="8,6" CornerRadius="3"
-                                                     FontFamily="{DynamicResource FontMono}" FontSize="11" />
+                                                <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                           Margin="0,2,0,4" />
+                                                <TextBox Text="{Binding SelectedNode.ScriptBody, Mode=TwoWay}"
+                                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                                         Height="120"
+                                                         Background="{DynamicResource BgPrimaryBrush}"
+                                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                         Padding="8,6" CornerRadius="3"
+                                                         FontFamily="{DynamicResource FontMono}" FontSize="11" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Border>

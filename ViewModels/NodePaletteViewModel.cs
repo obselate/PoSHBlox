@@ -8,7 +8,7 @@ using PoSHBlox.Services;
 namespace PoSHBlox.ViewModels;
 
 /// <summary>
-/// Palette sidebar ViewModel. Loads templates from TemplateLibrary
+/// Palette sidebar ViewModel. Loads templates from JSON files
 /// and provides search/filter functionality.
 /// </summary>
 public partial class NodePaletteViewModel : ObservableObject
@@ -22,7 +22,21 @@ public partial class NodePaletteViewModel : ObservableObject
 
     public NodePaletteViewModel()
     {
-        var allTemplates = TemplateLibrary.GetAll();
+        LoadTemplates();
+        ApplyFilter();
+    }
+
+    public void Reload()
+    {
+        Categories.Clear();
+        FilteredCategories.Clear();
+        LoadTemplates();
+        ApplyFilter();
+    }
+
+    private void LoadTemplates()
+    {
+        var allTemplates = TemplateLoader.LoadAll();
 
         var grouped = allTemplates
             .GroupBy(t => t.Category)
@@ -35,8 +49,6 @@ public partial class NodePaletteViewModel : ObservableObject
 
         foreach (var cat in grouped)
             Categories.Add(cat);
-
-        ApplyFilter();
     }
 
     private void ApplyFilter()

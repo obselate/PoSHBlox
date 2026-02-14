@@ -382,11 +382,7 @@ public class ScriptGenerator
         else
             sb.AppendLine($"{pad}ForEach-Object {{");
 
-        // Inside ForEach-Object, $_ is already available as a scope variable.
-        // Don't pipe it as implicit input — nodes reference it directly in
-        // their parameters (e.g. "$($_.Name)"). Piping $_ to cmdlets that
-        // also have explicit parameters causes parameter binding conflicts.
-        EmitZoneAsScope(sb, bodyZone, indent + 1, null);
+        EmitZoneAsScope(sb, bodyZone, indent + 1, "$_");
         sb.AppendLine($"{pad}}}");
     }
 

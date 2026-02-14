@@ -1,13 +1,12 @@
 {
   "version": 1,
   "metadata": {
-    "name": "Top CPU Process Dashboard",
     "createdUtc": "2026-02-13T18:00:00Z",
-    "modifiedUtc": "2026-02-13T18:00:00Z"
+    "modifiedUtc": "2026-02-14T21:48:18.4966852Z"
   },
   "view": {
-    "panX": 20,
-    "panY": -30,
+    "panX": -5.3333333333332575,
+    "panY": 142,
     "zoom": 0.85
   },
   "nodes": [
@@ -27,7 +26,10 @@
       "zones": [],
       "inputs": [],
       "outputs": [
-        { "name": "Out", "type": "Pipeline" }
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
       ],
       "parameters": []
     },
@@ -46,10 +48,16 @@
       "containerHeight": 300,
       "zones": [],
       "inputs": [
-        { "name": "In", "type": "Pipeline" }
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
       ],
       "outputs": [
-        { "name": "Out", "type": "Pipeline" }
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
       ],
       "parameters": [
         {
@@ -78,10 +86,16 @@
       "containerHeight": 300,
       "zones": [],
       "inputs": [
-        { "name": "In", "type": "Pipeline" }
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
       ],
       "outputs": [
-        { "name": "Out", "type": "Pipeline" }
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
       ],
       "parameters": [
         {
@@ -118,10 +132,16 @@
       "containerHeight": 300,
       "zones": [],
       "inputs": [
-        { "name": "In", "type": "Pipeline" }
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
       ],
       "outputs": [
-        { "name": "Out", "type": "Pipeline" }
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
       ],
       "parameters": [
         {
@@ -148,13 +168,21 @@
       "containerWidth": 520,
       "containerHeight": 540,
       "zones": [
-        { "name": "Body" }
+        {
+          "name": "Body"
+        }
       ],
       "inputs": [
-        { "name": "In", "type": "Pipeline" }
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
       ],
       "outputs": [
-        { "name": "Out", "type": "Pipeline" }
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
       ],
       "parameters": [
         {
@@ -199,7 +227,13 @@
           "type": "Enum",
           "defaultValue": "",
           "description": "Text color",
-          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "validValues": [
+            "White",
+            "Cyan",
+            "Yellow",
+            "Green",
+            "Red"
+          ],
           "value": "White"
         }
       ]
@@ -236,7 +270,13 @@
           "type": "Enum",
           "defaultValue": "",
           "description": "Text color",
-          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "validValues": [
+            "White",
+            "Cyan",
+            "Yellow",
+            "Green",
+            "Red"
+          ],
           "value": "Cyan"
         }
       ]
@@ -273,7 +313,13 @@
           "type": "Enum",
           "defaultValue": "",
           "description": "Text color",
-          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "validValues": [
+            "White",
+            "Cyan",
+            "Yellow",
+            "Green",
+            "Red"
+          ],
           "value": "Yellow"
         }
       ]
@@ -339,7 +385,13 @@
           "type": "Enum",
           "defaultValue": "",
           "description": "Text color",
-          "validValues": ["White", "Cyan", "Yellow", "Green", "Red"],
+          "validValues": [
+            "White",
+            "Cyan",
+            "Yellow",
+            "Green",
+            "Red"
+          ],
           "value": "Green"
         }
       ]

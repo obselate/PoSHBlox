@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "category": "Network / Remote",
+  "templates": [
+    {
+      "name": "Test-Connection",
+      "cmdletName": "Test-Connection",
+      "description": "Ping a host",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Results"],
+      "parameters": [
+        { "name": "ComputerName", "type": "StringArray", "isMandatory": true, "defaultValue": "", "description": "Host(s) to ping, comma-separated", "validValues": [] },
+        { "name": "Count", "type": "Int", "isMandatory": false, "defaultValue": "4", "description": "Number of pings", "validValues": [] },
+        { "name": "Quiet", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Return only True/False", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Invoke-Command",
+      "cmdletName": "Invoke-Command",
+      "description": "Run script on remote machines",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 2,
+      "outputCount": 1,
+      "inputNames": ["Credential", "ScriptBlock"],
+      "outputNames": ["Results"],
+      "parameters": [
+        { "name": "ComputerName", "type": "StringArray", "isMandatory": true, "defaultValue": "", "description": "Remote computer(s), comma-separated", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Test-NetConnection",
+      "cmdletName": "Test-NetConnection",
+      "description": "Test TCP port connectivity",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Result"],
+      "parameters": [
+        { "name": "ComputerName", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Host to test", "validValues": [] },
+        { "name": "Port", "type": "Int", "isMandatory": false, "defaultValue": "", "description": "TCP port to test", "validValues": [] },
+        { "name": "InformationLevel", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "Detail level", "validValues": ["Quiet", "Detailed"] }
+      ]
+    },
+    {
+      "name": "Get-NetAdapter",
+      "cmdletName": "Get-NetAdapter",
+      "description": "List network adapters",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Adapters"],
+      "parameters": [
+        { "name": "Name", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Adapter name filter", "validValues": [] },
+        { "name": "Physical", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Physical adapters only", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Get-NetIPAddress",
+      "cmdletName": "Get-NetIPAddress",
+      "description": "Get IP addresses",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["IPs"],
+      "parameters": [
+        { "name": "AddressFamily", "type": "Enum", "isMandatory": false, "defaultValue": "IPv4", "description": "Address family", "validValues": ["IPv4", "IPv6"] },
+        { "name": "InterfaceAlias", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Interface name filter", "validValues": [] }
+      ]
+    }
+  ]
+}

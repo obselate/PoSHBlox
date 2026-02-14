@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Media;
 
@@ -74,10 +75,41 @@ public static class GraphTheme
         ["String / Data"]     = Color.FromRgb(112, 141, 163), // #708DA3 slate-mid
         ["Custom"]            = Color.FromRgb(90, 90, 110),   // keep
         ["Control Flow"]      = Color.FromRgb(112, 96, 168),  // #7060A8 purple
-        ["Function"]          = Color.FromRgb(75, 143, 212),  // #4B8FD4 blue-bright
         ["Output"]            = Color.FromRgb(212, 148, 58),  // #D4943A amber
     };
 
     public static Color GetCategoryColor(string category)
-        => CategoryColors.TryGetValue(category, out var c) ? c : CategoryColors["Custom"];
+    {
+        if (CategoryColors.TryGetValue(category, out var c))
+            return c;
+
+        // Generate a stable hue for unknown/imported categories
+        int hash = 0;
+        foreach (char ch in category)
+            hash = hash * 31 + ch;
+
+        double hue = (hash & 0x7FFFFFFF) % 360;
+        double sat = 0.45;
+        double lum = 0.45;
+
+        // HSL to RGB
+        double chroma = (1 - Math.Abs(2 * lum - 1)) * sat;
+        double hPrime = hue / 60.0;
+        double x = chroma * (1 - Math.Abs(hPrime % 2 - 1));
+        double m = lum - chroma / 2;
+
+        double r1, g1, b1;
+        if (hPrime < 1)      { r1 = chroma; g1 = x; b1 = 0; }
+        else if (hPrime < 2) { r1 = x; g1 = chroma; b1 = 0; }
+        else if (hPrime < 3) { r1 = 0; g1 = chroma; b1 = x; }
+        else if (hPrime < 4) { r1 = 0; g1 = x; b1 = chroma; }
+        else if (hPrime < 5) { r1 = x; g1 = 0; b1 = chroma; }
+        else                 { r1 = chroma; g1 = 0; b1 = x; }
+
+        byte r = (byte)((r1 + m) * 255);
+        byte g = (byte)((g1 + m) * 255);
+        byte b = (byte)((b1 + m) * 255);
+
+        return Color.FromRgb(r, g, b);
+    }
 }

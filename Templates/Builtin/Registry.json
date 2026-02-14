@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "category": "Registry",
+  "templates": [
+    {
+      "name": "Get-ItemProperty",
+      "cmdletName": "Get-ItemProperty",
+      "description": "Read registry values",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Values"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "HKLM:\\SOFTWARE\\", "description": "Registry key path", "validValues": [] },
+        { "name": "Name", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Specific value name", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Set-ItemProperty",
+      "cmdletName": "Set-ItemProperty",
+      "description": "Write a registry value",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "HKLM:\\SOFTWARE\\", "description": "Registry key path", "validValues": [] },
+        { "name": "Name", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Value name", "validValues": [] },
+        { "name": "Value", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Value data", "validValues": [] },
+        { "name": "Type", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "Registry value type", "validValues": ["String", "ExpandString", "DWord", "QWord", "Binary", "MultiString"] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Create property if it doesn't exist", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "New-Item (Reg Key)",
+      "cmdletName": "New-Item",
+      "description": "Create a registry key",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 0,
+      "outputCount": 1,
+      "inputNames": [],
+      "outputNames": ["Key"],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "HKLM:\\SOFTWARE\\MyApp", "description": "Registry key to create", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Overwrite if exists", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Remove-ItemProperty",
+      "cmdletName": "Remove-ItemProperty",
+      "description": "Delete a registry value",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Path", "type": "Path", "isMandatory": true, "defaultValue": "", "description": "Registry key path", "validValues": [] },
+        { "name": "Name", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Value name to delete", "validValues": [] },
+        { "name": "Force", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Remove read-only or protected values", "validValues": [] },
+        { "name": "WhatIf", "type": "Bool", "isMandatory": false, "defaultValue": "true", "description": "Preview without executing", "validValues": [] }
+      ]
+    }
+  ]
+}

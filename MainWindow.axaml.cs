@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,9 +15,11 @@ using Avalonia.Platform.Storage;
 using Avalonia.Animation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Windowing;
 using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
+using PoSHBlox.Views;
 
 using TemplateCategory = PoSHBlox.ViewModels.TemplateCategory;
 
@@ -26,6 +29,7 @@ public partial class MainWindow : AppWindow
 {
     private DispatcherTimer? _previewTimer;
     private GridLength _savedPreviewHeight = new(200);
+    private bool _isClosingConfirmed;
 
     public MainWindow()
     {
@@ -74,6 +78,12 @@ public partial class MainWindow : AppWindow
                 // F5 — run script
                 case Key.F5:
                     OnRunClicked(this, e);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+N — new graph
+                case Key.N when e.KeyModifiers == KeyModifiers.Control:
+                    OnNewClicked(this, e);
                     e.Handled = true;
                     break;
 
@@ -282,7 +292,12 @@ public partial class MainWindow : AppWindow
 
     private async void OnSavePblxClicked(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is not GraphCanvasViewModel vm) return;
+        await SaveProjectAsync();
+    }
+
+    private async Task<bool> SaveProjectAsync()
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return false;
 
         string? path = vm.CurrentFilePath;
 
@@ -300,9 +315,9 @@ public partial class MainWindow : AppWindow
                 }
             });
 
-            if (file == null) return;
+            if (file == null) return false;
             path = file.TryGetLocalPath();
-            if (path == null) return;
+            if (path == null) return false;
         }
 
         try
@@ -310,10 +325,12 @@ public partial class MainWindow : AppWindow
             var json = ProjectSerializer.Serialize(vm, vm.ProjectCreatedUtc);
             await File.WriteAllTextAsync(path, json);
             vm.CurrentFilePath = path;
+            return true;
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to save project: {ex.Message}");
+            return false;
         }
     }
 
@@ -347,6 +364,63 @@ public partial class MainWindow : AppWindow
     {
         if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
             await clipboard.SetTextAsync(PreviewTextBox.Text ?? "");
+    }
+
+    private async void OnNewClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+        if (await ConfirmDiscardAsync())
+            vm.NewGraph();
+    }
+
+    private async Task<bool> ConfirmDiscardAsync()
+    {
+        if (DataContext is not GraphCanvasViewModel vm || vm.Nodes.Count == 0)
+            return true;
+
+        var dialog = new ContentDialog
+        {
+            Title = "Unsaved Changes",
+            Content = "Your current graph has unsaved changes. What would you like to do?",
+            PrimaryButtonText = "Save First",
+            SecondaryButtonText = "Discard",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        var result = await dialog.ShowAsync();
+
+        return result switch
+        {
+            ContentDialogResult.Primary => await SaveProjectAsync(),
+            ContentDialogResult.Secondary => true,
+            _ => false,
+        };
+    }
+
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        if (!_isClosingConfirmed && DataContext is GraphCanvasViewModel vm && vm.Nodes.Count > 0)
+        {
+            e.Cancel = true;
+            if (await ConfirmDiscardAsync())
+            {
+                _isClosingConfirmed = true;
+                Close();
+            }
+            return;
+        }
+        base.OnClosing(e);
+    }
+
+    private async void OnImportModuleClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+
+        var dialog = new ImportModuleWindow();
+        await dialog.ShowDialog(this);
+
+        vm.Palette.Reload();
     }
 
     private static string GenerateScript(GraphCanvasViewModel vm)

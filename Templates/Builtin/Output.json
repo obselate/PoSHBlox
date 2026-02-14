@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "category": "Output",
+  "templates": [
+    {
+      "name": "Write-Host",
+      "cmdletName": "Write-Host",
+      "description": "Write colored text to console (not pipeline)",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Object", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Text or object to display (leave blank to display pipeline input)", "validValues": [] },
+        { "name": "ForegroundColor", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "Text color", "validValues": ["Black", "DarkBlue", "DarkGreen", "DarkCyan", "DarkRed", "DarkMagenta", "DarkYellow", "Gray", "DarkGray", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White"] },
+        { "name": "BackgroundColor", "type": "Enum", "isMandatory": false, "defaultValue": "", "description": "Background color", "validValues": ["Black", "DarkBlue", "DarkGreen", "DarkCyan", "DarkRed", "DarkMagenta", "DarkYellow", "Gray", "DarkGray", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White"] },
+        { "name": "NoNewline", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Don't append newline", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Write-Output",
+      "cmdletName": "Write-Output",
+      "description": "Write objects to the pipeline (default behavior)",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "InputObject", "type": "String", "isMandatory": false, "defaultValue": "", "description": "Object to output", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Write-Warning",
+      "cmdletName": "Write-Warning",
+      "description": "Write a warning message",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Message", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Warning text", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Write-Error",
+      "cmdletName": "Write-Error",
+      "description": "Write a non-terminating error",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Message", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Error text", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Write-Verbose",
+      "cmdletName": "Write-Verbose",
+      "description": "Write verbose output (requires -Verbose or $VerbosePreference)",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": [
+        { "name": "Message", "type": "String", "isMandatory": true, "defaultValue": "", "description": "Verbose text", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Out-Host",
+      "cmdletName": "Out-Host",
+      "description": "Send output to the console host",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": []
+    },
+    {
+      "name": "Out-Null",
+      "cmdletName": "Out-Null",
+      "description": "Suppress output (discard pipeline objects)",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 0,
+      "inputNames": ["In"],
+      "outputNames": [],
+      "parameters": []
+    },
+    {
+      "name": "Format-Table",
+      "cmdletName": "Format-Table",
+      "description": "Format output as a table",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Properties to display (comma-separated)", "validValues": [] },
+        { "name": "AutoSize", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Auto-size columns", "validValues": [] },
+        { "name": "Wrap", "type": "Bool", "isMandatory": false, "defaultValue": "", "description": "Wrap long text", "validValues": [] }
+      ]
+    },
+    {
+      "name": "Format-List",
+      "cmdletName": "Format-List",
+      "description": "Format output as property list",
+      "scriptBody": "",
+      "containerType": "None",
+      "inputCount": 1,
+      "outputCount": 1,
+      "inputNames": ["In"],
+      "outputNames": ["Out"],
+      "parameters": [
+        { "name": "Property", "type": "StringArray", "isMandatory": false, "defaultValue": "", "description": "Properties to display (comma-separated or *)", "validValues": [] }
+      ]
+    }
+  ]
+}

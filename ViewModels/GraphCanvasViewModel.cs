@@ -59,6 +59,20 @@ public partial class GraphCanvasViewModel : ObservableObject
     // ── Commands ────────────────────────────────────────────────
 
     [RelayCommand]
+    public void NewGraph()
+    {
+        Connections.Clear();
+        Nodes.Clear();
+        SelectedNode = null;
+        CurrentFilePath = null;
+        _projectCreatedUtc = null;
+        _spawnCount = 0;
+        PanX = 0;
+        PanY = 0;
+        Zoom = 1.0;
+    }
+
+    [RelayCommand]
     public void AddNode()
     {
         var node = NodeFactory.CreateBlank(
