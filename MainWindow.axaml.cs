@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -245,12 +246,23 @@ public partial class MainWindow : AppWindow
             var tempPath = Path.Combine(Path.GetTempPath(), $"PoSHBlox_{Guid.NewGuid():N}.ps1");
             File.WriteAllText(tempPath, script);
 
-            Process.Start(new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
                 Arguments = $"-NoProfile -NoExit -ExecutionPolicy Bypass -File \"{tempPath}\"",
-                UseShellExecute = true,
-            });
+                UseShellExecute = false,
+            };
+
+            // Strip PowerShell 7+ module paths from PSModulePath so PS 5.1
+            // doesn't load PS 7 modules whose type data conflicts with PS 5.1.
+            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath))
+            {
+                var filtered = string.Join(";", modulePath.Split(';')
+                    .Where(p => !Regex.IsMatch(p, @"\\powershell\\\d", RegexOptions.IgnoreCase)));
+                psi.Environment["PSModulePath"] = filtered;
+            }
+
+            Process.Start(psi);
         }
         catch (Exception ex)
         {
@@ -261,6 +273,7 @@ public partial class MainWindow : AppWindow
     private async void OnOpenClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
+        if (!await ConfirmDiscardAsync()) return;
 
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
@@ -325,6 +338,7 @@ public partial class MainWindow : AppWindow
             var json = ProjectSerializer.Serialize(vm, vm.ProjectCreatedUtc);
             await File.WriteAllTextAsync(path, json);
             vm.CurrentFilePath = path;
+            vm.IsDirty = false;
             return true;
         }
         catch (Exception ex)
@@ -375,7 +389,7 @@ public partial class MainWindow : AppWindow
 
     private async Task<bool> ConfirmDiscardAsync()
     {
-        if (DataContext is not GraphCanvasViewModel vm || vm.Nodes.Count == 0)
+        if (DataContext is not GraphCanvasViewModel vm || !vm.IsDirty)
             return true;
 
         var dialog = new ContentDialog
@@ -400,7 +414,7 @@ public partial class MainWindow : AppWindow
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
-        if (!_isClosingConfirmed && DataContext is GraphCanvasViewModel vm && vm.Nodes.Count > 0)
+        if (!_isClosingConfirmed && DataContext is GraphCanvasViewModel vm && vm.IsDirty)
         {
             e.Cancel = true;
             if (await ConfirmDiscardAsync())

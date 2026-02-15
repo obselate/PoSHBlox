@@ -79,6 +79,9 @@ public static class NodeFactory
             case ContainerType.Function:
                 ConfigureFunction(node);
                 break;
+            case ContainerType.Label:
+                ConfigureLabel(node);
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), $"Unknown container type: {type}");
         }
@@ -164,6 +167,8 @@ public static class NodeFactory
         node.Category = "Function";
         node.ContainerWidth = 500;
         node.ContainerHeight = 320;
+        node.Inputs.Clear();
+        node.Outputs.Clear();
         node.Parameters.Add(new NodeParameter
         {
             Name = "FunctionName",
@@ -175,13 +180,32 @@ public static class NodeFactory
         });
         node.Parameters.Add(new NodeParameter
         {
-            Name = "InputParam",
+            Name = "ReturnType",
             Type = ParamType.String,
             DefaultValue = "",
-            Description = "Parameter name for pipeline input (leave blank for none)",
+            Description = "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+            Value = "",
+        });
+        node.Parameters.Add(new NodeParameter
+        {
+            Name = "ReturnVariable",
+            Type = ParamType.String,
+            DefaultValue = "",
+            Description = "Variable to return (e.g. result). Leave blank for no explicit return.",
             Value = "",
         });
         node.Zones.Add(new ContainerZone { Name = "Body" });
+    }
+
+    private static void ConfigureLabel(GraphNode node)
+    {
+        node.Title = "Label";
+        node.Category = "Annotation";
+        node.ContainerWidth = 420;
+        node.ContainerHeight = 260;
+        node.Inputs.Clear();
+        node.Outputs.Clear();
+        node.Zones.Add(new ContainerZone { Name = "Content" });
     }
 
     // ── Helpers ─────────────────────────────────────────────────

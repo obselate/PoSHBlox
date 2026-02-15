@@ -92,6 +92,8 @@ public class PblxParameter
     public string Description { get; set; } = "";
     public string[] ValidValues { get; set; } = [];
     public string Value { get; set; } = "";
+    public bool IsArgument { get; set; }
+    public bool IsPipelineInput { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extensions { get; set; }

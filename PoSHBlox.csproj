@@ -9,6 +9,9 @@
     <ApplicationIcon>Assets\poshblox.ico</ApplicationIcon>
     <RootNamespace>PoSHBlox</RootNamespace>
     <AssemblyName>PoSHBlox</AssemblyName>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>

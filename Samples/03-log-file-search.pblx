@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00.0000000Z",
+    "modifiedUtc": "2026-02-14T12:00:00.0000000Z"
+  },
+  "view": {
+    "panX": 50,
+    "panY": -10,
+    "zoom": 1.0
+  },
+  "nodes": [
+    {
+      "id": "c3000001",
+      "title": "Log File Search",
+      "category": "Annotation",
+      "scriptBody": "",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -50,
+      "y": 30,
+      "width": 200,
+      "containerType": "Label",
+      "containerWidth": 1200,
+      "containerHeight": 450,
+      "zones": [
+        {
+          "name": "Content"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": []
+    },
+    {
+      "id": "c3000002",
+      "title": "Get-ChildItem",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-ChildItem",
+      "outputVariable": "",
+      "x": 0,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Files",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "C:\\",
+          "description": "Directory to list",
+          "validValues": [],
+          "value": "C:\\Logs"
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Wildcard filter (e.g. *.txt)",
+          "validValues": [],
+          "value": "*.log"
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include subdirectories",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Depth",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Recursion depth limit",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include hidden/system items",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "c3000003",
+      "title": "Select-String",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-String",
+      "outputVariable": "",
+      "x": 280,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Pattern",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Regex pattern to match",
+          "validValues": [],
+          "value": "ERROR"
+        },
+        {
+          "name": "Path",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "File(s) to search (or use pipeline)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "CaseSensitive",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Case-sensitive matching",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "SimpleMatch",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Literal string match (not regex)",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "c3000004",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 560,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Name -like \"*pattern*\"",
+          "description": "Condition to filter objects",
+          "validValues": [],
+          "value": "$_.Line -notmatch \u0027DEBUG\u0027"
+        }
+      ]
+    },
+    {
+      "id": "c3000005",
+      "title": "Export-Csv",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Export-Csv",
+      "outputVariable": "",
+      "x": 840,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": ".\\output.csv",
+          "description": "Output file path",
+          "validValues": [],
+          "value": ".\\error-report.csv"
+        },
+        {
+          "name": "NoTypeInformation",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Omit type header",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Delimiter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Field delimiter (default comma)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Append",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Append to existing file",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Encoding",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "File encoding",
+          "validValues": [
+            "UTF8",
+            "ASCII",
+            "Unicode",
+            "Default"
+          ],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "c3000006",
+      "title": "Get-Content",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-Content",
+      "outputVariable": "",
+      "x": 0,
+      "y": 280,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Lines",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "File to read",
+          "validValues": [],
+          "value": "C:\\Logs\\app.log"
+        },
+        {
+          "name": "TotalCount",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Read only first N lines",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Tail",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Read only last N lines",
+          "validValues": [],
+          "value": "50"
+        },
+        {
+          "name": "Encoding",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "File encoding",
+          "validValues": [
+            "UTF8",
+            "ASCII",
+            "Unicode",
+            "Default"
+          ],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "c3000007",
+      "title": "Write-Verbose",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Verbose",
+      "outputVariable": "",
+      "x": 280,
+      "y": 280,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c3000001",
+      "parentZoneName": "Content",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Verbose text",
+          "validValues": [],
+          "value": "Processing log entries..."
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "c3000002",
+      "targetNodeId": "c3000003"
+    },
+    {
+      "sourceNodeId": "c3000003",
+      "targetNodeId": "c3000004"
+    },
+    {
+      "sourceNodeId": "c3000004",
+      "targetNodeId": "c3000005"
+    }
+  ]
+}

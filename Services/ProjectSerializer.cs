@@ -93,6 +93,8 @@ public static class ProjectSerializer
                     Description = p.Description,
                     ValidValues = p.ValidValues,
                     Value = p.Value,
+                    IsArgument = p.IsArgument,
+                    IsPipelineInput = p.IsPipelineInput,
                 });
             }
 
@@ -216,6 +218,8 @@ public static class ProjectSerializer
                     Description = pDto.Description,
                     ValidValues = pDto.ValidValues,
                     Value = pDto.Value,
+                    IsArgument = pDto.IsArgument,
+                    IsPipelineInput = pDto.IsPipelineInput,
                 });
             }
 

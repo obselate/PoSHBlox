@@ -29,7 +29,8 @@ public class NodeGraphRenderer
     /// Render the entire graph: background, grid, wires, containers, nodes, and HUD.
     /// </summary>
     public void Render(DrawingContext ctx, Rect bounds, GraphCanvasViewModel vm,
-        bool isDraggingWire, NodePort? wireStartPort, Point wireEndPoint)
+        bool isDraggingWire, NodePort? wireStartPort, Point wireEndPoint,
+        bool isDraggingNode = false, GraphNode? dragNode = null)
     {
         ctx.DrawRectangle(_bgBrush, null, bounds);
         DrawGrid(ctx, bounds, vm);
@@ -40,7 +41,16 @@ public class NodeGraphRenderer
         using (ctx.PushTransform(Matrix.CreateTranslation(vm.PanX, vm.PanY)))
         using (ctx.PushTransform(Matrix.CreateScale(vm.Zoom, vm.Zoom)))
         {
-            // Wires behind everything
+            // Containers: sorted by nesting depth (parents before children)
+            foreach (var node in vm.Nodes
+                .Where(n => n.IsContainer)
+                .OrderBy(n => GetNestingDepth(n)))
+            {
+                if (IsNodeVisible(node, viewport))
+                    DrawContainer(ctx, node, isDraggingNode, dragNode);
+            }
+
+            // Wires above containers
             foreach (var conn in vm.Connections)
             {
                 if (IsWireVisible(conn, viewport))
@@ -49,13 +59,6 @@ public class NodeGraphRenderer
 
             if (isDraggingWire && wireStartPort != null)
                 DrawPendingWire(ctx, wireStartPort, wireEndPoint);
-
-            // Containers behind regular nodes
-            foreach (var node in vm.Nodes.Where(n => n.IsContainer))
-            {
-                if (IsNodeVisible(node, viewport))
-                    DrawContainer(ctx, node);
-            }
 
             // Regular nodes on top
             foreach (var node in vm.Nodes.Where(n => !n.IsContainer))
@@ -177,7 +180,8 @@ public class NodeGraphRenderer
 
     // ── Containers ─────────────────────────────────────────────
 
-    private void DrawContainer(DrawingContext ctx, GraphNode node)
+    private void DrawContainer(DrawingContext ctx, GraphNode node,
+        bool isDraggingNode = false, GraphNode? dragNode = null)
     {
         var catColor = GraphTheme.GetCategoryColor(node.Category);
         double hh = GraphNode.ContainerHeaderHeight;
@@ -188,9 +192,10 @@ public class NodeGraphRenderer
             new RoundedRect(rect.Translate(new Vector(GraphTheme.ContainerShadowOffset, GraphTheme.ContainerShadowOffset)),
                 GraphTheme.ContainerCornerRadius));
 
-        // Body (dashed for control flow, solid for functions)
+        // Body (dashed for control flow, solid for functions and labels)
         var borderColor = node.IsSelected ? GraphTheme.NodeSelectedBorder : catColor;
-        var borderPen = node.ContainerType == ContainerType.Function
+        bool solidBorder = node.ContainerType is ContainerType.Function or ContainerType.Label;
+        var borderPen = solidBorder
             ? new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1.5)
             : new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1.5) { DashStyle = DashStyle.Dash };
         ctx.DrawRectangle(new SolidColorBrush(GraphTheme.ContainerBg), borderPen,
@@ -208,9 +213,14 @@ public class NodeGraphRenderer
         var title = MakeText(node.Title, 14, FontWeight.Bold, GraphTheme.TextPrimary);
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
 
-        // Zones
+        // Zones — highlight zone under cursor when dragging a node
         foreach (var zone in node.Zones)
-            DrawZone(ctx, node, zone);
+        {
+            bool highlight = isDraggingNode && dragNode != null
+                && dragNode != node // don't highlight own zones
+                && IsPointInZone(node, zone, dragNode.X + dragNode.EffectiveWidth / 2, dragNode.Y + dragNode.Height / 2);
+            DrawZone(ctx, node, zone, highlight);
+        }
 
         // Resize grip (bottom-right triangle)
         DrawResizeGrip(ctx, node);
@@ -220,13 +230,16 @@ public class NodeGraphRenderer
         foreach (var port in node.Outputs) DrawPort(ctx, node, port);
     }
 
-    private void DrawZone(DrawingContext ctx, GraphNode parent, ContainerZone zone)
+    private void DrawZone(DrawingContext ctx, GraphNode parent, ContainerZone zone, bool highlight = false)
     {
         var (zx, zy, zw, zh) = zone.GetAbsoluteRect(parent);
 
-        // Zone background
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.ZoneBg),
-            new Pen(new SolidColorBrush(GraphTheme.ZoneBorder), 1) { DashStyle = DashStyle.Dot },
+        // Zone background — use highlight color and solid teal border when a node is being dragged over
+        var bgColor = highlight ? GraphTheme.ZoneDropHighlight : GraphTheme.ZoneBg;
+        var borderPen = highlight
+            ? new Pen(new SolidColorBrush(GraphTheme.NodeSelectedBorder), 1.5)
+            : new Pen(new SolidColorBrush(GraphTheme.ZoneBorder), 1) { DashStyle = DashStyle.Dot };
+        ctx.DrawRectangle(new SolidColorBrush(bgColor), borderPen,
             new RoundedRect(new Rect(zx, zy, zw, zh), 6));
 
         // Zone label
@@ -241,6 +254,15 @@ public class NodeGraphRenderer
                 11, new SolidColorBrush(GraphTheme.ZoneHint));
             ctx.DrawText(hint, new Point(zx + (zw - hint.Width) / 2, zy + (zh - hint.Height) / 2));
         }
+    }
+
+    /// <summary>
+    /// Check if a point (in canvas space) is inside a container zone.
+    /// </summary>
+    private static bool IsPointInZone(GraphNode container, ContainerZone zone, double px, double py)
+    {
+        var (zx, zy, zw, zh) = zone.GetAbsoluteRect(container);
+        return px >= zx && px <= zx + zw && py >= zy && py <= zy + zh;
     }
 
     private static void DrawResizeGrip(DrawingContext ctx, GraphNode node)
@@ -375,6 +397,14 @@ public class NodeGraphRenderer
             new GradientStop(GraphTheme.HeaderGradientBottom, 1),
         }
     };
+
+    private static int GetNestingDepth(GraphNode node)
+    {
+        int depth = 0;
+        var current = node.ParentContainer;
+        while (current != null) { depth++; current = current.ParentContainer; }
+        return depth;
+    }
 
     private static FormattedText MakeText(string text, double size, FontWeight weight, Color color)
         => new(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,

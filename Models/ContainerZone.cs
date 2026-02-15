@@ -22,4 +22,26 @@ public class ContainerZone
     /// </summary>
     public (double X, double Y, double W, double H) GetAbsoluteRect(GraphNode parent)
         => (parent.X + OffsetX, parent.Y + OffsetY, Width, Height);
+
+    /// <summary>
+    /// Calculate the bounding box of all children relative to the zone origin.
+    /// Returns the minimum width/height the zone needs to contain all children with padding.
+    /// </summary>
+    public (double MinWidth, double MinHeight) GetContentBounds(GraphNode parent)
+    {
+        if (Children.Count == 0) return (0, 0);
+
+        var (zx, zy, _, _) = GetAbsoluteRect(parent);
+        double pad = GraphNode.ZonePadding;
+        double maxRight = 0, maxBottom = 0;
+
+        foreach (var child in Children)
+        {
+            double relRight = (child.X - zx) + child.EffectiveWidth + pad;
+            double relBottom = (child.Y - zy) + child.Height + pad;
+            if (relRight > maxRight) maxRight = relRight;
+            if (relBottom > maxBottom) maxBottom = relBottom;
+        }
+        return (maxRight, maxBottom);
+    }
 }

@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00.0000000Z",
+    "modifiedUtc": "2026-02-14T12:00:00.0000000Z"
+  },
+  "view": {
+    "panX": 0,
+    "panY": 0,
+    "zoom": 1.0
+  },
+  "nodes": [
+    {
+      "id": "d4000001",
+      "title": "Try / Catch",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 50,
+      "y": 50,
+      "width": 200,
+      "containerType": "TryCatch",
+      "containerWidth": 800,
+      "containerHeight": 350,
+      "zones": [
+        {
+          "name": "Try"
+        },
+        {
+          "name": "Catch"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ErrorAction",
+          "type": "Enum",
+          "defaultValue": "Stop",
+          "description": "Action to take when an error occurs",
+          "validValues": [
+            "Stop",
+            "Continue",
+            "SilentlyContinue"
+          ],
+          "value": "Stop"
+        }
+      ]
+    },
+    {
+      "id": "d4000002",
+      "title": "Get-Process",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "outputVariable": "",
+      "x": 80,
+      "y": 140,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "d4000001",
+      "parentZoneName": "Try",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Processes",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Process name(s) to retrieve",
+          "validValues": [],
+          "value": "notepad"
+        },
+        {
+          "name": "Id",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Process ID(s) to retrieve",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ComputerName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Remote computer name",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "d4000003",
+      "title": "Stop-Process",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Stop-Process",
+      "outputVariable": "",
+      "x": 80,
+      "y": 280,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "d4000001",
+      "parentZoneName": "Try",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Process name to stop",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Id",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Process ID to stop",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Force stop the process",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Show what would happen without actually stopping",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "d4000004",
+      "title": "Write-Error",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Error",
+      "outputVariable": "",
+      "x": 460,
+      "y": 140,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "d4000001",
+      "parentZoneName": "Catch",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Error message to display",
+          "validValues": [],
+          "value": "Failed to stop process: $($_.Exception.Message)"
+        }
+      ]
+    },
+    {
+      "id": "d4000005",
+      "title": "Write-Warning",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Warning",
+      "outputVariable": "",
+      "x": 460,
+      "y": 280,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "d4000001",
+      "parentZoneName": "Catch",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Warning message to display",
+          "validValues": [],
+          "value": "The process \u0027notepad\u0027 may not be running"
+        }
+      ]
+    },
+    {
+      "id": "d4000006",
+      "title": "Out-Null",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Out-Null",
+      "outputVariable": "",
+      "x": 900,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": []
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "d4000002",
+      "targetNodeId": "d4000003"
+    }
+  ]
+}

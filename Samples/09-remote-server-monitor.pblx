@@ -1,0 +1,468 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T04:15:00.634251Z"
+  },
+  "view": {
+    "panX": 100,
+    "panY": -10,
+    "zoom": 0.85
+  },
+  "nodes": [
+    {
+      "id": "c9000001",
+      "title": "Monitor-RemoteServers",
+      "category": "Function",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -100,
+      "y": 30,
+      "width": 200,
+      "containerType": "Function",
+      "containerWidth": 1220,
+      "containerHeight": 730,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "FunctionName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "Invoke-MyFunction",
+          "description": "PowerShell function name (use Verb-Noun convention)",
+          "validValues": [],
+          "value": "Monitor-RemoteServers"
+        },
+        {
+          "name": "ReturnType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ReturnVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Variable to return (e.g. result). Leave blank for no explicit return.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ServerList",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "List of servers to monitor",
+          "validValues": [],
+          "value": "",
+          "isArgument": true
+        }
+      ]
+    },
+    {
+      "id": "c9000002",
+      "title": "Invoke-Command",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Invoke-Command",
+      "outputVariable": "",
+      "x": -50,
+      "y": 130,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c9000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "Credential",
+          "type": "Pipeline"
+        },
+        {
+          "name": "ScriptBlock",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Results",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Remote computer name(s)",
+          "validValues": [],
+          "value": "Server01, Server02"
+        },
+        {
+          "name": "ScriptBlock",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Script block to execute remotely",
+          "validValues": [],
+          "value": "Get-Service"
+        }
+      ]
+    },
+    {
+      "id": "c9000003",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 250,
+      "y": 130,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 800,
+      "containerHeight": 350,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "parentNodeId": "c9000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "c9000004",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 290,
+      "y": 210,
+      "width": 200,
+      "containerType": "IfElse",
+      "containerWidth": 680,
+      "containerHeight": 230,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "c9000003",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Status -eq \u0027Running\u0027",
+          "description": "PowerShell condition to evaluate",
+          "validValues": [],
+          "value": "$_.Status -ne \u0027Running\u0027"
+        }
+      ]
+    },
+    {
+      "id": "c9000005",
+      "title": "Restart-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Restart-Service",
+      "outputVariable": "",
+      "x": 320,
+      "y": 290,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c9000004",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Service name",
+          "validValues": [],
+          "value": "$($_.Name)"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Force restart",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Pass service object to pipeline",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "c9000006",
+      "title": "Out-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Out-Host",
+      "outputVariable": "",
+      "x": 640,
+      "y": 290,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c9000004",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": []
+    },
+    {
+      "id": "c9000007",
+      "title": "Start-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Start-Service",
+      "outputVariable": "",
+      "x": -40,
+      "y": 530,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c9000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Service name",
+          "validValues": [],
+          "value": "Spooler"
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Pass service object to pipeline",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "c9000008",
+      "title": "Stop-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Stop-Service",
+      "outputVariable": "",
+      "x": 220,
+      "y": 530,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c9000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Service name",
+          "validValues": [],
+          "value": "Spooler"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Force stop dependent services",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Pass service object to pipeline",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "2caa2c76",
+      "title": "Monitor-RemoteServers",
+      "category": "Functions",
+      "scriptBody": "",
+      "cmdletName": "Monitor-RemoteServers",
+      "outputVariable": "",
+      "x": 1220,
+      "y": 90,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ServerList",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "List of servers to monitor",
+          "validValues": [],
+          "value": "Server01, Server02"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "c9000002",
+      "targetNodeId": "c9000003"
+    }
+  ]
+}

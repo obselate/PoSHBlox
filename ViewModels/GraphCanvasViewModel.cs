@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +14,16 @@ namespace PoSHBlox.ViewModels;
 
 public partial class GraphCanvasViewModel : ObservableObject
 {
+    // ── Static enum options for XAML binding ─────────────────────
+    public static ParamType[] ArgumentTypeOptions { get; } =
+    [
+        ParamType.String,
+        ParamType.Int,
+        ParamType.Bool,
+        ParamType.StringArray,
+        ParamType.ScriptBlock,
+    ];
+
     // ── Graph state ────────────────────────────────────────────
     public ObservableCollection<GraphNode> Nodes { get; } = new();
     public ObservableCollection<NodeConnection> Connections { get; } = new();
@@ -32,7 +45,9 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     // ── Project state ─────────────────────────────────────────
     [ObservableProperty] private string? _currentFilePath;
+    [ObservableProperty] private bool _isDirty;
     private DateTime? _projectCreatedUtc;
+    private bool _suppressDirty;
 
     public string WindowTitle => CurrentFilePath != null
         ? $"PoSHBlox \u2014 {Path.GetFileName(CurrentFilePath)}"
@@ -53,7 +68,12 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public GraphCanvasViewModel()
     {
+        Palette.SetGraphNodes(Nodes);
+        Nodes.CollectionChanged += OnNodesChanged;
+        Connections.CollectionChanged += (_, _) => MarkDirty();
+
         SeedExampleGraph();
+        IsDirty = false;
     }
 
     // ── Commands ────────────────────────────────────────────────
@@ -61,6 +81,7 @@ public partial class GraphCanvasViewModel : ObservableObject
     [RelayCommand]
     public void NewGraph()
     {
+        _suppressDirty = true;
         Connections.Clear();
         Nodes.Clear();
         SelectedNode = null;
@@ -70,6 +91,8 @@ public partial class GraphCanvasViewModel : ObservableObject
         PanX = 0;
         PanY = 0;
         Zoom = 1.0;
+        _suppressDirty = false;
+        IsDirty = false;
     }
 
     [RelayCommand]
@@ -101,19 +124,39 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         if (SelectedNode == null) return;
 
-        // Remove all connections to/from this node
-        var toRemove = Connections
-            .Where(c => c.Source.Owner == SelectedNode || c.Target.Owner == SelectedNode)
-            .ToList();
-        foreach (var c in toRemove)
-            Connections.Remove(c);
+        // Collect all nodes to delete (including descendants if container)
+        var toDelete = new List<GraphNode> { SelectedNode };
+        if (SelectedNode.IsContainer)
+            CollectDescendants(SelectedNode, toDelete);
 
-        // Remove from parent zone if nested
-        if (SelectedNode.ParentZone != null)
-            SelectedNode.ParentZone.Children.Remove(SelectedNode);
+        foreach (var node in toDelete)
+        {
+            // Remove connections
+            var conns = Connections
+                .Where(c => c.Source.Owner == node || c.Target.Owner == node)
+                .ToList();
+            foreach (var c in conns)
+                Connections.Remove(c);
 
-        Nodes.Remove(SelectedNode);
+            // Remove from parent zone
+            if (node.ParentZone != null)
+                node.ParentZone.Children.Remove(node);
+
+            Nodes.Remove(node);
+        }
+
         SelectedNode = null;
+    }
+
+    private static void CollectDescendants(GraphNode container, List<GraphNode> result)
+    {
+        foreach (var zone in container.Zones)
+            foreach (var child in zone.Children)
+            {
+                result.Add(child);
+                if (child.IsContainer)
+                    CollectDescendants(child, result);
+            }
     }
 
     [RelayCommand]
@@ -122,6 +165,27 @@ public partial class GraphCanvasViewModel : ObservableObject
         PanX = 0;
         PanY = 0;
         Zoom = 1.0;
+    }
+
+    [RelayCommand]
+    public void AddArgument()
+    {
+        if (SelectedNode is not { ContainerType: ContainerType.Function }) return;
+        SelectedNode.Parameters.Add(new NodeParameter
+        {
+            Name = "NewParam",
+            Type = ParamType.String,
+            IsArgument = true,
+            Description = "Function argument",
+        });
+    }
+
+    [RelayCommand]
+    public void RemoveArgument(NodeParameter arg)
+    {
+        if (SelectedNode is not { ContainerType: ContainerType.Function }) return;
+        if (arg.IsArgument)
+            SelectedNode.Parameters.Remove(arg);
     }
 
     // ── Public helpers ─────────────────────────────────────────
@@ -160,8 +224,88 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public void LoadFromDocument(PblxDocument doc)
     {
+        _suppressDirty = true;
         _projectCreatedUtc = doc.Metadata.CreatedUtc;
         ProjectSerializer.RebuildGraph(doc, this);
+        _suppressDirty = false;
+        IsDirty = false;
+        Palette.SyncFunctionTemplates();
+    }
+
+    // ── Dirty tracking ────────────────────────────────────────
+
+    private void MarkDirty()
+    {
+        if (!_suppressDirty) IsDirty = true;
+    }
+
+    private void OnNodesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        MarkDirty();
+
+        if (e.NewItems != null)
+            foreach (GraphNode node in e.NewItems)
+                SubscribeNode(node);
+
+        if (e.OldItems != null)
+            foreach (GraphNode node in e.OldItems)
+                UnsubscribeNode(node);
+
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            // Clear was called — can't enumerate old items, they're gone.
+            // Nodes list is now empty so nothing to unsubscribe.
+        }
+
+        Palette.SyncFunctionTemplates();
+    }
+
+    private static readonly string[] IgnoredNodeProps = [nameof(GraphNode.IsSelected)];
+
+    private void SubscribeNode(GraphNode node)
+    {
+        node.PropertyChanged += OnNodePropertyChanged;
+        foreach (var p in node.Parameters)
+            p.PropertyChanged += OnParamPropertyChanged;
+        node.Parameters.CollectionChanged += OnNodeParamsChanged;
+    }
+
+    private void UnsubscribeNode(GraphNode node)
+    {
+        node.PropertyChanged -= OnNodePropertyChanged;
+        foreach (var p in node.Parameters)
+            p.PropertyChanged -= OnParamPropertyChanged;
+        node.Parameters.CollectionChanged -= OnNodeParamsChanged;
+    }
+
+    private void OnNodePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != null && !IgnoredNodeProps.Contains(e.PropertyName))
+            MarkDirty();
+    }
+
+    private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(NodeParameter.Value))
+        {
+            MarkDirty();
+            Palette.SyncFunctionTemplates();
+        }
+    }
+
+    private void OnNodeParamsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        MarkDirty();
+
+        if (e.NewItems != null)
+            foreach (NodeParameter p in e.NewItems)
+                p.PropertyChanged += OnParamPropertyChanged;
+
+        if (e.OldItems != null)
+            foreach (NodeParameter p in e.OldItems)
+                p.PropertyChanged -= OnParamPropertyChanged;
+
+        Palette.SyncFunctionTemplates();
     }
 
     // ── Example graph seed ─────────────────────────────────────

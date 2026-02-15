@@ -1,0 +1,402 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T03:51:01.4474456Z"
+  },
+  "view": {
+    "panX": 150,
+    "panY": -10,
+    "zoom": 0.85
+  },
+  "nodes": [
+    {
+      "id": "f6000001",
+      "title": "Clear-TempFiles",
+      "category": "Function",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -150,
+      "y": 30,
+      "width": 200,
+      "containerType": "Function",
+      "containerWidth": 1100,
+      "containerHeight": 600,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "FunctionName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "Invoke-MyFunction",
+          "description": "PowerShell function name (use Verb-Noun convention)",
+          "validValues": [],
+          "value": "Clear-TempFiles"
+        },
+        {
+          "name": "ReturnType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ReturnVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Variable to return (e.g. result). Leave blank for no explicit return.",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "f6000002",
+      "title": "Variable Source",
+      "category": "Custom",
+      "scriptBody": "@(\n    \u0022C:\\Temp\u0022,\n    \u0022$env:TEMP\u0022,\n    \u0022$env:USERPROFILE\\AppData\\Local\\Temp\u0022\n)",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -100,
+      "y": 130,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "f6000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Data",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "f6000003",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 150,
+      "y": 130,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 500,
+      "containerHeight": 350,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "parentNodeId": "f6000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "f6000004",
+      "title": "Get-ChildItem",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-ChildItem",
+      "outputVariable": "",
+      "x": 180,
+      "y": 220,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "f6000003",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Files",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Path to search in",
+          "validValues": [],
+          "value": "$_"
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Filter pattern for file names",
+          "validValues": [],
+          "value": "*.tmp"
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Search subdirectories recursively",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Depth",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Maximum recursion depth",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include hidden and system files",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "f6000005",
+      "title": "Remove-Item",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Remove-Item",
+      "outputVariable": "",
+      "x": 180,
+      "y": 370,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "f6000003",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "Path of item to remove",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Remove items in subdirectories",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Force removal of read-only or hidden items",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Show what would happen without actually removing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "f6000006",
+      "title": "Write-Verbose",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Verbose",
+      "outputVariable": "",
+      "x": 700,
+      "y": 130,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "f6000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Verbose message to display",
+          "validValues": [],
+          "value": "Temp file cleanup complete"
+        }
+      ]
+    },
+    {
+      "id": "f6000007",
+      "title": "While Loop",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 700,
+      "y": 250,
+      "width": 200,
+      "containerType": "While",
+      "containerWidth": 350,
+      "containerHeight": 300,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "parentNodeId": "f6000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$true",
+          "description": "Condition to evaluate each iteration",
+          "validValues": [],
+          "value": "$retryCount -lt 3"
+        }
+      ]
+    },
+    {
+      "id": "f6000008",
+      "title": "Custom Script",
+      "category": "Custom",
+      "scriptBody": "$retryCount\u002B\u002B\nWrite-Host \u0022Retry attempt $retryCount...\u0022\nStart-Sleep -Seconds 2",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 730,
+      "y": 340,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "f6000007",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "8358db05",
+      "title": "Clear-TempFiles",
+      "category": "Functions",
+      "scriptBody": "",
+      "cmdletName": "Clear-TempFiles",
+      "outputVariable": "",
+      "x": 1210,
+      "y": 200,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "f6000002",
+      "targetNodeId": "f6000003"
+    },
+    {
+      "sourceNodeId": "f6000004",
+      "targetNodeId": "f6000005"
+    }
+  ]
+}

@@ -1,0 +1,574 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T03:50:33.158241Z"
+  },
+  "view": {
+    "panX": 100,
+    "panY": -10,
+    "zoom": 0.9
+  },
+  "nodes": [
+    {
+      "id": "e5000001",
+      "title": "Test-NetworkHealth",
+      "category": "Function",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -100,
+      "y": 30,
+      "width": 200,
+      "containerType": "Function",
+      "containerWidth": 1100,
+      "containerHeight": 550,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "FunctionName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "Invoke-MyFunction",
+          "description": "PowerShell function name (use Verb-Noun convention)",
+          "validValues": [],
+          "value": "Test-NetworkHealth"
+        },
+        {
+          "name": "ReturnType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ReturnVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Variable to return (e.g. result). Leave blank for no explicit return.",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "e5000002",
+      "title": "Test-Connection",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Test-Connection",
+      "outputVariable": "",
+      "x": -50,
+      "y": 130,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Results",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Target computer name or IP address",
+          "validValues": [],
+          "value": "google.com"
+        },
+        {
+          "name": "Count",
+          "type": "Int",
+          "defaultValue": "4",
+          "description": "Number of echo requests to send",
+          "validValues": [],
+          "value": "2"
+        },
+        {
+          "name": "Quiet",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Return only True/False result",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "e5000003",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 200,
+      "y": 130,
+      "width": 200,
+      "containerType": "IfElse",
+      "containerWidth": 700,
+      "containerHeight": 380,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "e5000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Status -eq \u0027Running\u0027",
+          "description": "PowerShell condition to evaluate",
+          "validValues": [],
+          "value": "Test-Connection -ComputerName 'google.com' -Count 1 -Quiet"
+        }
+      ]
+    },
+    {
+      "id": "e5000004",
+      "title": "Test-NetConnection",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Test-NetConnection",
+      "outputVariable": "",
+      "x": 230,
+      "y": 210,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000003",
+      "parentZoneName": "Then",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Result",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ComputerName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Target computer name or IP address",
+          "validValues": [],
+          "value": "google.com"
+        },
+        {
+          "name": "Port",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "TCP port to test",
+          "validValues": [],
+          "value": "443"
+        },
+        {
+          "name": "InformationLevel",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Level of detail in output",
+          "validValues": [
+            "Quiet",
+            "Detailed"
+          ],
+          "value": "Detailed"
+        }
+      ]
+    },
+    {
+      "id": "e5000005",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 230,
+      "y": 360,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000003",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "Network is UP - HTTPS port 443 accessible"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Green"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "e5000006",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 570,
+      "y": 210,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000003",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "Network is DOWN - Cannot reach google.com"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Red"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "e5000007",
+      "title": "Get-NetAdapter",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Get-NetAdapter",
+      "outputVariable": "",
+      "x": -50,
+      "y": 400,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Adapters",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Adapter name filter",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Physical",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Return only physical adapters",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "e5000008",
+      "title": "Get-NetIPAddress",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Get-NetIPAddress",
+      "outputVariable": "",
+      "x": 200,
+      "y": 400,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IPs",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "AddressFamily",
+          "type": "Enum",
+          "defaultValue": "IPv4",
+          "description": "Address family to filter by",
+          "validValues": [
+            "IPv4",
+            "IPv6"
+          ],
+          "value": "IPv4"
+        },
+        {
+          "name": "InterfaceAlias",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Filter by interface alias name",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "e5000009",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 450,
+      "y": 400,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "e5000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display as columns",
+          "validValues": [],
+          "value": "InterfaceAlias, IPAddress"
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Automatically size columns to fit content",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Wrap text in columns",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "d7c465a8",
+      "title": "Test-NetworkHealth",
+      "category": "Functions",
+      "scriptBody": "",
+      "cmdletName": "Test-NetworkHealth",
+      "outputVariable": "",
+      "x": 1090,
+      "y": 90,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "e5000008",
+      "targetNodeId": "e5000009"
+    }
+  ]
+}

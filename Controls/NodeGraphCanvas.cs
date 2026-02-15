@@ -158,16 +158,45 @@ public class NodeGraphCanvas : Control
 
         if (_isResizingContainer && _resizeNode != null)
         {
-            _resizeNode.ContainerWidth = Math.Max(300, canvasPos.X - _resizeNode.X);
-            _resizeNode.ContainerHeight = Math.Max(200, canvasPos.Y - _resizeNode.Y);
+            // Content-aware minimum: can't resize smaller than children
+            double minW = GraphNode.MinContainerWidth;
+            double minH = GraphNode.MinContainerHeight;
+            foreach (var zone in _resizeNode.Zones)
+            {
+                var (cw, ch) = zone.GetContentBounds(_resizeNode);
+                double pad = GraphNode.ZonePadding;
+                if (_resizeNode.Zones.Count == 1)
+                {
+                    minW = Math.Max(minW, cw + pad * 2);
+                    minH = Math.Max(minH, ch + GraphNode.ContainerHeaderHeight + pad);
+                }
+                else
+                {
+                    minW = Math.Max(minW, 2 * cw + pad * 3);
+                    minH = Math.Max(minH, ch + GraphNode.ContainerHeaderHeight + pad);
+                }
+            }
+            _resizeNode.ContainerWidth = Math.Max(minW, canvasPos.X - _resizeNode.X);
+            _resizeNode.ContainerHeight = Math.Max(minH, canvasPos.Y - _resizeNode.Y);
             _resizeNode.RecalcZoneLayout();
             return;
         }
 
         if (_isDraggingNode && _dragNode != null)
         {
-            _dragNode.X = Math.Round((canvasPos.X - _dragOffset.X) / 10) * 10;
-            _dragNode.Y = Math.Round((canvasPos.Y - _dragOffset.Y) / 10) * 10;
+            double newX = Math.Round((canvasPos.X - _dragOffset.X) / 10) * 10;
+            double newY = Math.Round((canvasPos.Y - _dragOffset.Y) / 10) * 10;
+
+            // If dragging a container, move all descendants (children, grandchildren, etc.)
+            if (_dragNode.IsContainer)
+            {
+                double dx = newX - _dragNode.X;
+                double dy = newY - _dragNode.Y;
+                MoveDescendants(_dragNode, dx, dy);
+            }
+
+            _dragNode.X = newX;
+            _dragNode.Y = newY;
             return;
         }
 
@@ -208,7 +237,7 @@ public class NodeGraphCanvas : Control
         }
 
         // Snap dropped node into container zone (only if it actually moved)
-        if (_isDraggingNode && _dragNode != null && !_dragNode.IsContainer)
+        if (_isDraggingNode && _dragNode != null)
         {
             double dx = _dragNode.X - _dragStartPos.X;
             double dy = _dragNode.Y - _dragStartPos.Y;
@@ -253,8 +282,9 @@ public class NodeGraphCanvas : Control
         if (_vm == null) return;
 
         // Remember previous zone membership
+        var prevContainer = node.ParentContainer;
         var prevZone = node.ParentZone;
-        int prevIndex = prevZone?.Children.IndexOf(node) ?? -1;
+        bool hadPrevZone = prevZone != null;
 
         // Remove from previous zone
         if (node.ParentContainer != null && node.ParentZone != null)
@@ -264,43 +294,79 @@ public class NodeGraphCanvas : Control
             node.ParentZone = null;
         }
 
-        double nodeCenterX = node.X + node.Width / 2;
+        double nodeCenterX = node.X + node.EffectiveWidth / 2;
         double nodeCenterY = node.Y + node.Height / 2;
+
+        // Collect all matching (container, zone) pairs, then pick the deepest
+        (GraphNode container, ContainerZone zone)? bestMatch = null;
+        int bestDepth = -1;
 
         foreach (var container in _vm.Nodes.Where(n => n.IsContainer))
         {
+            // Skip self-nesting
+            if (container == node) continue;
+
+            // Skip if target container is a descendant of the node being dropped (would create a cycle)
+            if (node.IsContainer && IsDescendantOf(container, node)) continue;
+
             foreach (var zone in container.Zones)
             {
                 var (zx, zy, zw, zh) = zone.GetAbsoluteRect(container);
                 if (nodeCenterX >= zx && nodeCenterX <= zx + zw &&
                     nodeCenterY >= zy && nodeCenterY <= zy + zh)
                 {
-                    node.ParentContainer = container;
-                    node.ParentZone = zone;
-
-                    // If returning to the same zone, restore original index
-                    if (zone == prevZone && prevIndex >= 0 && prevIndex <= zone.Children.Count)
-                        zone.Children.Insert(prevIndex, node);
-                    else if (!zone.Children.Contains(node))
-                        zone.Children.Add(node);
-
-                    // Snap: stack vertically inside zone with padding
-                    double snapPad = 10;
-                    double snapTop = zy + GraphNode.ZoneHeaderHeight + snapPad;
-                    int childIndex = zone.Children.IndexOf(node);
-                    for (int i = 0; i < childIndex; i++)
-                        snapTop += zone.Children[i].Height + snapPad;
-
-                    node.X = Math.Round((zx + snapPad) / 10) * 10;
-                    node.Y = Math.Round(snapTop / 10) * 10;
-
-                    if (node.Width > zw - snapPad * 2)
-                        node.Width = zw - snapPad * 2;
-
-                    return;
+                    int depth = GetNestingDepth(container);
+                    if (depth > bestDepth)
+                    {
+                        bestDepth = depth;
+                        bestMatch = (container, zone);
+                    }
                 }
             }
         }
+
+        if (bestMatch != null)
+        {
+            var (targetContainer, targetZone) = bestMatch.Value;
+            var (zx, zy, zw, zh) = targetZone.GetAbsoluteRect(targetContainer);
+
+            node.ParentContainer = targetContainer;
+            node.ParentZone = targetZone;
+
+            if (!targetZone.Children.Contains(node))
+                targetZone.Children.Add(node);
+
+            double pad = GraphNode.ZonePadding;
+
+            // Smart default: if this node had no previous zone (freshly created/palette drop),
+            // use stacking logic to find the next available position
+            if (!hadPrevZone)
+            {
+                double snapTop = zy + GraphNode.ZoneHeaderHeight + pad;
+                int childIndex = targetZone.Children.IndexOf(node);
+                for (int i = 0; i < childIndex; i++)
+                    snapTop += targetZone.Children[i].Height + pad;
+
+                node.X = Math.Round((zx + pad) / 10) * 10;
+                node.Y = Math.Round(snapTop / 10) * 10;
+            }
+            else
+            {
+                // Free placement: clamp position so node stays within zone bounds
+                double minX = zx + pad;
+                double minY = zy + GraphNode.ZoneHeaderHeight + pad;
+                node.X = Math.Round(Math.Max(minX, node.X) / 10) * 10;
+                node.Y = Math.Round(Math.Max(minY, node.Y) / 10) * 10;
+            }
+
+            // Auto-grow the container if the node extends beyond
+            targetContainer.AutoGrowToFitChildren();
+            return;
+        }
+
+        // Dropped outside any zone — shrink the previous container if there was one
+        if (prevContainer != null)
+            prevContainer.ShrinkToFitChildren();
     }
 
     // ── Hit testing ────────────────────────────────────────────
@@ -327,8 +393,10 @@ public class NodeGraphCanvas : Control
                 return n;
         }
 
-        // Container headers only (drag by header)
-        foreach (var n in _vm.Nodes.Where(n => n.IsContainer))
+        // Container headers: check deepest first so clicking a nested container selects it
+        foreach (var n in _vm.Nodes
+            .Where(n => n.IsContainer)
+            .OrderByDescending(n => GetNestingDepth(n)))
         {
             if (canvasPos.X >= n.X && canvasPos.X <= n.X + n.ContainerWidth &&
                 canvasPos.Y >= n.Y && canvasPos.Y <= n.Y + GraphNode.ContainerHeaderHeight)
@@ -394,6 +462,39 @@ public class NodeGraphCanvas : Control
         return null;
     }
 
+    // ── Nesting helpers ────────────────────────────────────────
+
+    private static bool IsDescendantOf(GraphNode candidate, GraphNode ancestor)
+    {
+        var current = candidate.ParentContainer;
+        while (current != null)
+        {
+            if (current == ancestor) return true;
+            current = current.ParentContainer;
+        }
+        return false;
+    }
+
+    private static int GetNestingDepth(GraphNode node)
+    {
+        int depth = 0;
+        var current = node.ParentContainer;
+        while (current != null) { depth++; current = current.ParentContainer; }
+        return depth;
+    }
+
+    private static void MoveDescendants(GraphNode container, double dx, double dy)
+    {
+        foreach (var zone in container.Zones)
+            foreach (var child in zone.Children)
+            {
+                child.X += dx;
+                child.Y += dy;
+                if (child.IsContainer)
+                    MoveDescendants(child, dx, dy);
+            }
+    }
+
     // ── Rendering ──────────────────────────────────────────────
 
     public override void Render(DrawingContext context)
@@ -402,6 +503,7 @@ public class NodeGraphCanvas : Control
         if (_vm == null) return;
 
         _renderer.Render(context, Bounds, _vm,
-            _isDraggingWire, _wireStartPort, _wireEndPoint);
+            _isDraggingWire, _wireStartPort, _wireEndPoint,
+            _isDraggingNode, _dragNode);
     }
 }

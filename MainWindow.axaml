@@ -7,7 +7,7 @@
         x:Class="PoSHBlox.MainWindow"
         x:Name="RootWindow"
         Title="{Binding WindowTitle, FallbackValue='PoSHBlox'}"
-        Width="1500" Height="900"
+        Width="1280" Height="720"
         Background="{DynamicResource BgPrimaryBrush}"
         FontFamily="{DynamicResource FontMono}"
         WindowStartupLocation="CenterScreen">
@@ -347,8 +347,11 @@
                                             <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <StackPanel Spacing="3" Margin="0,0,0,8">
-                                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <StackPanel Spacing="3" Margin="0,0,0,8"
+                                                                    IsVisible="{Binding !IsArgument}">
+                                                            <!-- Header (hidden for Bool — the CheckBox label replaces it) -->
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"
+                                                                        IsVisible="{Binding !IsBool}">
                                                                 <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource TextPrimaryBrush}" />
                                                                 <TextBlock Text="*" FontSize="12" FontWeight="Bold"
@@ -358,9 +361,35 @@
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
-                                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
+                                                                       IsVisible="{Binding !IsBool}" />
+                                                            <!-- Bool → CheckBox -->
+                                                            <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                      IsVisible="{Binding IsBool}"
+                                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                      FontSize="13"
+                                                                      HorizontalAlignment="Left"
+                                                                      VerticalContentAlignment="Center"
+                                                                      Padding="8,4" Margin="0,2">
+                                                                <TextBlock Text="{Binding Name}" FontSize="13"
+                                                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                            </CheckBox>
+                                                            <!-- Enum → ComboBox -->
+                                                            <ComboBox ItemsSource="{Binding EnumOptions}"
+                                                                      SelectedItem="{Binding SelectedEnumValue, Mode=TwoWay}"
+                                                                      IsVisible="{Binding IsEnum}"
+                                                                      Background="{DynamicResource BgPrimaryBrush}"
+                                                                      Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                      BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                      Padding="8,5" CornerRadius="3"
+                                                                      FontFamily="{DynamicResource FontMono}" FontSize="12"
+                                                                      HorizontalAlignment="Stretch"
+                                                                      HorizontalContentAlignment="Left"
+                                                                      VerticalContentAlignment="Center" />
+                                                            <!-- Everything else → TextBox -->
                                                             <TextBox Text="{Binding Value, Mode=TwoWay}"
                                                                      Watermark="{Binding DefaultValue}"
+                                                                     IsVisible="{Binding IsTextInput}"
                                                                      Background="{DynamicResource BgPrimaryBrush}"
                                                                      Foreground="{DynamicResource TextTertiaryBrush}"
                                                                      BorderBrush="{DynamicResource BorderPrimaryBrush}"
@@ -370,6 +399,80 @@
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
+
+                                            <!-- ── Function Arguments Section ── -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.IsFunctionContainer}">
+                                                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
+
+                                                <DockPanel Margin="0,2,0,4">
+                                                    <Button DockPanel.Dock="Right" Content="+ Add"
+                                                            Command="{Binding AddArgumentCommand}"
+                                                            Padding="8,3" CornerRadius="3" FontSize="11"
+                                                            Background="{DynamicResource BgSaveTintBrush}"
+                                                            Foreground="{DynamicResource TextFileBrush}"
+                                                            VerticalAlignment="Center">
+                                                        <Button.Resources>
+                                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel700}" />
+                                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreBlueBright200}" />
+                                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreBlueBright300}" />
+                                                        </Button.Resources>
+                                                    </Button>
+                                                    <TextBlock Text="ARGUMENTS" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               VerticalAlignment="Center" />
+                                                </DockPanel>
+
+                                                <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel IsVisible="{Binding IsArgument}" Spacing="4" Margin="0,0,0,8">
+                                                                <DockPanel>
+                                                                    <Button DockPanel.Dock="Right" Content="&#x2715;"
+                                                                            Command="{Binding #RootWindow.DataContext.RemoveArgumentCommand}"
+                                                                            CommandParameter="{Binding}"
+                                                                            Padding="6,2" CornerRadius="3" FontSize="11"
+                                                                            Background="{DynamicResource BgDeleteTintBrush}"
+                                                                            Foreground="{DynamicResource TextDeleteLightBrush}"
+                                                                            VerticalAlignment="Center" Margin="4,0,0,0">
+                                                                        <Button.Resources>
+                                                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreRedWarning700}" />
+                                                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreRedWarning900}" />
+                                                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreRedWarning200}" />
+                                                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreRedWarning300}" />
+                                                                        </Button.Resources>
+                                                                    </Button>
+                                                                    <TextBox Text="{Binding Name, Mode=TwoWay}"
+                                                                             Watermark="ParamName"
+                                                                             Background="{DynamicResource BgPrimaryBrush}"
+                                                                             Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                             BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                             Padding="8,4" CornerRadius="3"
+                                                                             FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                                </DockPanel>
+                                                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                                                    <ComboBox Grid.Column="0"
+                                                                              ItemsSource="{x:Static vm:GraphCanvasViewModel.ArgumentTypeOptions}"
+                                                                              SelectedItem="{Binding Type, Mode=TwoWay}"
+                                                                              Background="{DynamicResource BgPrimaryBrush}"
+                                                                              Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                              BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                              Padding="8,4" CornerRadius="3" FontSize="11"
+                                                                              HorizontalAlignment="Stretch" Margin="0,0,4,0" />
+                                                                    <CheckBox Grid.Column="1" Content="Required"
+                                                                              IsChecked="{Binding IsMandatory, Mode=TwoWay}"
+                                                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                              FontSize="11" Padding="4,2" Margin="4,0" VerticalContentAlignment="Center" />
+                                                                    <CheckBox Grid.Column="2" Content="Pipeline"
+                                                                              IsChecked="{Binding IsPipelineInput, Mode=TwoWay}"
+                                                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                              FontSize="11" Padding="4,2" Margin="4,0" VerticalContentAlignment="Center" />
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
 
                                             <StackPanel IsVisible="{Binding !SelectedNode.IsCmdletNode}">
                                                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />

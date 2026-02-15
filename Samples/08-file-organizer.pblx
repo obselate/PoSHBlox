@@ -1,0 +1,456 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T04:31:01.9331333Z"
+  },
+  "view": {
+    "panX": 111.08706666666637,
+    "panY": 125.81339999999983,
+    "zoom": 0.5904900000000002
+  },
+  "nodes": [
+    {
+      "id": "b8000001",
+      "title": "Get-ChildItem",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-ChildItem",
+      "outputVariable": "",
+      "x": 50,
+      "y": 100,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Files",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Directory to list",
+          "validValues": [],
+          "value": "C:\\"
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Wildcard filter pattern",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include subdirectories",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Depth",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Max recursion depth",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include hidden items",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b8000002",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 330,
+      "y": 50,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 900,
+      "containerHeight": 500,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "b8000003",
+      "title": "Get-Acl",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-Acl",
+      "outputVariable": "",
+      "x": 370,
+      "y": 600,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "Path to inspect ACL",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b8000004",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 370,
+      "y": 260,
+      "width": 200,
+      "containerType": "IfElse",
+      "containerWidth": 780,
+      "containerHeight": 250,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "b8000002",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Status -eq \u0027Running\u0027",
+          "description": "PowerShell condition to evaluate",
+          "validValues": [],
+          "value": "$_.Extension -match \u0027\\.(jpg|png|gif)$\u0027"
+        }
+      ]
+    },
+    {
+      "id": "b8000005",
+      "title": "Copy-Item",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Copy-Item",
+      "outputVariable": "",
+      "x": 400,
+      "y": 340,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b8000004",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "Source path",
+          "validValues": [],
+          "value": "$($_.FullName)"
+        },
+        {
+          "name": "Destination",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Destination path",
+          "validValues": [],
+          "value": "C:\\Organized\\Images"
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Copy subdirectories",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Overwrite existing",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Pass copied items to pipeline",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "b8000006",
+      "title": "Move-Item",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Move-Item",
+      "outputVariable": "",
+      "x": 780,
+      "y": 340,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b8000004",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "Source path",
+          "validValues": [],
+          "value": "$($_.FullName)"
+        },
+        {
+          "name": "Destination",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Destination path",
+          "validValues": [],
+          "value": "C:\\Organized\\Other"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Overwrite existing",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Pass moved items to pipeline",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "b8000007",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1280,
+      "y": 250,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "File organization complete!"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Cyan"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "b8000001",
+      "targetNodeId": "b8000002"
+    },
+    {
+      "sourceNodeId": "b8000001",
+      "targetNodeId": "b8000003"
+    }
+  ]
+}

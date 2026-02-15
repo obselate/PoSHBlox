@@ -24,4 +24,5 @@ public enum ContainerType
     TryCatch,
     While,
     Function,
+    Label,
 }

@@ -37,6 +37,7 @@ public partial class GraphNode : ObservableObject
     // ── Container support ──────────────────────────────────────
     public ContainerType ContainerType { get; set; } = ContainerType.None;
     public bool IsContainer => ContainerType != ContainerType.None;
+    public bool IsFunctionContainer => ContainerType == ContainerType.Function;
     public List<ContainerZone> Zones { get; } = new();
 
     /// <summary>Which container this node lives inside (null = top-level)</summary>
@@ -54,6 +55,8 @@ public partial class GraphNode : ObservableObject
     public const double ContainerHeaderHeight = 44;
     public const double ZoneHeaderHeight = 24;
     public const double ZonePadding = 10;
+    public const double MinContainerWidth = 300;
+    public const double MinContainerHeight = 200;
 
     // ── Constructor ────────────────────────────────────────────
     public GraphNode()
@@ -82,6 +85,103 @@ public partial class GraphNode : ObservableObject
             HeaderHeight + PortSpacing * 3);
 
     public double EffectiveWidth => IsContainer ? ContainerWidth : Width;
+
+    /// <summary>
+    /// Expand this container if any child extends beyond zone bounds.
+    /// Only grows, never shrinks below current size (preserves manual resize).
+    /// Snaps to 10px grid and calls RecalcZoneLayout() if changed.
+    /// </summary>
+    public void AutoGrowToFitChildren()
+    {
+        if (!IsContainer || Zones.Count == 0) return;
+
+        double pad = ZonePadding;
+        double requiredW, requiredH;
+
+        if (Zones.Count == 1)
+        {
+            var (contentW, contentH) = Zones[0].GetContentBounds(this);
+            requiredW = contentW + pad * 2;
+            requiredH = contentH + ContainerHeaderHeight + pad;
+        }
+        else
+        {
+            double maxZoneW = 0, maxZoneH = 0;
+            foreach (var zone in Zones)
+            {
+                var (cw, ch) = zone.GetContentBounds(this);
+                if (cw > maxZoneW) maxZoneW = cw;
+                if (ch > maxZoneH) maxZoneH = ch;
+            }
+            requiredW = 2 * maxZoneW + pad * 3;
+            requiredH = maxZoneH + ContainerHeaderHeight + pad;
+        }
+
+        double newW = Math.Max(ContainerWidth, requiredW);
+        double newH = Math.Max(ContainerHeight, requiredH);
+
+        // Snap to 10px grid
+        newW = Math.Ceiling(newW / 10) * 10;
+        newH = Math.Ceiling(newH / 10) * 10;
+
+        if (Math.Abs(newW - ContainerWidth) > 0.5 || Math.Abs(newH - ContainerHeight) > 0.5)
+        {
+            ContainerWidth = newW;
+            ContainerHeight = newH;
+            RecalcZoneLayout();
+
+            // Propagate growth to parent container
+            ParentContainer?.AutoGrowToFitChildren();
+        }
+    }
+
+    /// <summary>
+    /// Shrink this container to tightly fit content, respecting minimums.
+    /// Called when a node is removed from a zone. Snaps to 10px grid.
+    /// </summary>
+    public void ShrinkToFitChildren()
+    {
+        if (!IsContainer || Zones.Count == 0) return;
+
+        double pad = ZonePadding;
+        double requiredW, requiredH;
+
+        if (Zones.Count == 1)
+        {
+            var (contentW, contentH) = Zones[0].GetContentBounds(this);
+            requiredW = contentW + pad * 2;
+            requiredH = contentH + ContainerHeaderHeight + pad;
+        }
+        else
+        {
+            double maxZoneW = 0, maxZoneH = 0;
+            foreach (var zone in Zones)
+            {
+                var (cw, ch) = zone.GetContentBounds(this);
+                if (cw > maxZoneW) maxZoneW = cw;
+                if (ch > maxZoneH) maxZoneH = ch;
+            }
+            requiredW = 2 * maxZoneW + pad * 3;
+            requiredH = maxZoneH + ContainerHeaderHeight + pad;
+        }
+
+        double newW = Math.Max(MinContainerWidth, requiredW);
+        double newH = Math.Max(MinContainerHeight, requiredH);
+
+        // Snap to 10px grid
+        newW = Math.Ceiling(newW / 10) * 10;
+        newH = Math.Ceiling(newH / 10) * 10;
+
+        if (Math.Abs(newW - ContainerWidth) > 0.5 || Math.Abs(newH - ContainerHeight) > 0.5)
+        {
+            ContainerWidth = newW;
+            ContainerHeight = newH;
+            RecalcZoneLayout();
+        }
+
+        // Propagate shrink to parent container
+        ParentContainer?.ShrinkToFitChildren();
+    }
 
     /// <summary>
     /// Recalculate zone rectangles based on current container size.

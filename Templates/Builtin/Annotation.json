@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "category": "Annotation",
+  "templates": [
+    {
+      "name": "Label",
+      "cmdletName": "",
+      "description": "Visual label for grouping nodes - does not generate code",
+      "scriptBody": "",
+      "containerType": "Label",
+      "inputCount": 0,
+      "outputCount": 0,
+      "inputNames": [],
+      "outputNames": [],
+      "parameters": []
+    }
+  ]
+}

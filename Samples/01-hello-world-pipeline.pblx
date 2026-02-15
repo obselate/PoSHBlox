@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00.0000000Z",
+    "modifiedUtc": "2026-02-14T12:00:00.0000000Z"
+  },
+  "view": {
+    "panX": 0,
+    "panY": 0,
+    "zoom": 1.0
+  },
+  "nodes": [
+    {
+      "id": "a1000001",
+      "title": "Get-Process",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "outputVariable": "",
+      "x": 100,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Processes",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Filter by process name(s) (wildcards ok)",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "a1000002",
+      "title": "Sort-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Sort-Object",
+      "outputVariable": "",
+      "x": 380,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Name",
+          "description": "Property(s) to sort by",
+          "validValues": [],
+          "value": "CPU"
+        },
+        {
+          "name": "Descending",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sort descending",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Remove duplicates",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "a1000003",
+      "title": "Select-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-Object",
+      "outputVariable": "",
+      "x": 660,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Name, Status",
+          "description": "Property names, comma-separated",
+          "validValues": [],
+          "value": "Name, CPU, WorkingSet"
+        },
+        {
+          "name": "First",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Take first N objects",
+          "validValues": [],
+          "value": "10"
+        },
+        {
+          "name": "Last",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Take last N objects",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Remove duplicates",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "a1000004",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 940,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display (comma-separated)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Auto-size columns",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Wrap long text",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "a1000001",
+      "targetNodeId": "a1000002"
+    },
+    {
+      "sourceNodeId": "a1000002",
+      "targetNodeId": "a1000003"
+    },
+    {
+      "sourceNodeId": "a1000003",
+      "targetNodeId": "a1000004"
+    }
+  ]
+}

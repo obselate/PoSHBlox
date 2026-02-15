@@ -1,0 +1,1417 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T04:58:01.3382105Z"
+  },
+  "view": {
+    "panX": 355.2733333333333,
+    "panY": 34.099999999999746,
+    "zoom": 0.7865000000000002
+  },
+  "nodes": [
+    {
+      "id": "sh000001",
+      "title": "Get-FullSystemReport",
+      "category": "Function",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 50,
+      "y": 50,
+      "width": 200,
+      "containerType": "Function",
+      "containerWidth": 1770,
+      "containerHeight": 1222,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "FunctionName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "Invoke-MyFunction",
+          "description": "PowerShell function name (use Verb-Noun convention)",
+          "validValues": [],
+          "value": "Get-FullSystemReport"
+        },
+        {
+          "name": "ReturnType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ReturnVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Variable to return (e.g. result). Leave blank for no explicit return.",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000002",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 80,
+      "y": 110,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "========= SYSTEM HEALTH REPORT ========="
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Cyan"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000003",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 80,
+      "y": 190,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "--- Top Processes by CPU ---"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Yellow"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000004",
+      "title": "Get-Process",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "outputVariable": "",
+      "x": 80,
+      "y": 270,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Filter by process name(s) (wildcards ok)",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000005",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 330,
+      "y": 270,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Name -like \u0022*pattern*\u0022",
+          "description": "Condition to filter objects",
+          "validValues": [],
+          "value": "$_.CPU -gt 0"
+        }
+      ]
+    },
+    {
+      "id": "sh000006",
+      "title": "Sort-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Sort-Object",
+      "outputVariable": "",
+      "x": 580,
+      "y": 270,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Name",
+          "description": "Property(s) to sort by",
+          "validValues": [],
+          "value": "CPU"
+        },
+        {
+          "name": "Descending",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sort descending",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Remove duplicates",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000007",
+      "title": "Select-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-Object",
+      "outputVariable": "",
+      "x": 830,
+      "y": 270,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Name, Status",
+          "description": "Property names, comma-separated",
+          "validValues": [],
+          "value": "Name, CPU, WorkingSet64"
+        },
+        {
+          "name": "First",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Take first N objects",
+          "validValues": [],
+          "value": "10"
+        },
+        {
+          "name": "Last",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Take last N objects",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Remove duplicates",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000008",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 1080,
+      "y": 270,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display (comma-separated)",
+          "validValues": [],
+          "value": "Name, CPU, WorkingSet64"
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Auto-size columns",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Wrap long text",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000009",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 80,
+      "y": 380,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "--- Service Status ---"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Yellow"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00000a",
+      "title": "Get-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Service",
+      "outputVariable": "",
+      "x": 80,
+      "y": 460,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Services",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Service name(s) (wildcards ok)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Filter by display name(s)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ComputerName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Remote computer",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "DependentServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include dependent services",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "RequiredServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include required services",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00000b",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 330,
+      "y": 440,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 900,
+      "containerHeight": 430,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "sh00000c",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 380,
+      "y": 510,
+      "width": 200,
+      "containerType": "IfElse",
+      "containerWidth": 750,
+      "containerHeight": 310,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "sh00000b",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Status -eq \u0027Running\u0027",
+          "description": "PowerShell condition to evaluate",
+          "validValues": [],
+          "value": "$_.Status -eq \u0027Running\u0027"
+        }
+      ]
+    },
+    {
+      "id": "sh00000d",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 410,
+      "y": 600,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh00000c",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "$($_.DisplayName): RUNNING"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Green"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00000e",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 770,
+      "y": 600,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh00000c",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "$($_.DisplayName): STOPPED"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Red"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00000f",
+      "title": "Group-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Group-Object",
+      "outputVariable": "",
+      "x": 1350,
+      "y": 460,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Status",
+          "description": "Property(s) to group by",
+          "validValues": [],
+          "value": "Status"
+        },
+        {
+          "name": "NoElement",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Omit group members (count only)",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000010",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 1600,
+      "y": 460,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display (comma-separated)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Auto-size columns",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Wrap long text",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000016",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 70,
+      "y": 920,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "--- Network Adapters ---"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Yellow"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh000017",
+      "title": "Get-NetAdapter",
+      "category": "Network / Remote",
+      "scriptBody": "",
+      "cmdletName": "Get-NetAdapter",
+      "outputVariable": "",
+      "x": 320,
+      "y": 1050,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Adapters",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Adapter name filter",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Physical",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Return only physical adapters",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "sh000018",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 560,
+      "y": 1050,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Name -like \u0022*pattern*\u0022",
+          "description": "Condition to filter objects",
+          "validValues": [],
+          "value": "$_.Status -eq \u0027Up\u0027"
+        }
+      ]
+    },
+    {
+      "id": "sh000019",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 800,
+      "y": 1050,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display (comma-separated)",
+          "validValues": [],
+          "value": "Name, Status, LinkSpeed"
+        },
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Auto-size columns",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Wrap long text",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00001a",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 70,
+      "y": 1140,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "sh000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "========= REPORT COMPLETE ========="
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Cyan"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "sh00001b",
+      "title": "Get-FullSystemReport",
+      "category": "Functions",
+      "scriptBody": "",
+      "cmdletName": "Get-FullSystemReport",
+      "outputVariable": "",
+      "x": 1870,
+      "y": 120,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "sh000004",
+      "targetNodeId": "sh000005"
+    },
+    {
+      "sourceNodeId": "sh000005",
+      "targetNodeId": "sh000006"
+    },
+    {
+      "sourceNodeId": "sh000006",
+      "targetNodeId": "sh000007"
+    },
+    {
+      "sourceNodeId": "sh000007",
+      "targetNodeId": "sh000008"
+    },
+    {
+      "sourceNodeId": "sh00000a",
+      "targetNodeId": "sh00000b"
+    },
+    {
+      "sourceNodeId": "sh00000a",
+      "targetNodeId": "sh00000f"
+    },
+    {
+      "sourceNodeId": "sh00000f",
+      "targetNodeId": "sh000010"
+    },
+    {
+      "sourceNodeId": "sh000017",
+      "targetNodeId": "sh000018"
+    },
+    {
+      "sourceNodeId": "sh000018",
+      "targetNodeId": "sh000019"
+    }
+  ]
+}

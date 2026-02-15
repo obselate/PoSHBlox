@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square" alt=".NET 10" />
   <img src="https://img.shields.io/badge/Avalonia-11.3-7B2BF9?style=flat-square" alt="Avalonia" />
   <img src="https://img.shields.io/badge/FluentAvalonia-2.5-0078D4?style=flat-square" alt="FluentAvalonia" />
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-333?style=flat-square" alt="Platform" />
+  <img src="https://img.shields.io/badge/platform-Windows-333?style=flat-square" alt="Platform" />
 </p>
 
 ---
@@ -25,10 +25,13 @@ PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes o
 
 ### Features
 
-- **Node palette** with 30+ built-in cmdlet templates across categories (File/Folder, Process/Service, Registry, Network, String/Data, Output)
-- **Control flow containers** -- If/Else, ForEach, Try/Catch, While loops, and Functions
-- **Live script preview** and one-click Run in a PowerShell window
+- **Node palette** with 50+ built-in cmdlet templates across 9 categories (File/Folder, Process/Service, Registry, Network/Remote, String/Data, Output, Control Flow, Custom, Annotation)
+- **Control flow containers** -- If/Else, ForEach, Try/Catch, While loops, Functions, and Labels -- with support for nesting containers inside containers
+- **Live script preview** and one-click Run in a PowerShell 5.1 window
 - **Pipeline-aware code generation** -- chains piped cmdlets, assigns variables at branch points, and detects cycles
+- **Module import** -- import cmdlets from installed PowerShell modules to extend the palette
+- **10 sample projects** included to demonstrate common patterns
+- **Keyboard shortcuts** -- P (palette), F5 (run), Ctrl+S (save), Ctrl+E (export), Del (delete node), / (search), and more
 - **Dark theme** with a custom node-graph renderer (pan, zoom, Bezier wires)
 
 ## Getting Started
@@ -41,9 +44,19 @@ PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes o
 
 ```bash
 git clone https://github.com/obselate/PoSHBlox.git
-cd PoSHBlox/PoshNodeGraph
+cd PoSHBlox
 dotnet run
 ```
+
+### Publish
+
+Build a self-contained single-file executable:
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained
+```
+
+Output lands in `bin/Release/net10.0/win-x64/publish/` — just the exe, Templates, and Scripts folders.
 
 ## How It Works
 

@@ -35,6 +35,7 @@ public static class GraphTheme
     public static readonly Color ZoneLabel         = Color.FromArgb(120, 168, 186, 201);
     public static readonly Color ZoneHint          = Color.FromArgb(50, 112, 141, 163);
     public static readonly Color ResizeGrip        = Color.FromArgb(100, 112, 141, 163);
+    public static readonly Color ZoneDropHighlight = Color.FromArgb(40, 91, 168, 154);
     public const double ContainerCornerRadius = 10;
     public const double ContainerShadowOffset = 5;
     public const double ResizeGripSize = 14;
@@ -76,6 +77,7 @@ public static class GraphTheme
         ["Custom"]            = Color.FromRgb(90, 90, 110),   // keep
         ["Control Flow"]      = Color.FromRgb(112, 96, 168),  // #7060A8 purple
         ["Output"]            = Color.FromRgb(212, 148, 58),  // #D4943A amber
+        ["Annotation"]        = Color.FromRgb(100, 110, 120), // #646E78 neutral gray
     };
 
     public static Color GetCategoryColor(string category)

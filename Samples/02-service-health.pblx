@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T03:49:42.0854648Z"
+  },
+  "view": {
+    "panX": 200,
+    "panY": -20,
+    "zoom": 0.85
+  },
+  "nodes": [
+    {
+      "id": "b2000001",
+      "title": "Show-ServiceHealth",
+      "category": "Function",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": -200,
+      "y": 50,
+      "width": 200,
+      "containerType": "Function",
+      "containerWidth": 1300,
+      "containerHeight": 700,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "FunctionName",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "Invoke-MyFunction",
+          "description": "PowerShell function name (use Verb-Noun convention)",
+          "validValues": [],
+          "value": "Show-ServiceHealth"
+        },
+        {
+          "name": "ReturnType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ReturnVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Variable to return (e.g. result). Leave blank for no explicit return.",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000002",
+      "title": "Get-Service",
+      "category": "Process / Service",
+      "scriptBody": "",
+      "cmdletName": "Get-Service",
+      "outputVariable": "",
+      "x": -150,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Services",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Service name(s) (wildcards ok)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Filter by display name(s)",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "ComputerName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Remote computer",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "DependentServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include dependent services",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "RequiredServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Include required services",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000003",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 100,
+      "y": 150,
+      "width": 200,
+      "containerType": "ForEach",
+      "containerWidth": 850,
+      "containerHeight": 500,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Variable",
+          "type": "String",
+          "defaultValue": "$_",
+          "description": "Loop variable (default $_ for pipeline)",
+          "validValues": [],
+          "value": "$_"
+        }
+      ]
+    },
+    {
+      "id": "b2000004",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 150,
+      "y": 230,
+      "width": 200,
+      "containerType": "IfElse",
+      "containerWidth": 700,
+      "containerHeight": 370,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "b2000003",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Status -eq \u0027Running\u0027",
+          "description": "PowerShell condition to evaluate",
+          "validValues": [],
+          "value": "$_.Status -eq \u0027Running\u0027"
+        }
+      ]
+    },
+    {
+      "id": "b2000005",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 170,
+      "y": 310,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000004",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "[RUNNING] $($_.DisplayName)"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Green"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000006",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 520,
+      "y": 310,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000004",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Text or object to display (leave blank to display pipeline input)",
+          "validValues": [],
+          "value": "[STOPPED] $($_.DisplayName)"
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Text color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Red"
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Background color",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": ""
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Don\u0027t append newline",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000007",
+      "title": "Group-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Group-Object",
+      "outputVariable": "",
+      "x": -150,
+      "y": 500,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "Status",
+          "description": "Property(s) to group by",
+          "validValues": [],
+          "value": "Status"
+        },
+        {
+          "name": "NoElement",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Omit group members (count only)",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000008",
+      "title": "Measure-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Measure-Object",
+      "outputVariable": "",
+      "x": 100,
+      "y": 500,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Property(s) to measure",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Sum",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Calculate sum",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Average",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Calculate average",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Maximum",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Find maximum",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "Minimum",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Find minimum",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "b2000009",
+      "title": "Format-List",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-List",
+      "outputVariable": "",
+      "x": 350,
+      "y": 500,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Properties to display (comma-separated or *)",
+          "validValues": [],
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "id": "b200000a",
+      "title": "Write-Output",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Output",
+      "outputVariable": "",
+      "x": 600,
+      "y": 500,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "b2000001",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Object to output",
+          "validValues": [],
+          "value": "Service health check complete"
+        }
+      ]
+    },
+    {
+      "id": "6bfa10f4",
+      "title": "Show-ServiceHealth",
+      "category": "Functions",
+      "scriptBody": "",
+      "cmdletName": "Show-ServiceHealth",
+      "outputVariable": "",
+      "x": 1150,
+      "y": 60,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": []
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "b2000002",
+      "targetNodeId": "b2000003"
+    },
+    {
+      "sourceNodeId": "b2000002",
+      "targetNodeId": "b2000007"
+    },
+    {
+      "sourceNodeId": "b2000007",
+      "targetNodeId": "b2000009"
+    },
+    {
+      "sourceNodeId": "b2000002",
+      "targetNodeId": "b2000008"
+    }
+  ]
+}

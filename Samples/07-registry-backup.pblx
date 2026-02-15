@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "metadata": {
+    "createdUtc": "2026-02-14T12:00:00Z",
+    "modifiedUtc": "2026-02-15T03:32:49.4193527Z"
+  },
+  "view": {
+    "zoom": 1
+  },
+  "nodes": [
+    {
+      "id": "a7000001",
+      "title": "Try / Catch",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 50,
+      "y": 50,
+      "width": 200,
+      "containerType": "TryCatch",
+      "containerWidth": 700,
+      "containerHeight": 450,
+      "zones": [
+        {
+          "name": "Try"
+        },
+        {
+          "name": "Catch"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ErrorAction",
+          "type": "Enum",
+          "defaultValue": "Stop",
+          "description": "ErrorActionPreference inside try block",
+          "validValues": [
+            "Stop",
+            "Continue",
+            "SilentlyContinue"
+          ],
+          "value": "Stop"
+        }
+      ]
+    },
+    {
+      "id": "a7000002",
+      "title": "Get-ItemProperty",
+      "category": "Registry",
+      "scriptBody": "",
+      "cmdletName": "Get-ItemProperty",
+      "outputVariable": "",
+      "x": 80,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "a7000001",
+      "parentZoneName": "Try",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Values",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "HKLM:\\SOFTWARE\\",
+          "description": "Registry key path",
+          "validValues": [],
+          "value": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specific value name",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "a7000003",
+      "title": "ConvertTo-Json",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "ConvertTo-Json",
+      "outputVariable": "",
+      "x": 80,
+      "y": 290,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "a7000001",
+      "parentZoneName": "Try",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Depth",
+          "type": "Int",
+          "defaultValue": "3",
+          "description": "Serialization depth",
+          "validValues": [],
+          "value": "3"
+        },
+        {
+          "name": "Compress",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Minified output",
+          "validValues": [],
+          "value": ""
+        }
+      ]
+    },
+    {
+      "id": "a7000004",
+      "title": "Set-Content",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Set-Content",
+      "outputVariable": "",
+      "x": 80,
+      "y": 410,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "a7000001",
+      "parentZoneName": "Try",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "File to write",
+          "validValues": [],
+          "value": ".\\registry-backup.json"
+        },
+        {
+          "name": "Encoding",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "File encoding",
+          "validValues": [
+            "UTF8",
+            "ASCII",
+            "Unicode",
+            "Default"
+          ],
+          "value": "UTF8"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Create path if needed",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "a7000005",
+      "title": "Remove-ItemProperty",
+      "category": "Registry",
+      "scriptBody": "",
+      "cmdletName": "Remove-ItemProperty",
+      "outputVariable": "",
+      "x": 420,
+      "y": 150,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "a7000001",
+      "parentZoneName": "Catch",
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Registry key path",
+          "validValues": [],
+          "value": "HKLM:\\SOFTWARE\\MyApp"
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Value name to remove",
+          "validValues": [],
+          "value": "TempValue"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "a7000006",
+      "title": "New-Item",
+      "category": "Registry",
+      "scriptBody": "",
+      "cmdletName": "New-Item",
+      "outputVariable": "",
+      "x": 800,
+      "y": 100,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Key",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Registry key path to create",
+          "validValues": [],
+          "value": "HKLM:\\SOFTWARE\\MyApp"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Overwrite if exists",
+          "validValues": [],
+          "value": ""
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "a7000007",
+      "title": "Set-ItemProperty",
+      "category": "Registry",
+      "scriptBody": "",
+      "cmdletName": "Set-ItemProperty",
+      "outputVariable": "",
+      "x": 800,
+      "y": 280,
+      "width": 200,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Registry key path",
+          "validValues": [],
+          "value": "HKLM:\\SOFTWARE\\MyApp"
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Value name to set",
+          "validValues": [],
+          "value": "Version"
+        },
+        {
+          "name": "Value",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Value data",
+          "validValues": [],
+          "value": "1.0"
+        },
+        {
+          "name": "Type",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Registry value type",
+          "validValues": [],
+          "value": "String"
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Create if not exists",
+          "validValues": [],
+          "value": "true"
+        },
+        {
+          "name": "WhatIf",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Preview without executing",
+          "validValues": [],
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "a7000002",
+      "targetNodeId": "a7000003"
+    },
+    {
+      "sourceNodeId": "a7000003",
+      "targetNodeId": "a7000004"
+    }
+  ]
+}

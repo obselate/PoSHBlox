@@ -65,8 +65,10 @@ public class ScriptGenerator
                 EmitFunctionDefinition(sb, fn);
         }
 
-        // Phase 2: Emit top-level execution
-        var sorted = TopologicalSort(topLevel);
+        // Phase 2: Emit top-level execution (excluding function definitions)
+        var sorted = TopologicalSort(topLevel
+            .Where(n => n.ContainerType != ContainerType.Function)
+            .ToList());
         if (sorted == null)
         {
             sb.AppendLine("# ERROR: Cycle detected in graph!");
@@ -121,7 +123,7 @@ public class ScriptGenerator
         }
 
         // Also assign variables for standalone nodes feeding containers
-        foreach (var node in sorted.Where(n => !n.IsContainer || n.ContainerType == ContainerType.Function))
+        foreach (var node in sorted.Where(n => !n.IsContainer))
         {
             if (localVarMap.ContainsKey(node.Id)) continue;
             if (HasContainerDownstream(node, scopeIds))
@@ -145,7 +147,7 @@ public class ScriptGenerator
         {
             if (emitted.Contains(node.Id)) continue;
 
-            if (node.IsContainer && node.ContainerType != ContainerType.Function)
+            if (node.IsContainer)
             {
                 emitted.Add(node.Id);
                 string? containerInput = ResolveContainerInput(node, scopeIds, localVarMap, inputVar);
@@ -224,7 +226,7 @@ public class ScriptGenerator
         foreach (var node in sorted)
         {
             if (assigned.Contains(node.Id)) continue;
-            if (node.IsContainer && node.ContainerType != ContainerType.Function) continue;
+            if (node.IsContainer) continue;
 
             int inCount = CountIncoming(node, scopeIds);
             if (inCount > 0)
@@ -269,15 +271,7 @@ public class ScriptGenerator
 
         foreach (var node in chain)
         {
-            if (node.ContainerType == ContainerType.Function)
-            {
-                var fnName = GetParamValue(node, "FunctionName", "Invoke-MyFunction");
-                segments.Add(fnName);
-            }
-            else
-            {
-                segments.Add(BuildNodeExpression(node));
-            }
+            segments.Add(BuildNodeExpression(node));
         }
 
         return string.Join(" | ", segments);
@@ -299,24 +293,62 @@ public class ScriptGenerator
     private void EmitFunctionDefinition(StringBuilder sb, GraphNode fnNode)
     {
         var fnName = GetParamValue(fnNode, "FunctionName", "Invoke-MyFunction");
-        var inputParam = GetParamValue(fnNode, "InputParam", "");
+        var returnType = GetParamValue(fnNode, "ReturnType", "");
+        var returnVar = GetParamValue(fnNode, "ReturnVariable", "");
         var bodyZone = FindZone(fnNode, "Body");
+        var arguments = fnNode.Parameters.Where(p => p.IsArgument).ToList();
 
         sb.AppendLine($"function {fnName} {{");
 
-        if (!string.IsNullOrWhiteSpace(inputParam))
+        // OutputType attribute (optional)
+        if (!string.IsNullOrWhiteSpace(returnType))
+            sb.AppendLine($"    [OutputType([{returnType}])]");
+
+        if (arguments.Count > 0)
         {
-            sb.AppendLine($"    param(");
-            sb.AppendLine($"        [Parameter(ValueFromPipeline)]");
-            sb.AppendLine($"        ${inputParam}");
-            sb.AppendLine($"    )");
-            sb.AppendLine($"    process {{");
-            EmitZoneAsScope(sb, bodyZone, indent: 2, inputVar: "$" + inputParam);
-            sb.AppendLine($"    }}");
+            sb.AppendLine("    param(");
+            for (int i = 0; i < arguments.Count; i++)
+            {
+                var arg = arguments[i];
+                var attrs = new List<string>();
+                if (arg.IsMandatory) attrs.Add("Mandatory");
+                if (arg.IsPipelineInput) attrs.Add("ValueFromPipeline");
+
+                if (attrs.Count > 0)
+                    sb.AppendLine($"        [Parameter({string.Join(", ", attrs)})]");
+
+                var typeName = arg.PowerShellTypeName;
+                var comma = i < arguments.Count - 1 ? "," : "";
+                var defaultVal = !string.IsNullOrWhiteSpace(arg.DefaultValue) && arg.Type != ParamType.Bool
+                    ? $" = \"{arg.DefaultValue}\""
+                    : "";
+                sb.AppendLine($"        [{typeName}]${arg.Name}{defaultVal}{comma}");
+                if (i < arguments.Count - 1) sb.AppendLine();
+            }
+            sb.AppendLine("    )");
+
+            // If any pipeline argument exists, wrap body in process{}
+            var pipelineArg = arguments.FirstOrDefault(a => a.IsPipelineInput);
+            if (pipelineArg != null)
+            {
+                sb.AppendLine("    process {");
+                EmitZoneAsScope(sb, bodyZone, indent: 2, inputVar: "$" + pipelineArg.Name);
+                if (!string.IsNullOrWhiteSpace(returnVar))
+                    sb.AppendLine($"        return ${returnVar}");
+                sb.AppendLine("    }");
+            }
+            else
+            {
+                EmitZoneAsScope(sb, bodyZone, indent: 1, inputVar: null);
+                if (!string.IsNullOrWhiteSpace(returnVar))
+                    sb.AppendLine($"    return ${returnVar}");
+            }
         }
         else
         {
             EmitZoneAsScope(sb, bodyZone, indent: 1, inputVar: null);
+            if (!string.IsNullOrWhiteSpace(returnVar))
+                sb.AppendLine($"    return ${returnVar}");
         }
 
         sb.AppendLine("}");
@@ -348,7 +380,11 @@ public class ScriptGenerator
                 EmitWhile(sb, container, pad, indent, containerInput);
                 break;
             case ContainerType.Function:
-                break; // emitted in Phase 1
+                EmitFunctionDefinition(sb, container);
+                break;
+            case ContainerType.Label:
+                EmitZoneAsScope(sb, FindZone(container, "Content"), indent, containerInput);
+                break;
             default:
                 sb.AppendLine($"{pad}# WARNING: Unknown container type '{container.ContainerType}'");
                 break;
@@ -382,7 +418,10 @@ public class ScriptGenerator
         else
             sb.AppendLine($"{pad}ForEach-Object {{");
 
-        EmitZoneAsScope(sb, bodyZone, indent + 1, "$_");
+        // Don't auto-pipe $_ into zone children. Inside ForEach-Object, $_ is
+        // already a scoped variable that nodes can reference in their parameters
+        // (e.g. -Object "$_"). Auto-piping produces broken code like "$_ | Write-Host".
+        EmitZoneAsScope(sb, bodyZone, indent + 1, null);
         sb.AppendLine($"{pad}}}");
     }
 
@@ -548,7 +587,7 @@ public class ScriptGenerator
     // ── Utility helpers ────────────────────────────────────────
 
     private static bool IsControlFlowContainer(GraphNode node)
-        => node.IsContainer && node.ContainerType != ContainerType.Function;
+        => node.IsContainer;
 
     private static string FormatArgs(GraphNode node)
         => string.Join(" ",
