@@ -33,7 +33,7 @@ PoSHBlox/
 ├── Templates/
 │   ├── Builtin/         # Shipped cmdlet templates (JSON) — DO NOT hand-edit
 │   └── Custom/          # User/community templates (JSON) — this is where you add stuff
-├── TestProjects/        # Sample .pblx project files
+├── Samples/             # Example .pblx project files
 ├── Themes/              # AXAML theme/token files
 ├── ViewModels/          # MVVM ViewModels (CommunityToolkit.Mvvm)
 ├── Views/               # Additional windows (Import Module dialog)
@@ -114,7 +114,7 @@ Restart PoSHBlox and the new category appears in the palette.
 | Pipeline filter (in → out) | `1` | `1` | `Where-Object`, `Sort-Object` |
 | Sink node (no output) | `1` | `0` | `Remove-Item`, `Write-Host` |
 
-**Container types** (`containerType` field): `None`, `IfElse`, `ForEach`, `TryCatch`, `While`, `Function`
+**Container types** (`containerType` field): `None`, `IfElse`, `ForEach`, `TryCatch`, `While`, `Function`, `Label`
 
 **Script-body nodes** (no cmdlet): Leave `cmdletName` empty and put PowerShell code in `scriptBody`. The node will execute that code instead of a named cmdlet.
 
@@ -164,7 +164,7 @@ Keep PRs focused. One feature or fix per PR.
 
 - **More cmdlet templates** — especially for popular modules (Az, AWS, Exchange, VMware, etc.)
 - **Code generation edge cases** — nested pipelines, splatting, advanced parameter sets
-- **UX improvements** — auto-arrange, minimap, undo/redo, search in palette
+- **UX improvements** — auto-arrange, minimap, undo/redo
 - **Import dialog improvements** — progress bar for large modules, `pwsh` support for cross-platform
 - **Template validation** — catch malformed JSON with useful error messages instead of silent skips
 - **Documentation** — usage guides, tutorial content, wiki pages
