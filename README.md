@@ -20,7 +20,7 @@
 PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes on a canvas. Each node represents a cmdlet, control-flow block, or custom script fragment. Connections between nodes define the data pipeline. When you're done, export a clean `.ps1` file.
 
 <p align="center">
-  <img src="Assets/poshblox-UI.png" alt="PoSHBlox UI" width="900" />
+  <img src="Assets/poshblox-demo-optimized.gif" alt="PoSHBlox UI" width="900" />
 </p>
 
 ### Features
