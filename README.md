@@ -65,15 +65,6 @@ Output lands in `bin/Release/net10.0/win-x64/publish/` — just the exe, Templat
 3. **Configure** parameters in the right-side properties panel
 4. **Preview** the generated script, then **Run** or **Save** as `.ps1`
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| UI Framework | [Avalonia UI](https://avaloniaui.net/) 11.3 |
-| Theme | [FluentAvalonia](https://github.com/amwx/FluentAvalonia) 2.5 |
-| MVVM | [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) |
-| Runtime | .NET 10 |
-
 ## License
 
 GNU AGPL v3 — see [LICENSE](LICENSE)
