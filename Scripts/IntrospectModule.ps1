@@ -95,6 +95,21 @@ foreach ($cmd in $commands) {
         }
     } catch { }
 
+    # Parameter sets the cmdlet declares. CmdletBindingAttribute.DefaultParameterSetName
+    # is the preferred default. ParameterSets collection provides the list and per-set flags.
+    $knownSets = @()
+    $defaultSet = $null
+    try {
+        $defaultSet = $cmd.DefaultParameterSet
+        if ($cmd.ParameterSets) {
+            foreach ($ps in $cmd.ParameterSets) {
+                if ($ps.Name -and $ps.Name -ne '__AllParameterSets') {
+                    $knownSets += $ps.Name
+                }
+            }
+        }
+    } catch { }
+
     $params = @()
     $primaryPipelineParam = $null
     foreach ($p in $cmd.Parameters.GetEnumerator()) {
@@ -107,6 +122,8 @@ foreach ($cmd in $commands) {
         $isMandatory = $false
         $defaultValue = ""
         $isPipelineInput = $false
+        $paramSets = @()
+        $mandatoryInSets = @()
 
         # ValidateSet overrides the mapped type to Enum.
         $validateSet = $paramInfo.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
@@ -117,11 +134,23 @@ foreach ($cmd in $commands) {
             $validVals = [System.Enum]::GetNames($paramInfo.ParameterType)
         }
 
-        # Parameter attributes: Mandatory + ValueFromPipeline.
+        # Parameter attributes: Mandatory + ValueFromPipeline + ParameterSetName.
+        # Params can appear in multiple [Parameter(...)] attributes, one per set.
         $paramAttrs = $paramInfo.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }
         foreach ($attr in $paramAttrs) {
             if ($attr.Mandatory) { $isMandatory = $true }
             if ($attr.ValueFromPipeline) { $isPipelineInput = $true }
+
+            # __AllParameterSets is PS's sentinel for "applies to every set" —
+            # we represent that as an empty sets list (our model's same semantics).
+            $setName = $attr.ParameterSetName
+            if ($setName -and $setName -ne '__AllParameterSets') {
+                if ($paramSets -notcontains $setName) { $paramSets += $setName }
+                if ($attr.Mandatory -and $mandatoryInSets -notcontains $setName) {
+                    $mandatoryInSets += $setName
+                }
+            }
+        }
         }
 
         $helpMsg = ($paramAttrs | Select-Object -First 1).HelpMessage
@@ -139,6 +168,8 @@ foreach ($cmd in $commands) {
             description     = $helpMsg
             validValues     = @($validVals)
             isPipelineInput = $isPipelineInput
+            parameterSets   = @($paramSets)
+            mandatoryInSets = @($mandatoryInSets)
         }
     }
 
@@ -177,6 +208,8 @@ foreach ($cmd in $commands) {
         hasExecOut                = $true
         primaryPipelineParameter  = $primaryPipelineParam
         dataOutputs               = $dataOutputs
+        knownParameterSets        = @($knownSets)
+        defaultParameterSet       = $defaultSet
     }
 }
 

@@ -82,6 +82,12 @@ public class DiscoveredCmdlet
     public bool HasExecOut { get; set; } = true;
     public string? PrimaryPipelineParameter { get; set; }
     public List<DataOutputDef> DataOutputs { get; set; } = [];
+
+    /// <summary>Parameter sets this cmdlet declares (excluding __AllParameterSets).</summary>
+    public List<string> KnownParameterSets { get; set; } = [];
+
+    /// <summary>Cmdlet's declared default parameter set (may be null).</summary>
+    public string? DefaultParameterSet { get; set; }
 }
 
 public class DiscoveredParameter
@@ -95,4 +101,10 @@ public class DiscoveredParameter
 
     /// <summary>V2: <c>[Parameter(ValueFromPipeline)]</c> — promotes the paired pin to primary pipeline target.</summary>
     public bool IsPipelineInput { get; set; }
+
+    /// <summary>Sets this param belongs to (empty = all sets).</summary>
+    public List<string> ParameterSets { get; set; } = [];
+
+    /// <summary>Sets in which this param is mandatory (overrides IsMandatory when non-empty).</summary>
+    public List<string> MandatoryInSets { get; set; } = [];
 }

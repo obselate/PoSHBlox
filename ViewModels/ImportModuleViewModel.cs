@@ -103,6 +103,8 @@ public partial class ImportModuleViewModel : ObservableObject
                 DataOutputs = cmdlet.DataOutputs.Count > 0
                     ? cmdlet.DataOutputs
                     : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
+                KnownParameterSets = cmdlet.KnownParameterSets,
+                DefaultParameterSet = cmdlet.DefaultParameterSet,
             };
 
             foreach (var p in cmdlet.Parameters)
@@ -117,6 +119,8 @@ public partial class ImportModuleViewModel : ObservableObject
                     Description = p.Description,
                     ValidValues = p.ValidValues ?? [],
                     IsPipelineInput = p.IsPipelineInput,
+                    ParameterSets = p.ParameterSets,
+                    MandatoryInSets = p.MandatoryInSets,
                 });
             }
 
