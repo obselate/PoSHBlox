@@ -101,11 +101,29 @@ if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
 {
     $manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($manifest -and $manifest.ExportedCommands) {
+    $probe = $null
+
+    # Prefer the live ExportedCommands, but Get-Module -ListAvailable can
+    # return empty ExportedCommands for modules whose manifest exports via
+    # wildcard or needs loading to expand. Fall back to parsing the .psd1
+    # directly with Import-PowerShellDataFile — that sees CmdletsToExport
+    # and FunctionsToExport verbatim without any module-load side effect.
+    if ($manifest -and $manifest.ExportedCommands -and $manifest.ExportedCommands.Count -gt 0) {
         $probe = $manifest.ExportedCommands.Keys | Select-Object -First 1
-        if ($probe) {
-            Get-Command $probe -ErrorAction SilentlyContinue *>$null
-        }
+    }
+    if (-not $probe -and $manifest -and $manifest.Path -and (Test-Path $manifest.Path)) {
+        try {
+            $data = Import-PowerShellDataFile -Path $manifest.Path -ErrorAction Stop
+            $exports = @()
+            if ($data.CmdletsToExport)   { $exports += @($data.CmdletsToExport) }
+            if ($data.FunctionsToExport) { $exports += @($data.FunctionsToExport) }
+            # Skip wildcard-only exports; we need a concrete name.
+            $probe = $exports | Where-Object { $_ -and $_ -notmatch '^[\*\?]+$' } | Select-Object -First 1
+        } catch { }
+    }
+
+    if ($probe) {
+        Get-Command $probe -ErrorAction SilentlyContinue *>$null
     }
 }
 
