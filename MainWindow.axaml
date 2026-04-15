@@ -27,6 +27,18 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         </Style>
+
+        <!-- Node-graph context menu items — inherit the app's slate palette.
+             Monospace header keeps the trailing shortcut hint right-aligned. -->
+        <Style Selector="MenuItem.graphCtx">
+            <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Padding" Value="12,6" />
+        </Style>
+        <Style Selector="MenuItem.graphCtx:pointerover">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
     </uiw:AppWindow.Styles>
 
     <Grid>

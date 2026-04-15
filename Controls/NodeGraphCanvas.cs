@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -149,16 +150,90 @@ public class NodeGraphCanvas : Control
             _vm.SelectNode(null);
         }
 
-        // Right-click: delete wire
+        // Right-click: open a context menu sized to what's under the cursor —
+        // node / wire / empty canvas.
         if (props.IsRightButtonPressed)
         {
-            var conn = HitConnection(canvasPos);
-            if (conn != null)
+            var hitNode = HitNode(canvasPos);
+            var hitConn = hitNode == null ? HitConnection(canvasPos) : null;
+            if (hitNode != null)
             {
-                _vm.Connections.Remove(conn);
-                e.Handled = true;
+                _vm.SelectNode(hitNode);
+                ShowNodeContextMenu(hitNode);
             }
+            else if (hitConn != null)
+            {
+                ShowWireContextMenu(hitConn);
+            }
+            else
+            {
+                ShowCanvasContextMenu(canvasPos);
+            }
+            e.Handled = true;
         }
+    }
+
+    // ── Context menus ──────────────────────────────────────────
+
+    private void ShowNodeContextMenu(GraphNode node)
+    {
+        var items = new List<(string Label, Action? Action, bool IsSeparator)>();
+
+        // Duplicate only applies to non-container nodes (DuplicateSelected
+        // already skips containers — don't show a dead menu entry either).
+        if (!node.IsContainer)
+            items.Add(("Duplicate         Ctrl+D", () => _vm!.DuplicateSelected(), false));
+        items.Add(("Delete            Del",        () => _vm!.DeleteSelected(),    false));
+
+        if (!node.IsContainer)
+        {
+            items.Add(("", null, true));
+            items.Add((node.IsCollapsed ? "Expand            C" : "Collapse          C",
+                                           () => _vm!.ToggleCollapseSelected(), false));
+        }
+
+        ShowFlyout(items);
+    }
+
+    private void ShowWireContextMenu(NodeConnection conn)
+    {
+        ShowFlyout(new List<(string, Action?, bool)>
+        {
+            ("Delete wire",       () => _vm!.Connections.Remove(conn), false),
+        });
+    }
+
+    private void ShowCanvasContextMenu(Point canvasPos)
+    {
+        ShowFlyout(new List<(string, Action?, bool)>
+        {
+            ("Add blank node",    () => _vm!.AddNode(),                      false),
+            ("",                  null,                                      true),
+            ("Reset view         Ctrl+0", () => _vm!.ResetView(),            false),
+            ("Zoom to fit all    F",      () => ZoomToFit(selectionOnly: false), false),
+        });
+    }
+
+    private void ShowFlyout(IList<(string Label, Action? Action, bool IsSeparator)> items)
+    {
+        var flyout = new MenuFlyout
+        {
+            Placement = PlacementMode.Pointer,
+        };
+        foreach (var (label, action, isSeparator) in items)
+        {
+            if (isSeparator)
+            {
+                flyout.Items.Add(new Separator());
+                continue;
+            }
+            var mi = new MenuItem { Header = label };
+            mi.Classes.Add("graphCtx");
+            if (action != null)
+                mi.Click += (_, _) => action();
+            flyout.Items.Add(mi);
+        }
+        flyout.ShowAt(this, showAtPointer: true);
     }
 
     // ── Input: Pointer Move ────────────────────────────────────
