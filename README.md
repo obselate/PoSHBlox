@@ -58,6 +58,26 @@ dotnet publish -c Release -r win-x64 --self-contained
 
 Output lands in `bin/Release/net10.0/win-x64/publish/` — just the exe, Templates, and Scripts folders.
 
+### Download a prebuilt build
+
+Every push to every branch builds a Windows self-contained single-file
+executable through [GitHub Actions](../../actions/workflows/build.yml). The
+build bundles the `.exe` with `Templates/` and `Scripts/` into a `.zip`
+(needed at runtime). Two places to grab it:
+
+- **[Releases](../../releases)** — each branch has a rolling pre-release
+  named `Branch build: <branch-name>` with the latest `.zip` attached.
+  Overwritten on every push to that branch; delete the branch to retire it.
+  Tagged releases (`v*`) appear as proper releases with generated notes.
+- **[Actions tab](../../actions/workflows/build.yml)** — every run (including
+  PR builds) uploads its `.zip` as a 30-day artifact, linked from the run page.
+
+Extract, run `PoSHBlox.exe`. No .NET install required on the target machine.
+
+Stamped version follows `<baseFromCsproj>.<runNumber>` for branch builds and
+the tag name for releases; `InformationalVersion` additionally includes the
+commit SHA and branch slug (visible in Properties → Details on the file).
+
 ## How It Works
 
 1. **Add nodes** from the palette
