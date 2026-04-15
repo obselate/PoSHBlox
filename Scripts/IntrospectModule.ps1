@@ -136,11 +136,11 @@ if ($commands.Count -eq 0 -and $declaredExports.Count -gt 0) {
 }
 
 if ($commands.Count -eq 0) {
-    $diag = "Get-Module=$((Get-Module -Name $actualName | Measure-Object).Count), " +
-            "Get-Command -Module=$((Get-Command -Module $actualName -ErrorAction SilentlyContinue | Measure-Object).Count), " +
-            "declaredExports=$($declaredExports.Count), " +
-            "manifest=$(if ($manifest) { 'yes' } else { 'no' })"
-    Write-Error "Failed to introspect module '$actualName' — no commands reachable. [$diag]"
+    $gmCount = (Get-Module -Name $actualName | Measure-Object).Count
+    $gcmCount = (Get-Command -Module $actualName -ErrorAction SilentlyContinue | Measure-Object).Count
+    $manifestState = if ($manifest) { 'yes' } else { 'no' }
+    $diag = "Get-Module=$gmCount, Get-Command -Module=$gcmCount, declaredExports=$($declaredExports.Count), manifest=$manifestState"
+    Write-Error "Failed to introspect module '$actualName' - no commands reachable. [$diag]"
     exit 1
 }
 
