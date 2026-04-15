@@ -151,7 +151,6 @@ foreach ($cmd in $commands) {
                 }
             }
         }
-        }
 
         $helpMsg = ($paramAttrs | Select-Object -First 1).HelpMessage
         if (-not $helpMsg) { $helpMsg = "" }
