@@ -469,7 +469,9 @@ public class NodeGraphRenderer
         // chevron pattern doesn't apply). Regular nodes get a dedicated exec row.
         if (port.Kind == PortKind.Exec)
         {
-            const double inset = 10;
+            // Keep the triangle tips clear of the node's rounded corners
+            // (NodeCornerRadius=8) and give a little visual breathing room.
+            const double inset = 16;
             double x = port.Direction == PortDirection.Input ? node.X + inset : node.X + width - inset;
             double y;
             if (node.IsContainer)
