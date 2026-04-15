@@ -43,6 +43,9 @@ public partial class GraphCanvasViewModel : ObservableObject
     [ObservableProperty] private bool _isPaletteOpen = true;
     [ObservableProperty] private bool _isPreviewOpen;
 
+    /// <summary>Toggled by the '?' shortcut — overlays a keyboard cheat sheet.</summary>
+    [ObservableProperty] private bool _isCheatSheetOpen;
+
     // ── Project state ─────────────────────────────────────────
     [ObservableProperty] private string? _currentFilePath;
     [ObservableProperty] private bool _isDirty;
@@ -209,6 +212,73 @@ public partial class GraphCanvasViewModel : ObservableObject
         PanY = 0;
         Zoom = 1.0;
     }
+
+    /// <summary>
+    /// Deep-copy the selected non-container node at a 40px offset and select
+    /// the duplicate. Ports/parameters get fresh IDs; wires are not carried
+    /// over (duplicate means "start a copy", not "mirror with shared I/O").
+    /// Containers aren't supported in this pass — duplicating a container's
+    /// children and rewiring internal connections is a larger task.
+    /// </summary>
+    [RelayCommand]
+    public void DuplicateSelected()
+    {
+        if (SelectedNode == null || SelectedNode.IsContainer) return;
+
+        var src = SelectedNode;
+        var dup = new GraphNode
+        {
+            Title = src.Title,
+            Category = src.Category,
+            CmdletName = src.CmdletName,
+            ScriptBody = src.ScriptBody,
+            // Reset OutputVariable so the duplicate gets a fresh auto-name.
+            OutputVariable = "",
+            X = src.X + 40,
+            Y = src.Y + 40,
+            Width = src.Width,
+        };
+
+        // Default constructor seeds with ExecIn/ExecOut/Out — replace with a
+        // faithful copy of the source's pin shape so we preserve per-parameter
+        // pairing and any custom outputs.
+        dup.Inputs.Clear();
+        dup.Outputs.Clear();
+        foreach (var p in src.Inputs)
+            dup.Inputs.Add(ClonePort(p, dup));
+        foreach (var p in src.Outputs)
+            dup.Outputs.Add(ClonePort(p, dup));
+
+        foreach (var param in src.Parameters)
+            dup.Parameters.Add(new NodeParameter
+            {
+                Name = param.Name,
+                Type = param.Type,
+                IsMandatory = param.IsMandatory,
+                DefaultValue = param.DefaultValue,
+                Description = param.Description,
+                ValidValues = param.ValidValues,
+                Value = param.Value,
+                IsArgument = param.IsArgument,
+                IsPipelineInput = param.IsPipelineInput,
+                Owner = dup,
+            });
+
+        Nodes.Add(dup);
+        SelectNode(dup);
+    }
+
+    private static NodePort ClonePort(NodePort p, GraphNode owner) => new()
+    {
+        Name = p.Name,
+        Direction = p.Direction,
+        Kind = p.Kind,
+        DataType = p.DataType,
+        ParameterName = p.ParameterName,
+        IsPrimary = p.IsPrimary,
+        IsPrimaryPipelineTarget = p.IsPrimaryPipelineTarget,
+        Owner = owner,
+    };
 
     [RelayCommand]
     public void AddArgument()

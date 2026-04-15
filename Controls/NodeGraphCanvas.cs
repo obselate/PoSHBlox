@@ -530,6 +530,62 @@ public class NodeGraphCanvas : Control
             }
     }
 
+    // ── Public commands (driven by keyboard shortcuts) ─────────
+
+    /// <summary>
+    /// Fit the viewport to contain all top-level nodes (or just the selected
+    /// node when <paramref name="selectionOnly"/> is true). No-op if the graph
+    /// is empty or the control has no usable size yet.
+    /// </summary>
+    public void ZoomToFit(bool selectionOnly = false)
+    {
+        if (_vm == null) return;
+        if (Bounds.Width < 50 || Bounds.Height < 50) return;
+
+        var set = (selectionOnly && _vm.SelectedNode != null
+            ? new[] { _vm.SelectedNode }
+            : _vm.Nodes.Where(n => n.ParentContainer == null).ToArray());
+        if (set.Length == 0) return;
+
+        double minX = set.Min(n => n.X);
+        double minY = set.Min(n => n.Y);
+        double maxX = set.Max(n => n.X + (n.IsContainer ? n.ContainerWidth : n.Width));
+        double maxY = set.Max(n => n.Y + (n.IsContainer ? n.ContainerHeight : n.Height));
+
+        const double pad = 80;
+        double w = (maxX - minX) + pad * 2;
+        double h = (maxY - minY) + pad * 2;
+
+        double zoom = Math.Min(Bounds.Width / w, Bounds.Height / h);
+        zoom = Math.Clamp(zoom, 0.1, 3.0);
+
+        // Center the bounding rect in the viewport at the new zoom.
+        double cx = (minX + maxX) / 2;
+        double cy = (minY + maxY) / 2;
+        _vm.Zoom = zoom;
+        _vm.PanX = Bounds.Width / 2 - cx * zoom;
+        _vm.PanY = Bounds.Height / 2 - cy * zoom;
+    }
+
+    /// <summary>
+    /// Cancel any in-flight drag: wire drag (restoring a rerouted wire if
+    /// applicable), node drag, container resize, or panning. Used by Esc.
+    /// </summary>
+    public void CancelDrag()
+    {
+        if (_isDraggingWire && _reroutingOriginal != null && _vm != null)
+            _vm.Connections.Add(_reroutingOriginal);
+
+        _isPanning = false;
+        _isDraggingNode = false;
+        _dragNode = null;
+        _isDraggingWire = false;
+        _wireStartPort = null;
+        _reroutingOriginal = null;
+        _isResizingContainer = false;
+        _resizeNode = null;
+    }
+
     // ── Rendering ──────────────────────────────────────────────
 
     public override void Render(DrawingContext context)

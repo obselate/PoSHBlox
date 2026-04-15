@@ -16,6 +16,20 @@
         <vm:GraphCanvasViewModel />
     </uiw:AppWindow.DataContext>
 
+    <uiw:AppWindow.Styles>
+        <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
+        <Style Selector="TextBlock.cheatKey">
+            <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFileBrush}" />
+        </Style>
+        <Style Selector="TextBlock.cheatLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+    </uiw:AppWindow.Styles>
+
+    <Grid>
     <DockPanel>
         <!-- ══════ Title bar separator ══════ -->
         <Border DockPanel.Dock="Top" Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
@@ -510,7 +524,7 @@
                             </DockPanel>
                         </Border>
 
-                        <ctrl:NodeGraphCanvas DataContext="{Binding}" />
+                        <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
                     </DockPanel>
                 </SplitView.Content>
             </SplitView>
@@ -562,4 +576,65 @@
         </Grid>
 
     </DockPanel>
+
+    <!-- ══════ Cheat sheet overlay (toggled by ?) — last child so it renders on top. ══════ -->
+    <Border IsVisible="{Binding IsCheatSheetOpen}"
+            Background="#CC060D16">
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                MinWidth="460" MaxWidth="640" Padding="24,20"
+                Background="{DynamicResource BgPrimaryBrush}"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                BorderThickness="1" CornerRadius="8">
+            <StackPanel Spacing="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="Keyboard Shortcuts"
+                               FontSize="15" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="Esc / ? to close"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right" />
+                </DockPanel>
+                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
+
+                <!-- Two columns: shortcut ∷ description -->
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      RowSpacing="4">
+                    <TextBlock Grid.Row="0"  Grid.Column="0" Text="Ctrl+N"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="0"  Grid.Column="1" Text="New graph"    Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="1"  Grid.Column="0" Text="Ctrl+O"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="1"  Grid.Column="1" Text="Open .pblx project" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="2"  Grid.Column="0" Text="Ctrl+S"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="2"  Grid.Column="1" Text="Save .pblx"   Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="3"  Grid.Column="0" Text="Ctrl+E"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="3"  Grid.Column="1" Text="Export .ps1"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="4"  Grid.Column="0" Text="F5"           Classes="cheatKey"/>
+                    <TextBlock Grid.Row="4"  Grid.Column="1" Text="Run generated script"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="5"  Grid.Column="0" Text="Alt+S"        Classes="cheatKey"/>
+                    <TextBlock Grid.Row="5"  Grid.Column="1" Text="Toggle script preview" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="6"  Grid.Column="0" Text="P"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="6"  Grid.Column="1" Text="Toggle palette"        Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="7"  Grid.Column="0" Text="/"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="7"  Grid.Column="1" Text="Focus palette search"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="8"  Grid.Column="0" Text="Ctrl+D"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="8"  Grid.Column="1" Text="Duplicate selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="9"  Grid.Column="0" Text="Del / Backspace" Classes="cheatKey"/>
+                    <TextBlock Grid.Row="9"  Grid.Column="1" Text="Delete selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="F"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="10" Grid.Column="1" Text="Zoom to fit (selection or all)" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+0"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="11" Grid.Column="1" Text="Reset view"   Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Esc"          Classes="cheatKey"/>
+                    <TextBlock Grid.Row="12" Grid.Column="1" Text="Cancel drag · deselect · close overlay" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="13" Grid.Column="0" Text="?"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="13" Grid.Column="1" Text="Toggle this cheat sheet" Classes="cheatLabel"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Border>
+    </Grid>
 </uiw:AppWindow>

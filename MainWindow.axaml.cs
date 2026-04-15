@@ -112,14 +112,49 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
-                // Del — delete selected node (only when not typing)
+                // Del / Backspace — delete selected node (only when not typing)
                 case Key.Delete when !inTextBox:
+                case Key.Back when !inTextBox:
                     vm.DeleteSelected();
                     e.Handled = true;
                     break;
 
-                // / — focus palette search (only when not typing)
-                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.None:  // '/' key
+                // Ctrl+D — duplicate selected node
+                case Key.D when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    vm.DuplicateSelected();
+                    e.Handled = true;
+                    break;
+
+                // F — zoom-to-fit (selection if one is selected, whole graph otherwise)
+                case Key.F when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    GraphCanvas.ZoomToFit(selectionOnly: vm.SelectedNode != null);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+0 — reset pan/zoom
+                case Key.D0 when e.KeyModifiers == KeyModifiers.Control:
+                case Key.NumPad0 when e.KeyModifiers == KeyModifiers.Control:
+                    vm.ResetView();
+                    e.Handled = true;
+                    break;
+
+                // Esc — cancel in-flight drag, then deselect, then close cheat sheet / preview
+                case Key.Escape:
+                    GraphCanvas.CancelDrag();
+                    if (vm.IsCheatSheetOpen) vm.IsCheatSheetOpen = false;
+                    else if (vm.SelectedNode != null) vm.SelectNode(null);
+                    e.Handled = true;
+                    break;
+
+                // ? — toggle cheat sheet (Shift+/ on US layouts)
+                case Key.OemQuestion when !inTextBox:
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:  // '?'
+                    vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
+                    e.Handled = true;
+                    break;
+
+                // / — focus palette search (only when not typing, unshifted)
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.None:
                     vm.IsPaletteOpen = true;
                     PaletteSearchBox.Focus();
                     PaletteSearchBox.SelectAll();
