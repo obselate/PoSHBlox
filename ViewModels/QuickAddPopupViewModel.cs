@@ -66,8 +66,11 @@ public partial class QuickAddPopupViewModel : ObservableObject
     public ObservableCollection<TagChip> TagChips { get; } = new();
     public ObservableCollection<string> ActiveTags { get; } = new();
 
-    /// <summary>What the view renders: ordered list of categories with matching templates.</summary>
-    public ObservableCollection<TemplateCategory> FilteredCategories { get; } = new();
+    /// <summary>What the view renders: ordered list of categories with matching templates wrapped in selection-aware items.</summary>
+    public ObservableCollection<QuickAddCategory> FilteredCategories { get; } = new();
+
+    /// <summary>The item currently highlighted by arrow-key nav (Enter commits this one).</summary>
+    public QuickAddItem? SelectedItem { get; private set; }
 
     public QuickAddPopupViewModel(NodePaletteViewModel palette)
     {
@@ -191,14 +194,63 @@ public partial class QuickAddPopupViewModel : ObservableObject
                 ? g.OrderByDescending(k => k.Score).ThenBy(k => k.Template.Name)
                 : g.OrderBy(k => k.Template.Name);
 
-            var cat = new TemplateCategory
+            var cat = new QuickAddCategory
             {
                 Name = g.Key,
-                Templates = new ObservableCollection<NodeTemplate>(ordered.Select(x => x.Template)),
+                Items = new ObservableCollection<QuickAddItem>(
+                    ordered.Select(x => new QuickAddItem { Template = x.Template })),
                 IsExpanded = searching,  // auto-expand on search, collapsed otherwise
             };
             FilteredCategories.Add(cat);
         }
+
+        // Seed selection at the first visible item so Enter immediately spawns
+        // something sensible and Down/Up have a starting point.
+        SelectFirstVisible();
+    }
+
+    // ── Arrow-key nav ──────────────────────────────────────────
+
+    /// <summary>Flat list of items from expanded categories, in display order.</summary>
+    private IEnumerable<QuickAddItem> EnumerateVisibleItems()
+    {
+        foreach (var cat in FilteredCategories)
+            if (cat.IsExpanded)
+                foreach (var item in cat.Items)
+                    yield return item;
+    }
+
+    private void SelectFirstVisible()
+    {
+        ClearSelection();
+        SelectedItem = EnumerateVisibleItems().FirstOrDefault();
+        if (SelectedItem != null) SelectedItem.IsSelected = true;
+    }
+
+    private void ClearSelection()
+    {
+        if (SelectedItem != null) SelectedItem.IsSelected = false;
+        SelectedItem = null;
+    }
+
+    /// <summary>Move selection to the next visible item, wrapping at the end.</summary>
+    public void SelectNext()  => Move(+1);
+
+    /// <summary>Move selection to the previous visible item, wrapping at the start.</summary>
+    public void SelectPrevious() => Move(-1);
+
+    private void Move(int delta)
+    {
+        var list = EnumerateVisibleItems().ToList();
+        if (list.Count == 0) return;
+
+        int idx = SelectedItem == null ? 0 : list.IndexOf(SelectedItem);
+        if (idx < 0) idx = 0;
+        int next = ((idx + delta) % list.Count + list.Count) % list.Count;
+
+        ClearSelection();
+        SelectedItem = list[next];
+        SelectedItem.IsSelected = true;
     }
 
     // ── Compatibility oracle ───────────────────────────────────
@@ -242,4 +294,22 @@ public partial class QuickAddPopupViewModel : ObservableObject
 
         return false;
     }
+}
+
+/// <summary>Single template in the popup — carries its own selection flag so arrow-key nav can highlight.</summary>
+public partial class QuickAddItem : ObservableObject
+{
+    public required NodeTemplate Template { get; init; }
+    [ObservableProperty] private bool _isSelected;
+}
+
+/// <summary>Popup category — parallels <see cref="TemplateCategory"/> but wraps items in <see cref="QuickAddItem"/>.</summary>
+public partial class QuickAddCategory : ObservableObject
+{
+    public string Name { get; set; } = "";
+    public ObservableCollection<QuickAddItem> Items { get; set; } = new();
+    [ObservableProperty] private bool _isExpanded;
+
+    public Avalonia.Media.ISolidColorBrush CategoryBrush =>
+        new Avalonia.Media.SolidColorBrush(PoSHBlox.Rendering.GraphTheme.GetCategoryColor(Name));
 }

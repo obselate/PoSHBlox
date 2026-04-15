@@ -542,7 +542,7 @@ public partial class MainWindow : AppWindow
 
     private void OnQuickAddCategoryClicked(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: TemplateCategory cat })
+        if (sender is Button { Tag: QuickAddCategory cat })
             cat.IsExpanded = !cat.IsExpanded;
     }
 
@@ -565,15 +565,23 @@ public partial class MainWindow : AppWindow
                 e.Handled = true;
                 break;
 
+            case Key.Down:
+                vm.QuickAdd.SelectNext();
+                e.Handled = true;
+                break;
+
+            case Key.Up:
+                vm.QuickAdd.SelectPrevious();
+                e.Handled = true;
+                break;
+
             case Key.Enter:
-                // Commit first visible template.
-                var firstCat = vm.QuickAdd.FilteredCategories
-                    .FirstOrDefault(c => c.IsExpanded && c.Templates.Count > 0)
-                    ?? vm.QuickAdd.FilteredCategories.FirstOrDefault(c => c.Templates.Count > 0);
-                var first = firstCat?.Templates.FirstOrDefault();
-                if (first != null)
+                // Commit the highlighted item (Down/Up moves this). SelectFirstVisible
+                // seeds it on popup open, so Enter always has a target when results exist.
+                var selected = vm.QuickAdd.SelectedItem?.Template;
+                if (selected != null)
                 {
-                    vm.CommitQuickAdd(first);
+                    vm.CommitQuickAdd(selected);
                     e.Handled = true;
                 }
                 break;

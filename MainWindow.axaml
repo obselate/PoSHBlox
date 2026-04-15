@@ -28,6 +28,11 @@
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         </Style>
 
+        <!-- Quick-add: arrow-key selected item gets an accent background. -->
+        <Style Selector="Button.quickAddSelected">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
+
         <!-- Tag filter chips — inactive = muted slate, active = saved-tint accent. -->
         <Style Selector="ToggleButton.tagChip">
             <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
@@ -726,17 +731,18 @@
                                                        IsVisible="{Binding !IsExpanded}" />
                                             <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextMutedBrush}" />
-                                            <TextBlock Text="{Binding Templates.Count, StringFormat='({0})'}"
+                                            <TextBlock Text="{Binding Items.Count, StringFormat='({0})'}"
                                                        FontSize="10" Foreground="{DynamicResource TextMutedBrush}"
                                                        VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
-                                    <ItemsControl ItemsSource="{Binding Templates}"
+                                    <ItemsControl ItemsSource="{Binding Items}"
                                                   IsVisible="{Binding IsExpanded}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Button Click="OnQuickAddTemplateClicked"
-                                                        Tag="{Binding}"
+                                                        Tag="{Binding Template}"
+                                                        Classes.quickAddSelected="{Binding IsSelected}"
                                                         Background="Transparent"
                                                         HorizontalAlignment="Stretch"
                                                         HorizontalContentAlignment="Left"
@@ -747,9 +753,9 @@
                                                         <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
                                                     </Button.Resources>
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Name}" FontSize="12"
+                                                        <TextBlock Text="{Binding Template.Name}" FontSize="12"
                                                                    Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                        <TextBlock Text="{Binding Description}" FontSize="10"
+                                                        <TextBlock Text="{Binding Template.Description}" FontSize="10"
                                                                    Foreground="{DynamicResource TextMutedBrush}"
                                                                    TextTrimming="CharacterEllipsis" MaxWidth="340" />
                                                     </StackPanel>
