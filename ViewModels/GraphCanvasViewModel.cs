@@ -77,10 +77,53 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         Palette.SetGraphNodes(Nodes);
         Nodes.CollectionChanged += OnNodesChanged;
-        Connections.CollectionChanged += (_, _) => MarkDirty();
+        Connections.CollectionChanged += (_, _) =>
+        {
+            MarkDirty();
+            RefreshWiredState();
+        };
 
         SeedExampleGraph();
+        RefreshWiredState();
         IsDirty = false;
+    }
+
+    /// <summary>
+    /// Recompute <see cref="NodeParameter.IsWired"/> and its label for every
+    /// parameter across every node. Called on connection, param, and node
+    /// collection changes — cheap enough for typical graph sizes.
+    /// </summary>
+    private void RefreshWiredState()
+    {
+        foreach (var node in Nodes)
+        {
+            foreach (var param in node.Parameters)
+            {
+                var pin = param.InputPort;
+                if (pin == null)
+                {
+                    param.IsWired = false;
+                    param.WiredFromLabel = "";
+                    continue;
+                }
+                var conn = Connections.FirstOrDefault(c => c.Target == pin);
+                if (conn == null)
+                {
+                    param.IsWired = false;
+                    param.WiredFromLabel = "";
+                }
+                else
+                {
+                    var src = conn.Source.Owner;
+                    var srcTitle = string.IsNullOrWhiteSpace(src?.Title) ? "?" : src!.Title;
+                    var pinName  = string.IsNullOrWhiteSpace(conn.Source.Name)
+                        ? (conn.Source.IsPrimary ? "Out" : "Pin")
+                        : conn.Source.Name;
+                    param.IsWired = true;
+                    param.WiredFromLabel = $"\u2190 {srcTitle}.{pinName}";
+                }
+            }
+        }
     }
 
     // ── Commands ────────────────────────────────────────────────
@@ -265,6 +308,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         _projectCreatedUtc = doc.Metadata.CreatedUtc;
         ProjectSerializer.RebuildGraph(doc, this);
         _suppressDirty = false;
+        RefreshWiredState();
         IsDirty = false;
         Palette.SyncFunctionTemplates();
     }
@@ -319,6 +363,11 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         if (e.PropertyName != null && !IgnoredNodeProps.Contains(e.PropertyName))
             MarkDirty();
+
+        // A title rename changes the upstream label shown on any wired downstream
+        // parameter — refresh so the chip stays accurate.
+        if (e.PropertyName == nameof(GraphNode.Title))
+            RefreshWiredState();
     }
 
     private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -342,6 +391,7 @@ public partial class GraphCanvasViewModel : ObservableObject
             foreach (NodeParameter p in e.OldItems)
                 p.PropertyChanged -= OnParamPropertyChanged;
 
+        RefreshWiredState();
         Palette.SyncFunctionTemplates();
     }
 

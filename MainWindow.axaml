@@ -363,38 +363,53 @@
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
                                                                        IsVisible="{Binding !IsBool}" />
-                                                            <!-- Bool → CheckBox -->
-                                                            <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
-                                                                      IsVisible="{Binding IsBool}"
-                                                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                      FontSize="13"
-                                                                      HorizontalAlignment="Left"
-                                                                      VerticalContentAlignment="Center"
-                                                                      Padding="8,4" Margin="0,2">
-                                                                <TextBlock Text="{Binding Name}" FontSize="13"
-                                                                           Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                            </CheckBox>
-                                                            <!-- Enum → ComboBox -->
-                                                            <ComboBox ItemsSource="{Binding EnumOptions}"
-                                                                      SelectedItem="{Binding SelectedEnumValue, Mode=TwoWay}"
-                                                                      IsVisible="{Binding IsEnum}"
-                                                                      Background="{DynamicResource BgPrimaryBrush}"
-                                                                      Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                      BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                      Padding="8,5" CornerRadius="3"
-                                                                      FontFamily="{DynamicResource FontMono}" FontSize="12"
-                                                                      HorizontalAlignment="Stretch"
-                                                                      HorizontalContentAlignment="Left"
-                                                                      VerticalContentAlignment="Center" />
-                                                            <!-- Everything else → TextBox -->
-                                                            <TextBox Text="{Binding Value, Mode=TwoWay}"
-                                                                     Watermark="{Binding DefaultValue}"
-                                                                     IsVisible="{Binding IsTextInput}"
-                                                                     Background="{DynamicResource BgPrimaryBrush}"
-                                                                     Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                     Padding="8,5" CornerRadius="3"
-                                                                     FontFamily="{DynamicResource FontMono}" FontSize="12" />
+
+                                                            <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
+                                                            <Border IsVisible="{Binding IsWired}"
+                                                                    Background="{DynamicResource BgSecondaryBrush}"
+                                                                    BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                    BorderThickness="1" CornerRadius="10"
+                                                                    Padding="8,3" HorizontalAlignment="Left">
+                                                                <TextBlock Text="{Binding WiredFromLabel}" FontSize="11"
+                                                                           Foreground="{DynamicResource TextFileBrush}"
+                                                                           FontFamily="{DynamicResource FontMono}" />
+                                                            </Border>
+
+                                                            <!-- Literal editors: hidden while wired. One outer gate, type-specific inner toggles. -->
+                                                            <StackPanel IsVisible="{Binding IsUnwired}" Spacing="3">
+                                                                <!-- Bool → CheckBox -->
+                                                                <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                          IsVisible="{Binding IsBool}"
+                                                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                          FontSize="13"
+                                                                          HorizontalAlignment="Left"
+                                                                          VerticalContentAlignment="Center"
+                                                                          Padding="8,4" Margin="0,2">
+                                                                    <TextBlock Text="{Binding Name}" FontSize="13"
+                                                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                                </CheckBox>
+                                                                <!-- Enum → ComboBox -->
+                                                                <ComboBox ItemsSource="{Binding EnumOptions}"
+                                                                          SelectedItem="{Binding SelectedEnumValue, Mode=TwoWay}"
+                                                                          IsVisible="{Binding IsEnum}"
+                                                                          Background="{DynamicResource BgPrimaryBrush}"
+                                                                          Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                          Padding="8,5" CornerRadius="3"
+                                                                          FontFamily="{DynamicResource FontMono}" FontSize="12"
+                                                                          HorizontalAlignment="Stretch"
+                                                                          HorizontalContentAlignment="Left"
+                                                                          VerticalContentAlignment="Center" />
+                                                                <!-- Everything else → TextBox -->
+                                                                <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                                         Watermark="{Binding DefaultValue}"
+                                                                         IsVisible="{Binding IsTextInput}"
+                                                                         Background="{DynamicResource BgPrimaryBrush}"
+                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                         Padding="8,5" CornerRadius="3"
+                                                                         FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                            </StackPanel>
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>

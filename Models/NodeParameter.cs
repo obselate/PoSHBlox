@@ -29,6 +29,24 @@ public partial class NodeParameter : ObservableObject
     public NodePort? InputPort =>
         Owner?.Inputs.FirstOrDefault(p => p.ParameterName == Name);
 
+    /// <summary>
+    /// True when <see cref="InputPort"/> has at least one incoming wire. Set by
+    /// the view model on every connection change — the parameter doesn't observe
+    /// the graph itself.
+    /// </summary>
+    [ObservableProperty] private bool _isWired;
+
+    /// <summary>
+    /// Label used by the properties panel when <see cref="IsWired"/> is true —
+    /// typically <c>"← SourceNode.PinName"</c>. Empty otherwise.
+    /// </summary>
+    [ObservableProperty] private string _wiredFromLabel = "";
+
+    /// <summary>Convenience negation of <see cref="IsWired"/> for IsVisible bindings.</summary>
+    public bool IsUnwired => !IsWired;
+
+    partial void OnIsWiredChanged(bool value) => OnPropertyChanged(nameof(IsUnwired));
+
     /// <summary>Maps ParamType to PowerShell type accelerator for function signatures.</summary>
     public string PowerShellTypeName => Type switch
     {
