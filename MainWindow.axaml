@@ -28,6 +28,23 @@
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         </Style>
 
+        <!-- Tag filter chips — inactive = muted slate, active = saved-tint accent. -->
+        <Style Selector="ToggleButton.tagChip">
+            <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimaryBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="ToggleButton.tagChip:checked">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFileBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.tagChip:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextFileBrush}" />
+        </Style>
+
         <!-- Node-graph context menu items — inherit the app's slate palette.
              Monospace header keeps the trailing shortcut hint right-aligned. -->
         <Style Selector="MenuItem.graphCtx">
@@ -251,6 +268,25 @@
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
                                          Padding="8,6" CornerRadius="3" FontSize="12" />
+
+                                <!-- Tag filter chips: toggle any combination to narrow the palette. -->
+                                <ItemsControl ItemsSource="{Binding Palette.TagChips}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                                          Content="{Binding Label}"
+                                                          Classes="tagChip"
+                                                          Padding="8,3" CornerRadius="10"
+                                                          FontSize="10"
+                                                          FontFamily="{DynamicResource FontMono}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
 

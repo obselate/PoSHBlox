@@ -34,6 +34,13 @@ public class NodeTemplate
     public List<DataOutputDef> DataOutputs { get; set; } = [];
 
     /// <summary>
+    /// Palette tags derived from the PowerShell verb at load time
+    /// (see <see cref="PaletteTaxonomy"/>). "safe", "mutate", "destroy", "act".
+    /// Empty for non-cmdlet templates (containers, script bodies).
+    /// </summary>
+    public List<string> Tags { get; set; } = [];
+
+    /// <summary>
     /// V2: parameter set metadata for cmdlets that declare multiple sets
     /// (e.g. <c>Get-ChildItem</c> has <c>Items</c>/<c>LiteralItems</c>).
     /// Empty = legacy / single-set cmdlet; no per-set filtering happens.

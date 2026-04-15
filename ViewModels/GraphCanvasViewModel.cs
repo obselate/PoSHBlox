@@ -187,6 +187,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         var node = NodeFactory.CreateFromTemplate(template, x, y);
         Nodes.Add(node);
         SelectNode(node);
+        Palette.NoteSpawn(template);
     }
 
     [RelayCommand]

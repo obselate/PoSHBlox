@@ -59,6 +59,10 @@ public static class TemplateLoader
                 {
                     t.Category = catalog.Category;
                     NormalizeV1Fallback(t);
+                    // Derive palette tags from the Verb-Noun if they weren't
+                    // already set by the introspector / catalog author.
+                    if (t.Tags.Count == 0)
+                        t.Tags = [..PaletteTaxonomy.DeriveTags(t.CmdletName)];
                     templates.Add(t);
                 }
                 count++;
