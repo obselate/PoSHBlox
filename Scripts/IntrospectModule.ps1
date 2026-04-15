@@ -5,6 +5,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Force module auto-loading on. Inherited env settings can set this to None
+# or ModuleQualified, defeating the Get-Command probe path we rely on for
+# modules whose Import-Module fails on type conflicts.
+$PSModuleAutoloadingPreference = 'All'
+
 # Common parameters to skip
 $CommonParams = @(
     'Verbose','Debug','ErrorAction','WarningAction','InformationAction',
@@ -81,19 +86,8 @@ if ($resolved) {
     }
 }
 
-# Import if not already loaded. Swallow non-fatal errors/warnings -- some
-# modules (notably Microsoft.PowerShell.Security on 5.1) raise TypeData
-# re-registration warnings that get promoted to terminating errors under
-# -ErrorAction Stop even though the module itself loads fine.
-if (-not (Get-Module -Name $actualName)) {
-    try {
-        Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
-    } catch { }
-}
-
-# Declared exports from the manifest -- used both for the auto-load probe
-# below and as a last-resort enumeration source if Get-Command -Module keeps
-# returning empty.
+# Declared exports from the manifest -- used as a last-resort enumeration
+# source if Get-Command -Module returns empty, and for the auto-load probe.
 $manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
 $declaredExports = @()
 if ($manifest -and $manifest.ExportedCommands -and $manifest.ExportedCommands.Count -gt 0) {
@@ -108,16 +102,25 @@ if ($declaredExports.Count -eq 0 -and $manifest -and $manifest.Path -and (Test-P
     } catch { }
 }
 
-# If Get-Command -Module is still empty, hit one declared export with
-# Get-Command <name> -- PS's on-demand auto-loader is more tolerant of
-# type conflicts than explicit Import-Module.
+# Strategy: try PowerShell's on-demand auto-loader FIRST via Get-Command.
+# Auto-load tolerates type conflicts that Import-Module elevates to errors
+# (Microsoft.PowerShell.Security on 5.1 is the canonical offender). Doing
+# Import-Module first poisons the auto-loader's "already tried" state for
+# that module, blocking subsequent auto-load attempts.
+if (-not (Get-Module -Name $actualName) -and $declaredExports.Count -gt 0) {
+    $probe = $declaredExports | Select-Object -First 1
+    Get-Command $probe -ErrorAction SilentlyContinue *>$null
+}
+
+# If auto-load didn't pull the module in, fall back to explicit Import-Module
+# with all streams suppressed. Most modules that fail auto-load succeed here
+# (custom user modules, modules that aren't in the auto-load path).
 if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
 {
-    $probe = $declaredExports | Select-Object -First 1
-    if ($probe) {
-        Get-Command $probe -ErrorAction SilentlyContinue *>$null
-    }
+    try {
+        Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
+    } catch { }
 }
 
 # Collect the commands we will introspect. Preferred: Get-Command -Module,
