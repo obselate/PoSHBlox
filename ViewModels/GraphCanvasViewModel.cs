@@ -312,43 +312,50 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     private void SeedExampleGraph()
     {
-        var getProcess = new GraphNode
+        var getProcess = NodeFactory.CreateFromTemplate(new NodeTemplate
         {
-            Title = "Get-Process",
+            Name = "Get-Process",
             Category = "Process / Service",
             CmdletName = "Get-Process",
-            X = 100, Y = 150,
-        };
-        getProcess.Inputs.Clear();
-        getProcess.Parameters.Add(new NodeParameter
-        {
-            Name = "Name",
-            Type = ParamType.String,
-            Description = "Process name filter",
-        });
+            HasExecIn = false,
+            DataOutputs =
+            [
+                new DataOutputDef { Name = "Processes", Type = ParamType.Collection, IsPrimary = true },
+            ],
+            Parameters =
+            [
+                new ParameterDef { Name = "Name", Type = ParamType.String, Description = "Process name filter" },
+            ],
+        }, x: 100, y: 150);
 
-        var sort = new GraphNode
+        var sort = NodeFactory.CreateFromTemplate(new NodeTemplate
         {
-            Title = "Sort-Object",
+            Name = "Sort-Object",
             Category = "String / Data",
             CmdletName = "Sort-Object",
-            X = 400, Y = 150,
-        };
-        sort.Parameters.Add(new NodeParameter
-        {
-            Name = "Property", Type = ParamType.String,
-            IsMandatory = true, Value = "CPU",
-            Description = "Property to sort by",
-        });
-        sort.Parameters.Add(new NodeParameter
-        {
-            Name = "Descending", Type = ParamType.Bool,
-            Value = "true", Description = "Sort descending",
-        });
+            PrimaryPipelineParameter = "InputObject",
+            DataOutputs =
+            [
+                new DataOutputDef { Name = "Sorted", Type = ParamType.Collection, IsPrimary = true },
+            ],
+            Parameters =
+            [
+                new ParameterDef { Name = "InputObject", Type = ParamType.Collection, IsPipelineInput = true,
+                                   Description = "Upstream data via pipeline" },
+                new ParameterDef { Name = "Property", Type = ParamType.String, IsMandatory = true,
+                                   DefaultValue = "CPU", Description = "Property to sort by" },
+                new ParameterDef { Name = "Descending", Type = ParamType.Bool, DefaultValue = "true",
+                                   Description = "Sort descending" },
+            ],
+        }, x: 400, y: 150);
 
         Nodes.Add(getProcess);
         Nodes.Add(sort);
 
-        AddConnection(getProcess.Outputs[0], sort.Inputs[0]);
+        // Wire the exec flow and the primary data pipe.
+        if (getProcess.ExecOutPort != null && sort.ExecInPort != null)
+            AddConnection(getProcess.ExecOutPort, sort.ExecInPort);
+        if (getProcess.PrimaryDataOutput != null && sort.PrimaryPipelineTarget != null)
+            AddConnection(getProcess.PrimaryDataOutput, sort.PrimaryPipelineTarget);
     }
 }

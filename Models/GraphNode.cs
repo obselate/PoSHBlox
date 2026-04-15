@@ -61,28 +61,52 @@ public partial class GraphNode : ObservableObject
     // ── Constructor ────────────────────────────────────────────
     public GraphNode()
     {
+        // V2 default shape: ExecIn (top-left), ExecOut (top-right),
+        // one primary data output of type Any.
         Inputs.Add(new NodePort
         {
-            Name = "In",
+            Name = "",
+            Kind = PortKind.Exec,
             Direction = PortDirection.Input,
-            Type = PortType.Pipeline,
-            Owner = this
+            Owner = this,
+        });
+        Outputs.Add(new NodePort
+        {
+            Name = "",
+            Kind = PortKind.Exec,
+            Direction = PortDirection.Output,
+            Owner = this,
         });
         Outputs.Add(new NodePort
         {
             Name = "Out",
+            Kind = PortKind.Data,
             Direction = PortDirection.Output,
-            Type = PortType.Pipeline,
-            Owner = this
+            DataType = ParamType.Any,
+            IsPrimary = true,
+            Owner = this,
         });
     }
 
+    // ── V2 port helpers ────────────────────────────────────────
+    public IEnumerable<NodePort> DataInputs  => Inputs.Where(p => p.Kind == PortKind.Data);
+    public IEnumerable<NodePort> DataOutputs => Outputs.Where(p => p.Kind == PortKind.Data);
+    public NodePort? ExecInPort              => Inputs.FirstOrDefault(p => p.Kind == PortKind.Exec);
+    public NodePort? ExecOutPort             => Outputs.FirstOrDefault(p => p.Kind == PortKind.Exec);
+    public NodePort? PrimaryDataOutput       => DataOutputs.FirstOrDefault(p => p.IsPrimary)
+                                              ?? DataOutputs.FirstOrDefault();
+    public NodePort? PrimaryPipelineTarget   => DataInputs.FirstOrDefault(p => p.IsPrimaryPipelineTarget);
+
     // ── Computed layout properties ─────────────────────────────
+    /// <summary>
+    /// Height sized to the parameter-row count. Exec pins sit in the header so
+    /// only data pins contribute rows. Minimum keeps script-only nodes visible.
+    /// </summary>
     public double Height => IsContainer
         ? ContainerHeight
         : Math.Max(
-            HeaderHeight + PortSpacing + Math.Max(Inputs.Count, Outputs.Count) * PortSpacing + PortSpacing,
-            HeaderHeight + PortSpacing * 3);
+            HeaderHeight + PortSpacing + Math.Max(DataInputs.Count(), DataOutputs.Count()) * PortSpacing + PortSpacing,
+            HeaderHeight + PortSpacing * 2);
 
     public double EffectiveWidth => IsContainer ? ContainerWidth : Width;
 
