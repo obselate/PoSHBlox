@@ -78,6 +78,29 @@ Stamped version follows `<baseFromCsproj>.<runNumber>` for branch builds and
 the tag name for releases; `InformationalVersion` additionally includes the
 commit SHA and branch slug (visible in Properties → Details on the file).
 
+### Regenerating Builtin catalogs
+
+The shipped `Templates/Builtin/*.json` can be regenerated from live
+PowerShell modules via the CLI. From the repo root on Windows:
+
+```powershell
+# Pipe to Out-Host so the WinExe's output is flushed to the shell.
+.\bin\Debug\net10.0\PoSHBlox.exe --regen-manifest scripts\builtin-catalog.json 2>&1 | Out-Host
+
+# Dry-run first to preview:
+.\bin\Debug\net10.0\PoSHBlox.exe --regen-manifest scripts\builtin-catalog.json --dry-run 2>&1 | Out-Host
+```
+
+`scripts/builtin-catalog.json` is the reference manifest listing each
+output file, its category, and which cmdlets (from which modules) should
+populate it. Curated per-parameter defaults are preserved across runs.
+
+> **Why the `| Out-Host`?** The app ships as a `WinExe` so a double-click
+> doesn't flash a console window. That means PowerShell detaches stdout
+> when run directly; the CLI modes attach to the parent console on
+> startup, but piping forces PS to wait for the pipeline to finish before
+> returning the prompt so output doesn't interleave awkwardly.
+
 ## How It Works
 
 1. **Add nodes** from the palette

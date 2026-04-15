@@ -1,7 +1,9 @@
 using Avalonia;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using PoSHBlox.Services;
 
 namespace PoSHBlox;
@@ -18,13 +20,47 @@ class Program
         {
             switch (args[0])
             {
-                case "--regen-builtin":  return RunRegenSingle(args);
-                case "--regen-manifest": return RunRegenManifest(args);
+                case "--regen-builtin":
+                    AttachHostConsole();
+                    return RunRegenSingle(args);
+                case "--regen-manifest":
+                    AttachHostConsole();
+                    return RunRegenManifest(args);
             }
         }
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         return 0;
+    }
+
+    // ── Console plumbing for a WinExe running in CLI mode ──────
+    // The csproj declares <OutputType>WinExe</OutputType> so double-clicks
+    // don't flash a console window. But that also detaches stdout/stderr
+    // when launched from PowerShell/cmd, so --regen-* output disappears.
+    // Attaching to the parent process's console and re-binding the streams
+    // makes writes show up in the calling shell.
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool AttachConsole(uint dwProcessId);
+
+    private const uint ATTACH_PARENT_PROCESS = 0xFFFFFFFF;
+
+    private static void AttachHostConsole()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!AttachConsole(ATTACH_PARENT_PROCESS)) return;
+
+        // Re-point Console.Out / Console.Error at the freshly-attached console.
+        // Without this, the .NET runtime's cached handles from WinExe startup
+        // still point at the null device and writes silently no-op.
+        var stdout = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
+        var stderr = new StreamWriter(Console.OpenStandardError())  { AutoFlush = true };
+        Console.SetOut(stdout);
+        Console.SetError(stderr);
+
+        // Print a leading newline so the first line of output isn't glued to
+        // the PowerShell prompt that already returned.
+        Console.Out.WriteLine();
     }
 
     public static AppBuilder BuildAvaloniaApp()
