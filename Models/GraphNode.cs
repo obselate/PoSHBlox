@@ -72,6 +72,10 @@ public partial class GraphNode : ObservableObject
     // ── Layout constants ───────────────────────────────────────
     public const double HeaderHeight = 34;
     public const double PortSpacing = 26;
+
+    /// <summary>Height of the dedicated exec-pin row that sits between the header and data rows.</summary>
+    public const double ExecRowHeight = 20;
+
     public const double ContainerHeaderHeight = 44;
     public const double ZoneHeaderHeight = 24;
     public const double ZonePadding = 10;
@@ -178,10 +182,15 @@ public partial class GraphNode : ObservableObject
     /// Height sized to the parameter-row count. Exec pins sit in the header so
     /// only data pins contribute rows. Minimum keeps script-only nodes visible.
     /// </summary>
+    /// <summary>True when the node has at least one exec pin — drives the exec-row reservation.</summary>
+    public bool HasExecRow => ExecInPort != null || ExecOutPort != null;
+
     public double Height => IsContainer
         ? ContainerHeight
         : Math.Max(
-            HeaderHeight + PortSpacing
+            HeaderHeight
+              + (HasExecRow ? ExecRowHeight : 0)
+              + PortSpacing
               + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
               + PortSpacing
               + (HiddenDataInputCount > 0 ? PortSpacing : 0),

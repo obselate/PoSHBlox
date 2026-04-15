@@ -431,12 +431,22 @@ public class NodeGraphRenderer
         double headerH = node.IsContainer ? GraphNode.ContainerHeaderHeight : GraphNode.HeaderHeight;
         double width = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
 
+        // Containers still put exec pins in the header (they're wider and the
+        // chevron pattern doesn't apply). Regular nodes get a dedicated exec row.
         if (port.Kind == PortKind.Exec)
         {
-            // Seated in the header band, offset slightly inward from each edge.
-            double inset = 10;
+            const double inset = 10;
             double x = port.Direction == PortDirection.Input ? node.X + inset : node.X + width - inset;
-            double y = node.Y + headerH / 2;
+            double y;
+            if (node.IsContainer)
+            {
+                y = node.Y + headerH / 2;
+            }
+            else
+            {
+                // Centered vertically in the exec row sitting directly below the header.
+                y = node.Y + headerH + GraphNode.ExecRowHeight / 2;
+            }
             return new Point(x, y);
         }
 
@@ -452,8 +462,10 @@ public class NodeGraphRenderer
         }
         if (idx < 0) return new Point(-1e6, -1e6);
 
+        // Data rows start below the header, plus the exec row if one is present.
+        double execOffset = (!node.IsContainer && node.HasExecRow) ? GraphNode.ExecRowHeight : 0;
         double xd = port.Direction == PortDirection.Input ? node.X : node.X + width;
-        double yd = node.Y + headerH + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
+        double yd = node.Y + headerH + execOffset + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
         return new Point(xd, yd);
     }
 

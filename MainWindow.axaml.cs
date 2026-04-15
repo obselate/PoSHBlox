@@ -158,9 +158,12 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
-                // ? — toggle cheat sheet (Shift+/ on US layouts)
-                case Key.OemQuestion when !inTextBox:
-                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:  // '?'
+                // ? — toggle cheat sheet. Must require Shift — OemQuestion and Oem2
+                // are the same physical key on Windows (VK_OEM_2), so an unshifted
+                // "/" was also matching the first case and stealing the palette
+                // search shortcut. Guarding both cases on Shift keeps "/" free.
+                case Key.OemQuestion when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:
                     vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
                     e.Handled = true;
                     break;
