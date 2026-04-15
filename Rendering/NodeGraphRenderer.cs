@@ -190,26 +190,29 @@ public class NodeGraphRenderer
 
         // Validation badge — sits left of the chevron when the node has issues.
         // Color mirrors the border (red for errors, amber for warning-only).
-        // Drawn on a small dark pill so it stays legible on category headers
-        // that share the amber/red hue family (Output's header would otherwise
-        // swallow an amber warning badge).
+        // Drawn on a square dark chip with a matching-color ring so it stays
+        // legible on category headers that share the amber/red hue family
+        // (Output's header would otherwise swallow an amber warning badge).
         if (node.HasIssues)
         {
             var badgeColor = node.HasErrors ? GraphTheme.NodeErrorBorder : GraphTheme.NodeWarningBorder;
             var badge = MakeText("\u26A0", 12, FontWeight.Bold, badgeColor);   // ⚠
-            double badgeX = node.X + width - 38;
-            double badgeY = node.Y + (hh - badge.Height) / 2;
 
-            // Pill background: node body color at full opacity gives a hard
-            // contrast step against any header color, and the border ring
-            // keeps it visually coherent with the badge glyph itself.
-            var pillRect = new Rect(badgeX - 3, badgeY - 1, badge.Width + 6, badge.Height + 2);
+            // Square chip sized to the larger glyph dimension + padding so the
+            // glyph sits centered in a square rather than an elongated pill.
+            double chipSize = Math.Max(badge.Width, badge.Height) + 6;
+            double chipX = node.X + width - 42;
+            double chipY = node.Y + (hh - chipSize) / 2;
+
             ctx.DrawRectangle(
                 new SolidColorBrush(GraphTheme.NodeBackground),
                 new Pen(new SolidColorBrush(badgeColor), 1),
-                new RoundedRect(pillRect, 4));
+                new RoundedRect(new Rect(chipX, chipY, chipSize, chipSize), 3));
 
-            ctx.DrawText(badge, new Point(badgeX, badgeY));
+            // Center the glyph inside the chip.
+            double glyphX = chipX + (chipSize - badge.Width) / 2;
+            double glyphY = chipY + (chipSize - badge.Height) / 2;
+            ctx.DrawText(badge, new Point(glyphX, glyphY));
         }
 
         // Collapsed-hint row: "+N hidden" centered under the visible data rows.

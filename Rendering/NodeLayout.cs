@@ -25,7 +25,7 @@ public static class NodeLayout
     private const double HeaderChevronReserve = 24;
 
     /// <summary>Extra reserve when a validation badge sits left of the chevron.</summary>
-    private const double HeaderBadgeReserve = 20;
+    private const double HeaderBadgeReserve = 26;
 
     /// <summary>
     /// Width the renderer should use for a regular (non-container) node. Containers
