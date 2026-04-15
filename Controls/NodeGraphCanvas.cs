@@ -104,6 +104,17 @@ public class NodeGraphCanvas : Control
                 return;
             }
 
+            // Chevron click → toggle collapse state on the hit node. Checked
+            // before the general node hit so dragging near the header-right
+            // can still start a node drag; only direct chevron clicks toggle.
+            var chevronNode = HitChevron(canvasPos);
+            if (chevronNode != null)
+            {
+                chevronNode.IsCollapsed = !chevronNode.IsCollapsed;
+                e.Handled = true;
+                return;
+            }
+
             // Check port hit (start wire drag — or reroute an existing wire if
             // the pressed pin already has a connection).
             var port = HitPort(canvasPos);
@@ -308,7 +319,9 @@ public class NodeGraphCanvas : Control
         // Update cursor based on what's under the pointer
         var hoveredPort = HitPort(canvasPos);
         var hoveredResize = HitResizeGrip(canvasPos);
+        var hoveredChevron = HitChevron(canvasPos);
         Cursor = hoveredPort != null ? new Cursor(StandardCursorType.Hand)
+            : hoveredChevron != null ? new Cursor(StandardCursorType.Hand)
             : hoveredResize != null ? new Cursor(StandardCursorType.BottomRightCorner)
             : Cursor.Default;
     }
@@ -557,6 +570,30 @@ public class NodeGraphCanvas : Control
                     Math.Pow(canvasPos.Y - sample.Y, 2));
                 if (dist < 8) return conn;
             }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Hit-test for the collapse chevron in a regular node's header — a 24×HeaderHeight
+    /// box anchored at the top-right corner. Containers use the Function zone model
+    /// instead and don't carry a chevron.
+    /// </summary>
+    private GraphNode? HitChevron(Point canvasPos)
+    {
+        if (_vm == null) return null;
+
+        double hh = GraphNode.HeaderHeight;
+        for (int i = _vm.Nodes.Count - 1; i >= 0; i--)
+        {
+            var n = _vm.Nodes[i];
+            if (n.IsContainer) continue;
+
+            double w = NodeLayout.GetEffectiveWidth(n);
+            double cx = n.X + w - 24;
+            if (canvasPos.X >= cx && canvasPos.X <= n.X + w &&
+                canvasPos.Y >= n.Y && canvasPos.Y <= n.Y + hh)
+                return n;
         }
         return null;
     }
