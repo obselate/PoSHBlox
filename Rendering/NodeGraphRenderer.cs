@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Media;
 using PoSHBlox.Models;
+using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
 
 namespace PoSHBlox.Rendering;
@@ -19,7 +20,6 @@ public class NodeGraphRenderer
     private readonly SolidColorBrush _gridDotBrush = new(GraphTheme.GridMinor);
     private readonly SolidColorBrush _gridDotMajorBrush = new(GraphTheme.GridMajor);
     private readonly Pen _wirePen = new(new SolidColorBrush(GraphTheme.Wire), GraphTheme.WireThickness);
-    private readonly Pen _wirePendingPen = new(new SolidColorBrush(GraphTheme.WirePending), GraphTheme.WireThickness) { DashStyle = DashStyle.Dash };
 
     // Margin added to the viewport for culling (world-space units).
     // Covers port labels (~80px), shadows, selection borders, and breathing room.
@@ -47,7 +47,7 @@ public class NodeGraphRenderer
                 .OrderBy(n => GetNestingDepth(n)))
             {
                 if (IsNodeVisible(node, viewport))
-                    DrawContainer(ctx, node, isDraggingNode, dragNode);
+                    DrawContainer(ctx, node, isDraggingNode, dragNode, wireStartPort);
             }
 
             // Wires above containers
@@ -64,7 +64,7 @@ public class NodeGraphRenderer
             foreach (var node in vm.Nodes.Where(n => !n.IsContainer))
             {
                 if (IsNodeVisible(node, viewport))
-                    DrawNode(ctx, node);
+                    DrawNode(ctx, node, wireStartPort);
             }
         }
 
@@ -141,7 +141,7 @@ public class NodeGraphRenderer
 
     // ── Regular nodes ──────────────────────────────────────────
 
-    private void DrawNode(DrawingContext ctx, GraphNode node)
+    private void DrawNode(DrawingContext ctx, GraphNode node, NodePort? wireStartPort = null)
     {
         double hh = GraphNode.HeaderHeight;
         var rect = new Rect(node.X, node.Y, node.Width, node.Height);
@@ -174,14 +174,15 @@ public class NodeGraphRenderer
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
 
         // Ports
-        foreach (var port in node.Inputs) DrawPort(ctx, node, port);
-        foreach (var port in node.Outputs) DrawPort(ctx, node, port);
+        foreach (var port in node.Inputs) DrawPort(ctx, node, port, wireStartPort);
+        foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
     }
 
     // ── Containers ─────────────────────────────────────────────
 
     private void DrawContainer(DrawingContext ctx, GraphNode node,
-        bool isDraggingNode = false, GraphNode? dragNode = null)
+        bool isDraggingNode = false, GraphNode? dragNode = null,
+        NodePort? wireStartPort = null)
     {
         var catColor = GraphTheme.GetCategoryColor(node.Category);
         double hh = GraphNode.ContainerHeaderHeight;
@@ -226,8 +227,8 @@ public class NodeGraphRenderer
         DrawResizeGrip(ctx, node);
 
         // Ports
-        foreach (var port in node.Inputs) DrawPort(ctx, node, port);
-        foreach (var port in node.Outputs) DrawPort(ctx, node, port);
+        foreach (var port in node.Inputs) DrawPort(ctx, node, port, wireStartPort);
+        foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
     }
 
     private void DrawZone(DrawingContext ctx, GraphNode parent, ContainerZone zone, bool highlight = false)
@@ -284,21 +285,39 @@ public class NodeGraphRenderer
 
     // ── Ports ──────────────────────────────────────────────────
 
-    private void DrawPort(DrawingContext ctx, GraphNode node, NodePort port)
+    /// <summary>
+    /// Dim alpha applied to ports/labels that are incompatible with the current
+    /// wire-drag source. Chosen to read as clearly backgrounded without fully
+    /// disappearing.
+    /// </summary>
+    private const byte DimAlpha = 70;
+
+    private void DrawPort(DrawingContext ctx, GraphNode node, NodePort port, NodePort? wireStartPort)
     {
         var pos = GetPortPosition(node, port);
         bool isInput = port.Direction == PortDirection.Input;
 
+        // Compatibility dim: when a wire drag is active, port stays bright if
+        // it's the drag source itself or could accept the drag; otherwise dim.
+        bool dragActive = wireStartPort != null;
+        bool isSelf = dragActive && ReferenceEquals(wireStartPort, port);
+        bool compatible = !dragActive
+            || isSelf
+            || PortCompatibility.CanConnect(wireStartPort!, port);
+        byte alpha = compatible ? (byte)255 : DimAlpha;
+
         if (port.Kind == PortKind.Exec)
         {
-            DrawExecTriangle(ctx, pos);
+            DrawExecTriangle(ctx, pos, alpha);
             return;
         }
 
-        var color = GraphTheme.GetDataTypeColor(port.DataType);
+        var baseColor = GraphTheme.GetDataTypeColor(port.DataType);
+        var color = Color.FromArgb(alpha, baseColor.R, baseColor.G, baseColor.B);
+        var centerColor = Color.FromArgb(alpha, GraphTheme.PortCenter.R, GraphTheme.PortCenter.G, GraphTheme.PortCenter.B);
 
         // Outer ring + inner dot, colored by data type.
-        ctx.DrawEllipse(new SolidColorBrush(GraphTheme.PortCenter),
+        ctx.DrawEllipse(new SolidColorBrush(centerColor),
             new Pen(new SolidColorBrush(color), 2),
             pos, GraphTheme.PortRadius, GraphTheme.PortRadius);
         ctx.DrawEllipse(new SolidColorBrush(color), null,
@@ -307,7 +326,8 @@ public class NodeGraphRenderer
         // Label — skip for unnamed pins (e.g. ForEach's synthesized Source).
         if (string.IsNullOrEmpty(port.Name)) return;
 
-        var label = MakeText(port.Name, 10, FontWeight.Normal, GraphTheme.PortLabel);
+        var labelColor = Color.FromArgb(alpha, GraphTheme.PortLabel.R, GraphTheme.PortLabel.G, GraphTheme.PortLabel.B);
+        var label = MakeText(port.Name, 10, FontWeight.Normal, labelColor);
         double labelX = isInput
             ? pos.X + GraphTheme.PortRadius + 6
             : pos.X - GraphTheme.PortRadius - label.Width - 6;
@@ -317,9 +337,9 @@ public class NodeGraphRenderer
     /// <summary>
     /// Right-pointing filled triangle at <paramref name="pos"/>. Blueprint-style
     /// exec-pin glyph. Both input (left edge) and output (right edge) point right
-    /// to cue data-flow direction.
+    /// to cue data-flow direction. Alpha controls dim-state during wire drags.
     /// </summary>
-    private static void DrawExecTriangle(DrawingContext ctx, Point pos)
+    private static void DrawExecTriangle(DrawingContext ctx, Point pos, byte alpha = 255)
     {
         double size = GraphTheme.PortRadius + 1;
         double tipX = pos.X + size;
@@ -332,7 +352,8 @@ public class NodeGraphRenderer
             g.LineTo(new Point(baseX, pos.Y + size));
             g.EndFigure(true);
         }
-        var brush = new SolidColorBrush(GraphTheme.ExecPin);
+        var color = Color.FromArgb(alpha, GraphTheme.ExecPin.R, GraphTheme.ExecPin.G, GraphTheme.ExecPin.B);
+        var brush = new SolidColorBrush(color);
         ctx.DrawGeometry(brush, new Pen(brush, 1.5), geo);
     }
 
@@ -350,7 +371,19 @@ public class NodeGraphRenderer
         var start = GetPortPosition(startPort.Owner!, startPort);
         var end = endPoint;
         if (startPort.Direction == PortDirection.Input) (start, end) = (end, start);
-        ctx.DrawGeometry(null, _wirePendingPen, MakeBezier(start, end));
+
+        // Color the in-flight wire by the source pin's type so users see what
+        // they'd be producing. Exec drags use the cream exec color; data drags
+        // use the typed palette entry.
+        var wireColor = startPort.Kind == PortKind.Exec
+            ? GraphTheme.ExecPin
+            : GraphTheme.GetDataTypeColor(startPort.DataType);
+
+        var pen = new Pen(new SolidColorBrush(wireColor), GraphTheme.WireThickness)
+        {
+            DashStyle = DashStyle.Dash,
+        };
+        ctx.DrawGeometry(null, pen, MakeBezier(start, end));
     }
 
     // ── HUD ────────────────────────────────────────────────────

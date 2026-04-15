@@ -242,18 +242,13 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public void AddConnection(NodePort source, NodePort target)
     {
-        if (source.Owner == target.Owner) return;
+        // Direction-specific guard (the shared compatibility check is direction-
+        // agnostic; here we enforce the canonical Output→Input ordering).
         if (source.Direction != PortDirection.Output || target.Direction != PortDirection.Input) return;
-
-        // V2 pin-kind compatibility: Exec only connects to Exec, Data only to Data.
-        if (source.Kind != target.Kind) return;
+        if (!PortCompatibility.CanConnect(source, target)) return;
 
         if (source.Kind == PortKind.Data)
         {
-            // Data-type compatibility — Any matches anything; Object accepts anything;
-            // Collection/StringArray interchangeable; otherwise exact match.
-            if (!IsDataTypeCompatible(source.DataType, target.DataType)) return;
-
             // Data input accepts exactly one upstream. Replace any existing wire.
             foreach (var c in Connections.Where(c => c.Target == target).ToList())
                 Connections.Remove(c);
@@ -268,15 +263,6 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (Connections.Any(c => c.Source == source && c.Target == target)) return;
 
         Connections.Add(new NodeConnection { Source = source, Target = target });
-    }
-
-    private static bool IsDataTypeCompatible(ParamType src, ParamType tgt)
-    {
-        if (src == ParamType.Any || tgt == ParamType.Any) return true;
-        if (tgt == ParamType.Object) return true;
-        if ((src == ParamType.StringArray && tgt == ParamType.Collection) ||
-            (src == ParamType.Collection && tgt == ParamType.StringArray)) return true;
-        return src == tgt;
     }
 
     public void RemoveConnectionsForPort(NodePort port)
