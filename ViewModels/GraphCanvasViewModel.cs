@@ -14,6 +14,13 @@ namespace PoSHBlox.ViewModels;
 
 public partial class GraphCanvasViewModel : ObservableObject
 {
+    /// <summary>
+    /// Toggle: emit V2 scripts (exec-order + pipeline collapse) instead of V1.
+    /// Default false during the refactor's validation window. Step 9 flips this
+    /// permanently and deletes V1.
+    /// </summary>
+    public static bool GenerateV2 { get; set; } = false;
+
     // ── Static enum options for XAML binding ─────────────────────
     public static ParamType[] ArgumentTypeOptions { get; } =
     [

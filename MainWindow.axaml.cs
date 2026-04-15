@@ -439,7 +439,8 @@ public partial class MainWindow : AppWindow
 
     private static string GenerateScript(GraphCanvasViewModel vm)
     {
-        var generator = new ScriptGenerator(vm.Nodes, vm.Connections);
-        return generator.Generate();
+        if (GraphCanvasViewModel.GenerateV2)
+            return new ScriptGeneratorV2(vm.Nodes, vm.Connections).Generate();
+        return new ScriptGenerator(vm.Nodes, vm.Connections).Generate();
     }
 }

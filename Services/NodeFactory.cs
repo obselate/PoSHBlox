@@ -125,7 +125,17 @@ public static class NodeFactory
         node.Title = "ForEach-Object";
         node.ContainerWidth = 420;
         node.ContainerHeight = 300;
-        // ForEach gets an "Item" data output — body-internal nodes wire it for $_.
+        // Unpaired data input: the collection to iterate. Primary pipeline target
+        // so upstream can collapse into `$collection | ForEach-Object { ... }`.
+        node.Inputs.Add(new NodePort
+        {
+            Name = "Source", Kind = PortKind.Data,
+            Direction = PortDirection.Input,
+            DataType = ParamType.Collection,
+            IsPrimaryPipelineTarget = true,
+            Owner = node,
+        });
+        // Data output: the current iteration item. Body nodes wire this to get `$_`.
         node.Outputs.Add(new NodePort
         {
             Name = "Item", Kind = PortKind.Data,
