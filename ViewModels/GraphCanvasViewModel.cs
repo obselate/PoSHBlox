@@ -38,7 +38,22 @@ public partial class GraphCanvasViewModel : ObservableObject
     [ObservableProperty] private double _zoom = 1.0;
 
     // ── Selection ──────────────────────────────────────────────
+    /// <summary>
+    /// The primary (most-recently-added) selected node — what the properties
+    /// panel binds to. Stays present even in multi-select so existing
+    /// single-node bindings keep working.
+    /// </summary>
     [ObservableProperty] private GraphNode? _selectedNode;
+
+    /// <summary>
+    /// All nodes currently selected. Invariant: if any node is selected,
+    /// <see cref="SelectedNode"/> is one of them. Editing commands (Delete,
+    /// Duplicate, Collapse) iterate this collection.
+    /// </summary>
+    public ObservableCollection<GraphNode> SelectedNodes { get; } = new();
+
+    public bool HasMultiSelection => SelectedNodes.Count > 1;
+    public int SelectionCount => SelectedNodes.Count;
 
     // ── Panel visibility ─────────────────────────────────────
     [ObservableProperty] private bool _isPaletteOpen = true;
@@ -222,30 +237,39 @@ public partial class GraphCanvasViewModel : ObservableObject
     [RelayCommand]
     public void DeleteSelected()
     {
-        if (SelectedNode == null) return;
+        if (SelectedNodes.Count == 0) return;
 
-        // Collect all nodes to delete (including descendants if container)
-        var toDelete = new List<GraphNode> { SelectedNode };
-        if (SelectedNode.IsContainer)
-            CollectDescendants(SelectedNode, toDelete);
+        // Collect every node to delete — selected nodes plus every descendant
+        // of any selected container. Deduplicate via a set so a child that
+        // belongs to a selected container isn't processed twice.
+        var toDelete = new HashSet<GraphNode>();
+        foreach (var sel in SelectedNodes.ToList())
+        {
+            toDelete.Add(sel);
+            if (sel.IsContainer)
+            {
+                var kids = new List<GraphNode>();
+                CollectDescendants(sel, kids);
+                foreach (var k in kids) toDelete.Add(k);
+            }
+        }
 
         foreach (var node in toDelete)
         {
-            // Remove connections
+            // Remove connections touching this node.
             var conns = Connections
                 .Where(c => c.Source.Owner == node || c.Target.Owner == node)
                 .ToList();
             foreach (var c in conns)
                 Connections.Remove(c);
 
-            // Remove from parent zone
             if (node.ParentZone != null)
                 node.ParentZone.Children.Remove(node);
 
             Nodes.Remove(node);
         }
 
-        SelectedNode = null;
+        ClearSelection();
     }
 
     private static void CollectDescendants(GraphNode container, List<GraphNode> result)
@@ -268,18 +292,49 @@ public partial class GraphCanvasViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Deep-copy the selected non-container node at a 40px offset and select
-    /// the duplicate. Ports/parameters get fresh IDs; wires are not carried
-    /// over (duplicate means "start a copy", not "mirror with shared I/O").
-    /// Containers aren't supported in this pass — duplicating a container's
-    /// children and rewiring internal connections is a larger task.
+    /// Deep-copy every selected non-container node at a 40px offset and select
+    /// the duplicates. Ports/parameters get fresh IDs; wires are not carried
+    /// over — duplicate is "start a copy", not "mirror with shared I/O".
+    /// Containers are skipped (zone-subtree duplication is a bigger task).
     /// </summary>
     [RelayCommand]
     public void DuplicateSelected()
     {
-        if (SelectedNode == null || SelectedNode.IsContainer) return;
+        if (SelectedNodes.Count == 0) return;
 
-        var src = SelectedNode;
+        var sources = SelectedNodes.Where(n => !n.IsContainer).ToList();
+        if (sources.Count == 0) return;
+
+        // Clone first so we don't mutate SelectedNodes while iterating when we
+        // retarget the selection to the new dupes.
+        var dupes = sources.Select(CloneNode).ToList();
+
+        ClearSelection();
+        foreach (var dup in dupes)
+        {
+            Nodes.Add(dup);
+            AddToSelection(dup);
+        }
+    }
+
+    /// <summary>
+    /// Toggle collapsed state on every selected non-container node. When a mix
+    /// is currently selected, the first node's current state drives the target:
+    /// "make them all match the opposite of the primary".
+    /// </summary>
+    [RelayCommand]
+    public void ToggleCollapseSelected()
+    {
+        var targets = SelectedNodes.Where(n => !n.IsContainer).ToList();
+        if (targets.Count == 0) return;
+
+        bool newState = !targets[0].IsCollapsed;
+        foreach (var n in targets)
+            n.IsCollapsed = newState;
+    }
+
+    private GraphNode CloneNode(GraphNode src)
+    {
         var dup = new GraphNode
         {
             Title = src.Title,
@@ -323,16 +378,7 @@ public partial class GraphCanvasViewModel : ObservableObject
                 Owner = dup,
             });
 
-        Nodes.Add(dup);
-        SelectNode(dup);
-    }
-
-    /// <summary>Toggle the selected node's collapsed state — hides non-essential params.</summary>
-    [RelayCommand]
-    public void ToggleCollapseSelected()
-    {
-        if (SelectedNode == null || SelectedNode.IsContainer) return;
-        SelectedNode.IsCollapsed = !SelectedNode.IsCollapsed;
+        return dup;
     }
 
     /// <summary>
@@ -432,11 +478,78 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     // ── Public helpers ─────────────────────────────────────────
 
+    /// <summary>
+    /// Replace the entire selection with just <paramref name="node"/>
+    /// (or clear if null). Primary interaction for plain clicks.
+    /// </summary>
     public void SelectNode(GraphNode? node)
     {
-        if (SelectedNode != null) SelectedNode.IsSelected = false;
+        ClearSelection();
+        if (node != null) AddToSelection(node);
+    }
+
+    /// <summary>Add a node to the selection, updating primary to point at it.</summary>
+    public void AddToSelection(GraphNode node)
+    {
+        if (!SelectedNodes.Contains(node))
+        {
+            SelectedNodes.Add(node);
+            node.IsSelected = true;
+        }
         SelectedNode = node;
-        if (node != null) node.IsSelected = true;
+        OnPropertyChanged(nameof(HasMultiSelection));
+        OnPropertyChanged(nameof(SelectionCount));
+    }
+
+    /// <summary>Remove a node from the selection.</summary>
+    public void RemoveFromSelection(GraphNode node)
+    {
+        if (SelectedNodes.Remove(node))
+            node.IsSelected = false;
+        if (SelectedNode == node)
+            SelectedNode = SelectedNodes.LastOrDefault();
+        OnPropertyChanged(nameof(HasMultiSelection));
+        OnPropertyChanged(nameof(SelectionCount));
+    }
+
+    /// <summary>Toggle a node's selection membership. Used by shift-click.</summary>
+    public void ToggleSelection(GraphNode node)
+    {
+        if (SelectedNodes.Contains(node))
+            RemoveFromSelection(node);
+        else
+            AddToSelection(node);
+    }
+
+    /// <summary>Clear all selection state.</summary>
+    public void ClearSelection()
+    {
+        foreach (var n in SelectedNodes) n.IsSelected = false;
+        SelectedNodes.Clear();
+        SelectedNode = null;
+        OnPropertyChanged(nameof(HasMultiSelection));
+        OnPropertyChanged(nameof(SelectionCount));
+    }
+
+    /// <summary>
+    /// Replace (or extend, when <paramref name="extend"/> is true) the selection
+    /// with every top-level node whose bounds intersect the given canvas-space
+    /// rectangle. Used by the lasso drag on empty canvas.
+    /// </summary>
+    public void SelectNodesInRect(double x, double y, double width, double height, bool extend = false)
+    {
+        if (!extend) ClearSelection();
+        double x2 = x + width, y2 = y + height;
+        foreach (var n in Nodes)
+        {
+            if (n.ParentContainer != null) continue;   // skip zone-nested
+            double nw = n.IsContainer ? n.ContainerWidth : n.Width;
+            double nh = n.IsContainer ? n.ContainerHeight : n.Height;
+            double nx2 = n.X + nw, ny2 = n.Y + nh;
+            bool intersects = !(nx2 < x || n.X > x2 || ny2 < y || n.Y > y2);
+            if (intersects && !SelectedNodes.Contains(n))
+                AddToSelection(n);
+        }
     }
 
     public void AddConnection(NodePort source, NodePort target)

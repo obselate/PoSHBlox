@@ -30,7 +30,8 @@ public class NodeGraphRenderer
     /// </summary>
     public void Render(DrawingContext ctx, Rect bounds, GraphCanvasViewModel vm,
         bool isDraggingWire, NodePort? wireStartPort, Point wireEndPoint,
-        bool isDraggingNode = false, GraphNode? dragNode = null)
+        bool isDraggingNode = false, GraphNode? dragNode = null,
+        bool isLassoing = false, Point lassoStart = default, Point lassoEnd = default)
     {
         ctx.DrawRectangle(_bgBrush, null, bounds);
         DrawGrid(ctx, bounds, vm);
@@ -66,9 +67,30 @@ public class NodeGraphRenderer
                 if (IsNodeVisible(node, viewport))
                     DrawNode(ctx, node, wireStartPort);
             }
+
+            // Lasso rectangle on top of everything else in the world layer.
+            if (isLassoing)
+                DrawLassoRect(ctx, lassoStart, lassoEnd);
         }
 
         DrawHud(ctx, bounds, vm);
+    }
+
+    /// <summary>
+    /// Dashed selection rectangle. Thin outline + faint fill so users can see
+    /// through it to the nodes they're about to select.
+    /// </summary>
+    private static void DrawLassoRect(DrawingContext ctx, Point a, Point b)
+    {
+        double x = Math.Min(a.X, b.X);
+        double y = Math.Min(a.Y, b.Y);
+        double w = Math.Abs(b.X - a.X);
+        double h = Math.Abs(b.Y - a.Y);
+        if (w < 1 && h < 1) return;
+
+        var fill   = new SolidColorBrush(Color.FromArgb(28, 91, 168, 154));   // faint teal
+        var stroke = new Pen(new SolidColorBrush(GraphTheme.NodeSelectedBorder), 1.0) { DashStyle = DashStyle.Dash };
+        ctx.DrawRectangle(fill, stroke, new Rect(x, y, w, h));
     }
 
     // ── Viewport culling helpers ─────────────────────────────

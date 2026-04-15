@@ -32,6 +32,25 @@ public class NodeGraphCanvas : Control
     private Point _dragOffset;
     private Point _dragStartPos;
 
+    /// <summary>
+    /// Per-node starting position captured on drag-press. When the drag node is
+    /// part of a multi-selection, every selected node's start position lives
+    /// here and each move computes its new position as start + delta. Avoids
+    /// accumulated floating-point drift across many move events.
+    /// </summary>
+    private readonly Dictionary<GraphNode, Point> _multiDragStart = new();
+
+    /// <summary>Left-click on empty canvas records this so a drag can morph into a lasso.</summary>
+    private bool _isLassoArmed;
+    private bool _isLassoing;
+    private bool _lassoExtend;   // shift held when lasso started
+    private Point _lassoStart;
+    private Point _lassoEnd;
+
+    /// <summary>Read by the renderer to draw the lasso rect while a lasso is active.</summary>
+    public (bool Active, Point Start, Point End) CurrentLasso
+        => (_isLassoing, _lassoStart, _lassoEnd);
+
     private bool _isDraggingWire;
     private NodePort? _wireStartPort;
     private Point _wireEndPoint;
@@ -153,21 +172,48 @@ public class NodeGraphCanvas : Control
                 return;
             }
 
-            // Check node hit (start node drag)
+            // Check node hit (start node drag). Selection semantics:
+            //   shift+click  → toggle membership, no drag
+            //   click node not in selection → replace selection with this one
+            //   click node already in selection → keep selection, drag all of them
             var node = HitNode(canvasPos);
             if (node != null)
             {
-                _vm.SelectNode(node);
+                bool shift = (e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift;
+                if (shift)
+                {
+                    _vm.ToggleSelection(node);
+                    e.Handled = true;
+                    return;
+                }
+
+                if (!_vm.SelectedNodes.Contains(node))
+                    _vm.SelectNode(node);
+
                 _isDraggingNode = true;
                 _dragNode = node;
                 _dragOffset = new Point(canvasPos.X - node.X, canvasPos.Y - node.Y);
                 _dragStartPos = new Point(node.X, node.Y);
+
+                // Snapshot every selected node's start position so the move
+                // handler can apply a consistent delta to all of them.
+                _multiDragStart.Clear();
+                foreach (var sel in _vm.SelectedNodes)
+                    _multiDragStart[sel] = new Point(sel.X, sel.Y);
+
                 e.Handled = true;
                 return;
             }
 
-            // Clicked empty space: deselect
-            _vm.SelectNode(null);
+            // Empty space click: arm a potential lasso. If the user releases
+            // without moving, we treat it as "deselect"; if they drag, we
+            // morph into the lasso selection rectangle. Shift modifier extends
+            // the existing selection instead of replacing it.
+            _isLassoArmed = true;
+            _lassoExtend = (e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift;
+            _lassoStart = canvasPos;
+            _lassoEnd = canvasPos;
+            e.Handled = true;
         }
 
         // Right-click: open a context menu sized to what's under the cursor —
@@ -178,7 +224,12 @@ public class NodeGraphCanvas : Control
             var hitConn = hitNode == null ? HitConnection(canvasPos) : null;
             if (hitNode != null)
             {
-                _vm.SelectNode(hitNode);
+                // Right-click on a node outside the current selection switches
+                // focus to that single node. Right-click inside an existing
+                // multi-selection keeps the selection so "Delete 5" stays
+                // meaningful.
+                if (!_vm.SelectedNodes.Contains(hitNode))
+                    _vm.SelectNode(hitNode);
                 ShowNodeContextMenu(hitNode);
             }
             else if (hitConn != null)
@@ -198,18 +249,25 @@ public class NodeGraphCanvas : Control
     private void ShowNodeContextMenu(GraphNode node)
     {
         var items = new List<(string Label, Action? Action, bool IsSeparator)>();
+        int n = _vm!.SelectedNodes.Count;
+        string nodeWord = n == 1 ? "node" : "nodes";
+        string countTag = n > 1 ? $" ({n})" : "";
 
         // Duplicate only applies to non-container nodes (DuplicateSelected
-        // already skips containers — don't show a dead menu entry either).
-        if (!node.IsContainer)
-            items.Add(("Duplicate         Ctrl+D", () => _vm!.DuplicateSelected(), false));
-        items.Add(("Delete            Del",        () => _vm!.DeleteSelected(),    false));
+        // skips containers internally — don't show a dead menu entry either).
+        bool anyNonContainer = _vm.SelectedNodes.Any(x => !x.IsContainer);
+        if (anyNonContainer)
+            items.Add(($"Duplicate{countTag}  Ctrl+D", () => _vm.DuplicateSelected(), false));
 
-        if (!node.IsContainer)
+        items.Add(($"Delete {nodeWord}{countTag}  Del", () => _vm.DeleteSelected(), false));
+
+        if (anyNonContainer)
         {
             items.Add(("", null, true));
-            items.Add((node.IsCollapsed ? "Expand            C" : "Collapse          C",
-                                           () => _vm!.ToggleCollapseSelected(), false));
+            // Label follows the clicked node's current state — matches what C
+            // would do on the primary.
+            items.Add((node.IsCollapsed ? $"Expand{countTag}  C" : $"Collapse{countTag}  C",
+                                           () => _vm.ToggleCollapseSelected(), false));
         }
 
         ShowFlyout(items);
@@ -350,16 +408,53 @@ public class NodeGraphCanvas : Control
             double newX = Math.Round((canvasPos.X - _dragOffset.X) / 10) * 10;
             double newY = Math.Round((canvasPos.Y - _dragOffset.Y) / 10) * 10;
 
-            // If dragging a container, move all descendants (children, grandchildren, etc.)
+            // Delta computed from the drag leader so every selected node moves
+            // in lockstep. When dragging a container, also carry its descendants.
+            double dx = newX - _dragNode.X;
+            double dy = newY - _dragNode.Y;
+
             if (_dragNode.IsContainer)
-            {
-                double dx = newX - _dragNode.X;
-                double dy = newY - _dragNode.Y;
                 MoveDescendants(_dragNode, dx, dy);
-            }
 
             _dragNode.X = newX;
             _dragNode.Y = newY;
+
+            // Move the rest of the selection by the same delta from each
+            // node's start position. Using start snapshots (not the previous
+            // move's positions) avoids accumulated 10px-snap rounding drift.
+            if (_multiDragStart.Count > 1)
+            {
+                double dxTotal = _dragNode.X - _dragStartPos.X;
+                double dyTotal = _dragNode.Y - _dragStartPos.Y;
+                foreach (var (other, start) in _multiDragStart)
+                {
+                    if (ReferenceEquals(other, _dragNode)) continue;
+                    double targetX = start.X + dxTotal;
+                    double targetY = start.Y + dyTotal;
+                    double deltaX = targetX - other.X;
+                    double deltaY = targetY - other.Y;
+                    if (other.IsContainer)
+                        MoveDescendants(other, deltaX, deltaY);
+                    other.X = targetX;
+                    other.Y = targetY;
+                }
+            }
+            return;
+        }
+
+        if (_isLassoArmed)
+        {
+            double dist2 = (canvasPos - _lassoStart).Length;
+            if (dist2 > 4)   // ~4px threshold to distinguish click-to-deselect from drag
+            {
+                _isLassoing = true;
+                _isLassoArmed = false;
+            }
+        }
+
+        if (_isLassoing)
+        {
+            _lassoEnd = canvasPos;
             return;
         }
 
@@ -427,7 +522,10 @@ public class NodeGraphCanvas : Control
             }
         }
 
-        // Snap dropped node into container zone (only if it actually moved)
+        // Snap dropped node into container zone (only if it actually moved).
+        // Only the drag leader participates in zone-snap to avoid yanking a
+        // cohesive multi-selection across zones when one node wanders over a
+        // container — users can explicitly drag individual children later.
         if (_isDraggingNode && _dragNode != null)
         {
             double dx = _dragNode.X - _dragStartPos.X;
@@ -436,10 +534,30 @@ public class NodeGraphCanvas : Control
                 TrySnapToZone(_dragNode);
         }
 
+        // Commit lasso selection, or treat the un-dragged press as a deselect.
+        if (_isLassoing)
+        {
+            var canvasPos = ScreenToCanvas(e.GetPosition(this));
+            _lassoEnd = canvasPos;
+            double lx = Math.Min(_lassoStart.X, _lassoEnd.X);
+            double ly = Math.Min(_lassoStart.Y, _lassoEnd.Y);
+            double lw = Math.Abs(_lassoEnd.X - _lassoStart.X);
+            double lh = Math.Abs(_lassoEnd.Y - _lassoStart.Y);
+            _vm.SelectNodesInRect(lx, ly, lw, lh, extend: _lassoExtend);
+        }
+        else if (_isLassoArmed)
+        {
+            // Click on empty canvas without drag → clear selection.
+            _vm.ClearSelection();
+        }
+
         // Reset all interaction state
         _isPanning = false;
         _isDraggingNode = false;
         _dragNode = null;
+        _multiDragStart.Clear();
+        _isLassoArmed = false;
+        _isLassoing = false;
         _isDraggingWire = false;
         _wireStartPort = null;
         _reroutingOriginal = null;
@@ -727,8 +845,8 @@ public class NodeGraphCanvas : Control
         if (_vm == null) return;
         if (Bounds.Width < 50 || Bounds.Height < 50) return;
 
-        var set = (selectionOnly && _vm.SelectedNode != null
-            ? new[] { _vm.SelectedNode }
+        var set = (selectionOnly && _vm.SelectedNodes.Count > 0
+            ? _vm.SelectedNodes.ToArray()
             : _vm.Nodes.Where(n => n.ParentContainer == null).ToArray());
         if (set.Length == 0) return;
 
@@ -764,6 +882,9 @@ public class NodeGraphCanvas : Control
         _isPanning = false;
         _isDraggingNode = false;
         _dragNode = null;
+        _multiDragStart.Clear();
+        _isLassoArmed = false;
+        _isLassoing = false;
         _isDraggingWire = false;
         _wireStartPort = null;
         _reroutingOriginal = null;
@@ -780,6 +901,7 @@ public class NodeGraphCanvas : Control
 
         _renderer.Render(context, Bounds, _vm,
             _isDraggingWire, _wireStartPort, _wireEndPoint,
-            _isDraggingNode, _dragNode);
+            _isDraggingNode, _dragNode,
+            _isLassoing, _lassoStart, _lassoEnd);
     }
 }

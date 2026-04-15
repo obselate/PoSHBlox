@@ -139,7 +139,7 @@ public partial class MainWindow : AppWindow
 
                 // F — zoom-to-fit (selection if one is selected, whole graph otherwise)
                 case Key.F when !inTextBox && e.KeyModifiers == KeyModifiers.None:
-                    GraphCanvas.ZoomToFit(selectionOnly: vm.SelectedNode != null);
+                    GraphCanvas.ZoomToFit(selectionOnly: vm.SelectedNodes.Count > 0);
                     e.Handled = true;
                     break;
 
@@ -154,7 +154,7 @@ public partial class MainWindow : AppWindow
                 case Key.Escape:
                     GraphCanvas.CancelDrag();
                     if (vm.IsCheatSheetOpen) vm.IsCheatSheetOpen = false;
-                    else if (vm.SelectedNode != null) vm.SelectNode(null);
+                    else if (vm.SelectedNodes.Count > 0) vm.ClearSelection();
                     e.Handled = true;
                     break;
 
