@@ -11,9 +11,16 @@ namespace PoSHBlox.Services;
 
 /// <summary>
 /// Serializes and deserializes the .pblx project format.
+///
+/// V2 writes pin IDs on ports and connections. V1 files are migrated in-place
+/// on load: ports are reshaped to V2 (ExecIn + per-parameter data inputs +
+/// ExecOut + data outputs), and each V1 index-based wire becomes one exec
+/// wire plus, where meaningful, one primary-pipeline-target data wire.
 /// </summary>
 public static class ProjectSerializer
 {
+    public const int CurrentVersion = 2;
+
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = true,
@@ -31,7 +38,7 @@ public static class ProjectSerializer
 
         var doc = new PblxDocument
         {
-            Version = 1,
+            Version = CurrentVersion,
             Metadata = new PblxMetadata
             {
                 CreatedUtc = existingCreatedUtc ?? now,
@@ -45,7 +52,6 @@ public static class ProjectSerializer
             },
         };
 
-        // Build node DTOs
         foreach (var node in vm.Nodes)
         {
             var dto = new PblxNode
@@ -64,24 +70,18 @@ public static class ProjectSerializer
                 ContainerHeight = node.ContainerHeight,
             };
 
-            // Nesting
             if (node.ParentContainer != null && node.ParentZone != null)
             {
                 dto.ParentNodeId = node.ParentContainer.Id;
                 dto.ParentZoneName = node.ParentZone.Name;
             }
 
-            // Zones
             foreach (var zone in node.Zones)
                 dto.Zones.Add(new PblxZone { Name = zone.Name });
 
-            // Ports
-            foreach (var port in node.Inputs)
-                dto.Inputs.Add(new PblxPort { Name = port.Name, Type = port.Type.ToString() });
-            foreach (var port in node.Outputs)
-                dto.Outputs.Add(new PblxPort { Name = port.Name, Type = port.Type.ToString() });
+            foreach (var port in node.Inputs)  dto.Inputs.Add(PortToDto(port));
+            foreach (var port in node.Outputs) dto.Outputs.Add(PortToDto(port));
 
-            // Parameters
             foreach (var p in node.Parameters)
             {
                 dto.Parameters.Add(new PblxParameter
@@ -101,28 +101,35 @@ public static class ProjectSerializer
             doc.Nodes.Add(dto);
         }
 
-        // Build connection DTOs using node ID + port index
         foreach (var conn in vm.Connections)
         {
             var sourceNode = conn.Source.Owner;
             var targetNode = conn.Target.Owner;
             if (sourceNode == null || targetNode == null) continue;
 
-            int sourceIdx = IndexOf(sourceNode.Outputs, conn.Source);
-            int targetIdx = IndexOf(targetNode.Inputs, conn.Target);
-            if (sourceIdx < 0 || targetIdx < 0) continue;
-
             doc.Connections.Add(new PblxConnection
             {
                 SourceNodeId = sourceNode.Id,
-                SourcePortIndex = sourceIdx,
+                SourcePortId = conn.Source.Id,
                 TargetNodeId = targetNode.Id,
-                TargetPortIndex = targetIdx,
+                TargetPortId = conn.Target.Id,
             });
         }
 
         return JsonSerializer.Serialize(doc, Options);
     }
+
+    private static PblxPort PortToDto(NodePort p) => new()
+    {
+        Id = p.Id,
+        Name = p.Name,
+        Kind = p.Kind.ToString(),
+        DataType = p.DataType.ToString(),
+        ParameterName = p.ParameterName,
+        IsPrimary = p.IsPrimary,
+        IsPrimaryPipelineTarget = p.IsPrimaryPipelineTarget,
+        Type = p.Type.ToString(),
+    };
 
     /// <summary>
     /// Deserialize a .pblx JSON string and load the graph into the view model.
@@ -132,25 +139,34 @@ public static class ProjectSerializer
         var doc = JsonSerializer.Deserialize<PblxDocument>(json, Options);
         if (doc == null) return;
 
-        if (doc.Version > 1)
-            Debug.WriteLine($"[ProjectSerializer] File version {doc.Version} is newer than supported (1). Proceeding with best-effort load.");
+        if (doc.Version < CurrentVersion)
+        {
+            Debug.WriteLine($"[ProjectSerializer] Migrating v{doc.Version} → v{CurrentVersion}.");
+            V1Migrator.Migrate(doc);
+        }
+        else if (doc.Version > CurrentVersion)
+        {
+            Debug.WriteLine($"[ProjectSerializer] File version {doc.Version} is newer than supported ({CurrentVersion}). Best-effort load.");
+        }
 
         vm.LoadFromDocument(doc);
     }
 
     /// <summary>
-    /// Rebuild the graph from a deserialized document. Called by <see cref="GraphCanvasViewModel.LoadFromDocument"/>.
+    /// Rebuild the graph from a deserialized (and migrated-if-needed) document.
+    /// Assumes the document is at <see cref="CurrentVersion"/>.
     /// </summary>
     internal static void RebuildGraph(PblxDocument doc, GraphCanvasViewModel vm)
     {
-        // Clear existing state
         vm.Connections.Clear();
         vm.Nodes.Clear();
         vm.SelectNode(null);
 
         var nodeMap = new Dictionary<string, GraphNode>();
+        // pin-ID → NodePort, for connection resolution.
+        var portMap = new Dictionary<string, NodePort>();
 
-        // First pass: create all nodes
+        // First pass: create nodes.
         foreach (var dto in doc.Nodes)
         {
             var node = new GraphNode
@@ -166,46 +182,24 @@ public static class ProjectSerializer
                 Width = dto.Width,
             };
 
-            // Container type
             if (Enum.TryParse<ContainerType>(dto.ContainerType, out var ct))
                 node.ContainerType = ct;
 
             node.ContainerWidth = dto.ContainerWidth;
             node.ContainerHeight = dto.ContainerHeight;
 
-            // Rebuild zones
             foreach (var zoneDto in dto.Zones)
                 node.Zones.Add(new ContainerZone { Name = zoneDto.Name });
 
-            // Rebuild ports — clear defaults first
             node.Inputs.Clear();
             node.Outputs.Clear();
 
             foreach (var portDto in dto.Inputs)
-            {
-                Enum.TryParse<PortType>(portDto.Type, out var pt);
-                node.Inputs.Add(new NodePort
-                {
-                    Name = portDto.Name,
-                    Direction = PortDirection.Input,
-                    Type = pt,
-                    Owner = node,
-                });
-            }
+                AddPortFromDto(node, node.Inputs, portDto, PortDirection.Input, portMap);
 
             foreach (var portDto in dto.Outputs)
-            {
-                Enum.TryParse<PortType>(portDto.Type, out var pt);
-                node.Outputs.Add(new NodePort
-                {
-                    Name = portDto.Name,
-                    Direction = PortDirection.Output,
-                    Type = pt,
-                    Owner = node,
-                });
-            }
+                AddPortFromDto(node, node.Outputs, portDto, PortDirection.Output, portMap);
 
-            // Rebuild parameters
             foreach (var pDto in dto.Parameters)
             {
                 Enum.TryParse<ParamType>(pDto.Type, out var paramType);
@@ -220,6 +214,7 @@ public static class ProjectSerializer
                     Value = pDto.Value,
                     IsArgument = pDto.IsArgument,
                     IsPipelineInput = pDto.IsPipelineInput,
+                    Owner = node,
                 });
             }
 
@@ -230,7 +225,7 @@ public static class ProjectSerializer
             vm.Nodes.Add(node);
         }
 
-        // Second pass: resolve parent/zone nesting
+        // Second pass: nesting.
         foreach (var dto in doc.Nodes)
         {
             if (dto.ParentNodeId == null || dto.ParentZoneName == null) continue;
@@ -245,34 +240,45 @@ public static class ProjectSerializer
             zone.Children.Add(child);
         }
 
-        // Third pass: rebuild connections
+        // Third pass: connections, keyed by pin IDs.
         foreach (var cDto in doc.Connections)
         {
-            if (!nodeMap.TryGetValue(cDto.SourceNodeId, out var srcNode)) continue;
-            if (!nodeMap.TryGetValue(cDto.TargetNodeId, out var tgtNode)) continue;
-            if (cDto.SourcePortIndex >= srcNode.Outputs.Count) continue;
-            if (cDto.TargetPortIndex >= tgtNode.Inputs.Count) continue;
-
-            var sourcePort = srcNode.Outputs[cDto.SourcePortIndex];
-            var targetPort = tgtNode.Inputs[cDto.TargetPortIndex];
-            vm.AddConnection(sourcePort, targetPort);
+            if (!portMap.TryGetValue(cDto.SourcePortId, out var srcPort)) continue;
+            if (!portMap.TryGetValue(cDto.TargetPortId, out var tgtPort)) continue;
+            vm.AddConnection(srcPort, tgtPort);
         }
 
-        // Restore view state
         vm.PanX = doc.View.PanX;
         vm.PanY = doc.View.PanY;
         vm.Zoom = doc.View.Zoom;
         vm.ClampZoom();
     }
 
-    private static int IndexOf<T>(IEnumerable<T> collection, T item)
+    private static void AddPortFromDto(
+        GraphNode node,
+        System.Collections.ObjectModel.ObservableCollection<NodePort> list,
+        PblxPort dto,
+        PortDirection dir,
+        Dictionary<string, NodePort> portMap)
     {
-        int i = 0;
-        foreach (var element in collection)
+        Enum.TryParse<PortKind>(dto.Kind, ignoreCase: true, out var kind);
+        Enum.TryParse<ParamType>(dto.DataType, ignoreCase: true, out var dtype);
+        Enum.TryParse<PortType>(dto.Type, ignoreCase: true, out var legacyType);
+
+        var port = new NodePort
         {
-            if (ReferenceEquals(element, item)) return i;
-            i++;
-        }
-        return -1;
+            Id = string.IsNullOrEmpty(dto.Id) ? Guid.NewGuid().ToString("N")[..8] : dto.Id,
+            Name = dto.Name,
+            Direction = dir,
+            Kind = kind,
+            DataType = dtype,
+            ParameterName = dto.ParameterName,
+            IsPrimary = dto.IsPrimary,
+            IsPrimaryPipelineTarget = dto.IsPrimaryPipelineTarget,
+            Type = legacyType,
+            Owner = node,
+        };
+        list.Add(port);
+        portMap[port.Id] = port;
     }
 }

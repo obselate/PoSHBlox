@@ -9,11 +9,14 @@ namespace PoSHBlox.Services;
 /// Flat, JSON-friendly DTOs for the .pblx project format.
 /// Every DTO carries <see cref="JsonExtensionData"/> so unknown fields from
 /// newer versions are preserved on round-trip (forward-compatibility).
+///
+/// Version 2: pin IDs replace port indices, ports carry Kind/DataType/etc.
+/// Version 1 documents are migrated in-place on load by ProjectSerializer.
 /// </summary>
 
 public class PblxDocument
 {
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = 2;
     public PblxMetadata Metadata { get; set; } = new();
     public PblxViewState View { get; set; } = new();
     public List<PblxNode> Nodes { get; set; } = [];
@@ -76,7 +79,26 @@ public class PblxNode
 
 public class PblxPort
 {
+    /// <summary>Stable pin identity — required in V2, absent in V1 (migration mints one).</summary>
+    public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+
+    /// <summary>V2: <c>Exec</c> or <c>Data</c>. Default Data for backwards JSON shape.</summary>
+    public string Kind { get; set; } = "Data";
+
+    /// <summary>V2: the <see cref="PoSHBlox.Models.ParamType"/> carried by this data pin.</summary>
+    public string DataType { get; set; } = "Any";
+
+    /// <summary>V2: for data inputs derived from a parameter, the parameter name.</summary>
+    public string? ParameterName { get; set; }
+
+    /// <summary>V2: output-side flag — the primary data producer (for pipeline collapse).</summary>
+    public bool IsPrimary { get; set; }
+
+    /// <summary>V2: input-side flag — accepts upstream via pipeline (ValueFromPipeline).</summary>
+    public bool IsPrimaryPipelineTarget { get; set; }
+
+    /// <summary>V1 legacy PortType. Dropped in Step 9.</summary>
     public string Type { get; set; } = "Pipeline";
 
     [JsonExtensionData]
@@ -110,9 +132,15 @@ public class PblxZone
 public class PblxConnection
 {
     public string SourceNodeId { get; set; } = "";
-    public int SourcePortIndex { get; set; }
     public string TargetNodeId { get; set; } = "";
-    public int TargetPortIndex { get; set; }
+
+    /// <summary>V2: pin IDs survive reordering / template updates.</summary>
+    public string SourcePortId { get; set; } = "";
+    public string TargetPortId { get; set; } = "";
+
+    /// <summary>V1 legacy index-based addressing. Used only during migration.</summary>
+    public int SourcePortIndex { get; set; } = -1;
+    public int TargetPortIndex { get; set; } = -1;
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extensions { get; set; }
