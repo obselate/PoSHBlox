@@ -43,6 +43,10 @@ public static class NodeFactory
             ScriptBody = template.ScriptBody,
             X = x,
             Y = y,
+            KnownParameterSets = template.KnownParameterSets.ToArray(),
+            ActiveParameterSet = template.DefaultParameterSet
+                ?? template.KnownParameterSets.FirstOrDefault()
+                ?? "",
         };
 
         CopyParameters(node, template);
@@ -320,6 +324,8 @@ public static class NodeFactory
                 ValidValues = pdef.ValidValues,
                 Value = pdef.DefaultValue,
                 IsPipelineInput = pdef.IsPipelineInput,
+                ParameterSets = pdef.ParameterSets.ToArray(),
+                MandatoryInSets = pdef.MandatoryInSets.ToArray(),
             }));
         }
     }

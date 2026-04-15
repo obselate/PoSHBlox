@@ -36,6 +36,16 @@ public partial class GraphNode : ObservableObject
     /// </summary>
     [ObservableProperty] private bool _isCollapsed;
 
+    /// <summary>
+    /// Sets this node's cmdlet declares. Empty = single-set / legacy template;
+    /// no set picker shown and no set-based filtering applied. Populated by
+    /// <see cref="PoSHBlox.Services.NodeFactory"/> from the template.
+    /// </summary>
+    public string[] KnownParameterSets { get; set; } = [];
+
+    /// <summary>Currently-active parameter set. Empty when <see cref="KnownParameterSets"/> is empty.</summary>
+    [ObservableProperty] private string _activeParameterSet = "";
+
     // ── Ports & parameters ─────────────────────────────────────
     public ObservableCollection<NodePort> Inputs { get; } = new();
     public ObservableCollection<NodePort> Outputs { get; } = new();
@@ -129,14 +139,35 @@ public partial class GraphNode : ObservableObject
 
     /// <summary>
     /// Should this port render / accept input? Exec pins and data outputs are
-    /// always visible; data inputs depend on the current collapse state.
+    /// always visible; data inputs are filtered first by the active parameter
+    /// set (pins whose paired param doesn't belong to the active set are
+    /// hidden regardless of collapse), then by collapse state.
     /// </summary>
     public bool IsPortVisible(NodePort port)
     {
         if (port.Kind == PortKind.Exec) return true;
         if (port.Direction == PortDirection.Output) return true;
+
+        // Active-parameter-set filter — only applies when the node's cmdlet
+        // actually declares multiple sets and the param opts into specific ones.
+        if (!string.IsNullOrEmpty(port.ParameterName) && KnownParameterSets.Length > 0)
+        {
+            var param = Parameters.FirstOrDefault(p => p.Name == port.ParameterName);
+            if (param != null && param.ParameterSets.Length > 0
+                && !param.ParameterSets.Contains(ActiveParameterSet, StringComparer.OrdinalIgnoreCase))
+                return false;
+        }
+
         if (!IsCollapsed) return true;
         return IsDataInputVisibleWhenCollapsed(port);
+    }
+
+    partial void OnActiveParameterSetChanged(string value)
+    {
+        // Active-set changes flip visibility + height the same way collapse does.
+        OnPropertyChanged(nameof(Height));
+        OnPropertyChanged(nameof(VisibleDataInputs));
+        OnPropertyChanged(nameof(HiddenDataInputCount));
     }
 
     // ── Computed layout properties ─────────────────────────────

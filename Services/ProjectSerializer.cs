@@ -66,6 +66,8 @@ public static class ProjectSerializer
                 Y = node.Y,
                 Width = node.Width,
                 IsCollapsed = node.IsCollapsed,
+                KnownParameterSets = node.KnownParameterSets,
+                ActiveParameterSet = node.ActiveParameterSet,
                 ContainerType = node.ContainerType.ToString(),
                 ContainerWidth = node.ContainerWidth,
                 ContainerHeight = node.ContainerHeight,
@@ -96,6 +98,8 @@ public static class ProjectSerializer
                     Value = p.Value,
                     IsArgument = p.IsArgument,
                     IsPipelineInput = p.IsPipelineInput,
+                    ParameterSets = p.ParameterSets,
+                    MandatoryInSets = p.MandatoryInSets,
                 });
             }
 
@@ -181,6 +185,8 @@ public static class ProjectSerializer
                 Y = dto.Y,
                 Width = dto.Width,
                 IsCollapsed = dto.IsCollapsed,
+                KnownParameterSets = dto.KnownParameterSets,
+                ActiveParameterSet = dto.ActiveParameterSet,
             };
 
             if (Enum.TryParse<ContainerType>(dto.ContainerType, out var ct))
@@ -215,6 +221,8 @@ public static class ProjectSerializer
                     Value = pDto.Value,
                     IsArgument = pDto.IsArgument,
                     IsPipelineInput = pDto.IsPipelineInput,
+                    ParameterSets = pDto.ParameterSets,
+                    MandatoryInSets = pDto.MandatoryInSets,
                     Owner = node,
                 });
             }

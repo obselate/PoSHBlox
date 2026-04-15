@@ -237,6 +237,9 @@ public partial class GraphCanvasViewModel : ObservableObject
             X = src.X + 40,
             Y = src.Y + 40,
             Width = src.Width,
+            IsCollapsed = src.IsCollapsed,
+            KnownParameterSets = (string[])src.KnownParameterSets.Clone(),
+            ActiveParameterSet = src.ActiveParameterSet,
         };
 
         // Default constructor seeds with ExecIn/ExecOut/Out — replace with a
@@ -261,6 +264,8 @@ public partial class GraphCanvasViewModel : ObservableObject
                 Value = param.Value,
                 IsArgument = param.IsArgument,
                 IsPipelineInput = param.IsPipelineInput,
+                ParameterSets = (string[])param.ParameterSets.Clone(),
+                MandatoryInSets = (string[])param.MandatoryInSets.Clone(),
                 Owner = dup,
             });
 

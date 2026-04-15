@@ -33,6 +33,16 @@ public class NodeTemplate
     /// <summary>V2: data output pins. Empty = factory creates one primary "Out" of type Any.</summary>
     public List<DataOutputDef> DataOutputs { get; set; } = [];
 
+    /// <summary>
+    /// V2: parameter set metadata for cmdlets that declare multiple sets
+    /// (e.g. <c>Get-ChildItem</c> has <c>Items</c>/<c>LiteralItems</c>).
+    /// Empty = legacy / single-set cmdlet; no per-set filtering happens.
+    /// </summary>
+    public List<string> KnownParameterSets { get; set; } = [];
+
+    /// <summary>V2: which set a node spawns with. Null = first of KnownParameterSets (if any).</summary>
+    public string? DefaultParameterSet { get; set; }
+
     // ── [Legacy V1] ────────────────────────────────────────────
     // Kept so existing Templates/Builtin/*.json and Samples/*.pblx still load.
     // NodeFactory ignores these when V2 fields are present, falls back otherwise.
@@ -59,6 +69,15 @@ public class ParameterDef
 
     /// <summary>V2: true = <c>[Parameter(ValueFromPipeline)]</c>. Primary-pipeline-target candidate.</summary>
     public bool IsPipelineInput { get; set; }
+
+    /// <summary>
+    /// V2: parameter sets this param belongs to. Empty = "all sets" (common params
+    /// appearing outside any set, or legacy templates without set info).
+    /// </summary>
+    public List<string> ParameterSets { get; set; } = [];
+
+    /// <summary>V2: sets in which this param is mandatory. Falls back to IsMandatory when empty.</summary>
+    public List<string> MandatoryInSets { get; set; } = [];
 }
 
 /// <summary>V2: describes a single data-output pin on a node.</summary>

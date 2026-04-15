@@ -19,6 +19,16 @@ public partial class NodeParameter : ObservableObject
     /// <summary>true = [Parameter(ValueFromPipeline)]</summary>
     public bool IsPipelineInput { get; set; }
 
+    /// <summary>
+    /// Parameter sets this param belongs to. Empty = visible in every set
+    /// (common params, legacy templates). Non-empty = visible only when
+    /// the node's <see cref="GraphNode.ActiveParameterSet"/> is in this list.
+    /// </summary>
+    public string[] ParameterSets { get; set; } = [];
+
+    /// <summary>Sets in which this param is mandatory. Falls back to <see cref="IsMandatory"/> when empty.</summary>
+    public string[] MandatoryInSets { get; set; } = [];
+
     /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
     public GraphNode? Owner { get; set; }
 

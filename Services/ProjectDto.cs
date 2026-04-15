@@ -61,6 +61,12 @@ public class PblxNode
     /// <summary>Per-node collapse state — hides non-mandatory unwired empty data inputs.</summary>
     public bool IsCollapsed { get; set; }
 
+    /// <summary>Parameter sets declared by the cmdlet; empty = single-set / legacy.</summary>
+    public string[] KnownParameterSets { get; set; } = [];
+
+    /// <summary>Currently-active parameter set.</summary>
+    public string ActiveParameterSet { get; set; } = "";
+
     // Container fields (only populated for containers)
     public string ContainerType { get; set; } = "None";
     public double ContainerWidth { get; set; } = 500;
@@ -116,6 +122,12 @@ public class PblxParameter
     public string Value { get; set; } = "";
     public bool IsArgument { get; set; }
     public bool IsPipelineInput { get; set; }
+
+    /// <summary>Sets this param belongs to (empty = all sets).</summary>
+    public string[] ParameterSets { get; set; } = [];
+
+    /// <summary>Sets in which this param is mandatory (overrides IsMandatory when non-empty).</summary>
+    public string[] MandatoryInSets { get; set; } = [];
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extensions { get; set; }
