@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using PoSHBlox.Models;
 using PoSHBlox.Rendering;
 using PoSHBlox.ViewModels;
@@ -46,19 +45,14 @@ public class NodeGraphCanvas : Control
     private bool _isResizingContainer;
     private GraphNode? _resizeNode;
 
-    /// <summary>Most recent pointer position in canvas-local coords — used to anchor quick-add on Tab.</summary>
+    /// <summary>Most recent pointer position in canvas-local coords.</summary>
     private Point _lastPointerLocal;
 
-    /// <summary>Pointer position translated into the visual-root's coordinate space (good for positioning popups).</summary>
-    public Point CurrentPointerPosition
-    {
-        get
-        {
-            if (this.GetVisualRoot() is Visual root)
-                return TranslatePoint(_lastPointerLocal, root) ?? _lastPointerLocal;
-            return _lastPointerLocal;
-        }
-    }
+    /// <summary>Most recent pointer position in TopLevel coords — good for anchoring popups that live in the window's root Grid.</summary>
+    private Point _lastPointerInWindow;
+
+    /// <summary>Pointer position in window-root coordinate space (for positioning popups).</summary>
+    public Point CurrentPointerPosition => _lastPointerInWindow;
 
     public NodeGraphCanvas()
     {
@@ -265,10 +259,10 @@ public class NodeGraphCanvas : Control
         const double pad = 8;
 
         double rootW = 1280, rootH = 720;
-        if (this.GetVisualRoot() is Control root)
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
         {
-            rootW = root.Bounds.Width;
-            rootH = root.Bounds.Height;
+            rootW = topLevel.ClientSize.Width;
+            rootH = topLevel.ClientSize.Height;
         }
 
         double x = windowPoint.X;
@@ -313,6 +307,8 @@ public class NodeGraphCanvas : Control
         var screenPos = e.GetPosition(this);
         var canvasPos = ScreenToCanvas(screenPos);
         _lastPointerLocal = screenPos;
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
+            _lastPointerInWindow = e.GetPosition(topLevel);
 
         if (_isPanning)
         {
@@ -423,10 +419,9 @@ public class NodeGraphCanvas : Control
                     // Fresh wire drag released on empty space → open the quick-add
                     // popup anchored at the cursor with the source pin captured.
                     // Auto-wire happens in CommitQuickAdd if the user picks a result.
-                    var localPos = e.GetPosition(this);
-                    var windowPos = this.GetVisualRoot() is Visual root
-                        ? (TranslatePoint(localPos, root) ?? localPos)
-                        : localPos;
+                    var windowPos = TopLevel.GetTopLevel(this) is { } topLevel
+                        ? e.GetPosition(topLevel)
+                        : e.GetPosition(this);
                     OpenQuickAddAt(windowPos, _wireStartPort);
                 }
             }

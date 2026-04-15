@@ -47,6 +47,8 @@ public partial class ImportModuleViewModel : ObservableObject
                     HasExecOut = c.HasExecOut,
                     PrimaryPipelineParameter = c.PrimaryPipelineParameter,
                     DataOutputs = c.DataOutputs,
+                    KnownParameterSets = c.KnownParameterSets,
+                    DefaultParameterSet = c.DefaultParameterSet,
                 });
             }
 
@@ -151,4 +153,7 @@ public partial class SelectableCmdlet : ObservableObject
     public bool HasExecOut { get; set; } = true;
     public string? PrimaryPipelineParameter { get; set; }
     public System.Collections.Generic.List<DataOutputDef> DataOutputs { get; set; } = [];
+
+    public System.Collections.Generic.List<string> KnownParameterSets { get; set; } = [];
+    public string? DefaultParameterSet { get; set; }
 }
