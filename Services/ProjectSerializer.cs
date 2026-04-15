@@ -65,6 +65,7 @@ public static class ProjectSerializer
                 X = node.X,
                 Y = node.Y,
                 Width = node.Width,
+                IsCollapsed = node.IsCollapsed,
                 ContainerType = node.ContainerType.ToString(),
                 ContainerWidth = node.ContainerWidth,
                 ContainerHeight = node.ContainerHeight,
@@ -179,6 +180,7 @@ public static class ProjectSerializer
                 X = dto.X,
                 Y = dto.Y,
                 Width = dto.Width,
+                IsCollapsed = dto.IsCollapsed,
             };
 
             if (Enum.TryParse<ContainerType>(dto.ContainerType, out var ct))

@@ -450,6 +450,9 @@ public class NodeGraphCanvas : Control
         {
             foreach (var port in node.Inputs.Concat(node.Outputs))
             {
+                // Hidden pins on collapsed nodes mustn't accept clicks.
+                if (!node.IsPortVisible(port)) continue;
+
                 var portPos = NodeGraphRenderer.GetPortPosition(node, port);
                 double dist = Math.Sqrt(
                     Math.Pow(canvasPos.X - portPos.X, 2) +

@@ -125,6 +125,12 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
+                // C — collapse / expand selected node
+                case Key.C when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    vm.ToggleCollapseSelected();
+                    e.Handled = true;
+                    break;
+
                 // F — zoom-to-fit (selection if one is selected, whole graph otherwise)
                 case Key.F when !inTextBox && e.KeyModifiers == KeyModifiers.None:
                     GraphCanvas.ZoomToFit(selectionOnly: vm.SelectedNode != null);

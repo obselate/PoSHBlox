@@ -602,7 +602,7 @@
                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
 
                 <!-- Two columns: shortcut ∷ description -->
-                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                       RowSpacing="4">
                     <TextBlock Grid.Row="0"  Grid.Column="0" Text="Ctrl+N"       Classes="cheatKey"/>
                     <TextBlock Grid.Row="0"  Grid.Column="1" Text="New graph"    Classes="cheatLabel"/>
@@ -622,6 +622,8 @@
                     <TextBlock Grid.Row="7"  Grid.Column="1" Text="Focus palette search"  Classes="cheatLabel"/>
                     <TextBlock Grid.Row="8"  Grid.Column="0" Text="Ctrl+D"       Classes="cheatKey"/>
                     <TextBlock Grid.Row="8"  Grid.Column="1" Text="Duplicate selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="14" Grid.Column="0" Text="C"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="14" Grid.Column="1" Text="Collapse / expand selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="9"  Grid.Column="0" Text="Del / Backspace" Classes="cheatKey"/>
                     <TextBlock Grid.Row="9"  Grid.Column="1" Text="Delete selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="F"            Classes="cheatKey"/>

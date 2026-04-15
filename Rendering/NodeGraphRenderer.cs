@@ -173,6 +173,21 @@ public class NodeGraphRenderer
         var title = MakeText(node.Title, 13, FontWeight.Bold, GraphTheme.TextPrimary);
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
 
+        // Collapse-state chevron on the header (right side, dim). Indicates the
+        // node can be collapsed/expanded — wired to the C keyboard shortcut /
+        // upcoming context menu.
+        var chevronGlyph = node.IsCollapsed ? "\u25B8" : "\u25BE"; // ▸ / ▾
+        var chevron = MakeText(chevronGlyph, 11, FontWeight.Normal, GraphTheme.TextSecondary);
+        ctx.DrawText(chevron, new Point(node.X + node.Width - 18, node.Y + (hh - chevron.Height) / 2));
+
+        // Collapsed-hint row: "+N hidden" centered under the visible data rows.
+        if (node.HiddenDataInputCount > 0)
+        {
+            var hint = MakeText($"+{node.HiddenDataInputCount} hidden", 10, FontWeight.Normal, GraphTheme.HudText);
+            double hintY = node.Y + node.Height - hint.Height - 8;
+            ctx.DrawText(hint, new Point(node.X + (node.Width - hint.Width) / 2, hintY));
+        }
+
         // Ports
         foreach (var port in node.Inputs) DrawPort(ctx, node, port, wireStartPort);
         foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
@@ -294,6 +309,9 @@ public class NodeGraphRenderer
 
     private void DrawPort(DrawingContext ctx, GraphNode node, NodePort port, NodePort? wireStartPort)
     {
+        // Collapsed nodes hide non-essential data input pins — don't draw them.
+        if (!node.IsPortVisible(port)) return;
+
         var pos = GetPortPosition(node, port);
         bool isInput = port.Direction == PortDirection.Input;
 
@@ -421,14 +439,17 @@ public class NodeGraphRenderer
             return new Point(x, y);
         }
 
-        // Data pin: index within DataInputs or DataOutputs only (ignoring exec pins).
-        int idx = 0, i = 0;
-        var list = port.Direction == PortDirection.Input ? node.DataInputs : node.DataOutputs;
+        // Data pin: index within VisibleDataInputs (so collapsed hidden rows don't
+        // reserve space) or DataOutputs. Returns an off-screen point for pins not
+        // in the visible list — keeps them out of the way of hit testing too.
+        int idx = -1, i = 0;
+        var list = port.Direction == PortDirection.Input ? node.VisibleDataInputs : node.DataOutputs;
         foreach (var p in list)
         {
             if (ReferenceEquals(p, port)) { idx = i; break; }
             i++;
         }
+        if (idx < 0) return new Point(-1e6, -1e6);
 
         double xd = port.Direction == PortDirection.Input ? node.X : node.X + width;
         double yd = node.Y + headerH + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;

@@ -58,6 +58,9 @@ public class PblxNode
     public double Y { get; set; }
     public double Width { get; set; } = 200;
 
+    /// <summary>Per-node collapse state — hides non-mandatory unwired empty data inputs.</summary>
+    public bool IsCollapsed { get; set; }
+
     // Container fields (only populated for containers)
     public string ContainerType { get; set; } = "None";
     public double ContainerWidth { get; set; } = 500;

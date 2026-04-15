@@ -268,6 +268,14 @@ public partial class GraphCanvasViewModel : ObservableObject
         SelectNode(dup);
     }
 
+    /// <summary>Toggle the selected node's collapsed state — hides non-essential params.</summary>
+    [RelayCommand]
+    public void ToggleCollapseSelected()
+    {
+        if (SelectedNode == null || SelectedNode.IsContainer) return;
+        SelectedNode.IsCollapsed = !SelectedNode.IsCollapsed;
+    }
+
     private static NodePort ClonePort(NodePort p, GraphNode owner) => new()
     {
         Name = p.Name,

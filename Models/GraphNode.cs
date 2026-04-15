@@ -29,6 +29,13 @@ public partial class GraphNode : ObservableObject
     [ObservableProperty] private double _width = 200;
     [ObservableProperty] private bool _isSelected;
 
+    /// <summary>
+    /// When true the node hides non-mandatory, unwired, empty-value data inputs
+    /// (e.g. WhatIf, PassThru). Exec pins and data outputs always stay visible.
+    /// Persisted in .pblx; toggled from keyboard / context menu.
+    /// </summary>
+    [ObservableProperty] private bool _isCollapsed;
+
     // ── Ports & parameters ─────────────────────────────────────
     public ObservableCollection<NodePort> Inputs { get; } = new();
     public ObservableCollection<NodePort> Outputs { get; } = new();
@@ -97,6 +104,41 @@ public partial class GraphNode : ObservableObject
                                               ?? DataOutputs.FirstOrDefault();
     public NodePort? PrimaryPipelineTarget   => DataInputs.FirstOrDefault(p => p.IsPrimaryPipelineTarget);
 
+    /// <summary>
+    /// Data input pins that should actually render. Equal to <see cref="DataInputs"/>
+    /// when expanded; when collapsed, filters out pins whose paired parameter is
+    /// non-mandatory, unwired, and has no user-set value. Unpaired data inputs
+    /// (e.g. ForEach's Source) always stay visible.
+    /// </summary>
+    public IEnumerable<NodePort> VisibleDataInputs => IsCollapsed
+        ? DataInputs.Where(IsDataInputVisibleWhenCollapsed)
+        : DataInputs;
+
+    /// <summary>How many data input pins are hidden by collapse — used by the renderer hint.</summary>
+    public int HiddenDataInputCount => IsCollapsed
+        ? DataInputs.Count() - VisibleDataInputs.Count()
+        : 0;
+
+    private bool IsDataInputVisibleWhenCollapsed(NodePort port)
+    {
+        if (string.IsNullOrEmpty(port.ParameterName)) return true;  // unpaired data inputs
+        var param = Parameters.FirstOrDefault(p => p.Name == port.ParameterName);
+        if (param == null) return true;
+        return param.IsMandatory || param.IsWired || !string.IsNullOrWhiteSpace(param.Value);
+    }
+
+    /// <summary>
+    /// Should this port render / accept input? Exec pins and data outputs are
+    /// always visible; data inputs depend on the current collapse state.
+    /// </summary>
+    public bool IsPortVisible(NodePort port)
+    {
+        if (port.Kind == PortKind.Exec) return true;
+        if (port.Direction == PortDirection.Output) return true;
+        if (!IsCollapsed) return true;
+        return IsDataInputVisibleWhenCollapsed(port);
+    }
+
     // ── Computed layout properties ─────────────────────────────
     /// <summary>
     /// Height sized to the parameter-row count. Exec pins sit in the header so
@@ -105,8 +147,24 @@ public partial class GraphNode : ObservableObject
     public double Height => IsContainer
         ? ContainerHeight
         : Math.Max(
-            HeaderHeight + PortSpacing + Math.Max(DataInputs.Count(), DataOutputs.Count()) * PortSpacing + PortSpacing,
+            HeaderHeight + PortSpacing
+              + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
+              + PortSpacing
+              + (HiddenDataInputCount > 0 ? PortSpacing : 0),
             HeaderHeight + PortSpacing * 2);
+
+    /// <summary>
+    /// Reactive re-layout hook: when IsCollapsed flips, the layout-derived
+    /// properties (Height, visible pin lists) change — but CommunityToolkit
+    /// only fires a change notice for IsCollapsed itself. Explicitly notify
+    /// so the renderer recomputes.
+    /// </summary>
+    partial void OnIsCollapsedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(Height));
+        OnPropertyChanged(nameof(VisibleDataInputs));
+        OnPropertyChanged(nameof(HiddenDataInputCount));
+    }
 
     public double EffectiveWidth => IsContainer ? ContainerWidth : Width;
 
