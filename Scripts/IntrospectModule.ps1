@@ -84,14 +84,33 @@ if ($resolved) {
 # Import if not already loaded. Swallow non-fatal errors/warnings — some
 # modules (notably Microsoft.PowerShell.Security on 5.1) raise TypeData
 # re-registration warnings that get promoted to terminating errors under
-# -ErrorAction Stop even though the module itself loads fine. We verify
-# success post-hoc with Get-Module / Get-Command.
+# -ErrorAction Stop even though the module itself loads fine.
 if (-not (Get-Module -Name $actualName)) {
     try {
         Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
     } catch { }
 }
 
+# If Import-Module really did fail, try to trigger PowerShell's on-demand
+# module auto-loading by running Get-Command on a known exported command
+# from the module's manifest. Auto-loading has more tolerance for type
+# conflicts than explicit Import-Module; this is the reliable escape hatch
+# for modules like Microsoft.PowerShell.Security whose .types.ps1xml
+# conflicts with types already registered at engine startup.
+if (-not (Get-Module -Name $actualName) -and
+    -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
+{
+    $manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($manifest -and $manifest.ExportedCommands) {
+        $probe = $manifest.ExportedCommands.Keys | Select-Object -First 1
+        if ($probe) {
+            Get-Command $probe -ErrorAction SilentlyContinue *>$null
+        }
+    }
+}
+
+# Final verification. Either the module loaded, or Get-Command -Module returns
+# commands that are otherwise reachable — both are enough to proceed.
 if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue)) {
     Write-Error "Failed to import module '$actualName' and no commands available."
