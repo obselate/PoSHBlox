@@ -35,7 +35,7 @@ function Map-ParamType {
         '^PSCredential$'                                { return 'Credential' }
         '^Hashtable$'                                   { return 'HashTable' }
         '^String$'                                      {
-            # Path-ish heuristic — if the param name hints path, type as Path
+            # Path-ish heuristic -- if the param name hints path, type as Path
             if ($pm.Name -match '^(Path|LiteralPath|Destination|FilePath|OutputPath|WorkingDirectory|LogPath|SourcePath)$') {
                 return 'Path'
             }
@@ -49,9 +49,9 @@ function Map-ParamType {
 }
 
 # Resolve module. Three paths in priority order:
-#   1. Get-Module -ListAvailable — normal modules on disk.
+#   1. Get-Module -ListAvailable -- normal modules on disk.
 #   2. Wildcard match against the same.
-#   3. Get-Command -Module — catches built-in snap-ins (Microsoft.PowerShell.Core
+#   3. Get-Command -Module -- catches built-in snap-ins (Microsoft.PowerShell.Core
 #      et al in Windows PowerShell 5.1) that Get-Module can't see but whose
 #      cmdlets are always importable.
 $resolved = Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue
@@ -81,7 +81,7 @@ if ($resolved) {
     }
 }
 
-# Import if not already loaded. Swallow non-fatal errors/warnings — some
+# Import if not already loaded. Swallow non-fatal errors/warnings -- some
 # modules (notably Microsoft.PowerShell.Security on 5.1) raise TypeData
 # re-registration warnings that get promoted to terminating errors under
 # -ErrorAction Stop even though the module itself loads fine.
@@ -91,7 +91,7 @@ if (-not (Get-Module -Name $actualName)) {
     } catch { }
 }
 
-# Declared exports from the manifest — used both for the auto-load probe
+# Declared exports from the manifest -- used both for the auto-load probe
 # below and as a last-resort enumeration source if Get-Command -Module keeps
 # returning empty.
 $manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -109,7 +109,7 @@ if ($declaredExports.Count -eq 0 -and $manifest -and $manifest.Path -and (Test-P
 }
 
 # If Get-Command -Module is still empty, hit one declared export with
-# Get-Command <name> — PS's on-demand auto-loader is more tolerant of
+# Get-Command <name> -- PS's on-demand auto-loader is more tolerant of
 # type conflicts than explicit Import-Module.
 if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
@@ -122,7 +122,7 @@ if (-not (Get-Module -Name $actualName) -and
 
 # Collect the commands we will introspect. Preferred: Get-Command -Module,
 # which picks up everything that belongs to the module including dynamically
-# added functions. Fallback: iterate declared exports individually — each
+# added functions. Fallback: iterate declared exports individually -- each
 # Get-Command <name> call triggers auto-load if the command isn't reachable
 # yet, and returns CommandInfo objects we can pass to the enumeration loop.
 $commands = @(Get-Command -Module $actualName -CommandType Cmdlet,Function -ErrorAction SilentlyContinue | Sort-Object Name)
@@ -209,7 +209,7 @@ foreach ($cmd in $commands) {
             if ($attr.Mandatory) { $isMandatory = $true }
             if ($attr.ValueFromPipeline) { $isPipelineInput = $true }
 
-            # __AllParameterSets is PS's sentinel for "applies to every set" —
+            # __AllParameterSets is PS's sentinel for "applies to every set" --
             # we represent that as an empty sets list (our model's same semantics).
             $setName = $attr.ParameterSetName
             if ($setName -and $setName -ne '__AllParameterSets') {
@@ -240,7 +240,7 @@ foreach ($cmd in $commands) {
         }
     }
 
-    # Output types → V2 DataOutputs. If the cmdlet declares OutputType, name
+    # Output types -> V2 DataOutputs. If the cmdlet declares OutputType, name
     # the primary after the last segment of the first declared type; otherwise
     # fall back to a single primary "Out" of type Any.
     $dataOutputs = @()
