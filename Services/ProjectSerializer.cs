@@ -128,7 +128,6 @@ public static class ProjectSerializer
         ParameterName = p.ParameterName,
         IsPrimary = p.IsPrimary,
         IsPrimaryPipelineTarget = p.IsPrimaryPipelineTarget,
-        Type = p.Type.ToString(),
     };
 
     /// <summary>
@@ -263,7 +262,6 @@ public static class ProjectSerializer
     {
         Enum.TryParse<PortKind>(dto.Kind, ignoreCase: true, out var kind);
         Enum.TryParse<ParamType>(dto.DataType, ignoreCase: true, out var dtype);
-        Enum.TryParse<PortType>(dto.Type, ignoreCase: true, out var legacyType);
 
         var port = new NodePort
         {
@@ -275,7 +273,6 @@ public static class ProjectSerializer
             ParameterName = dto.ParameterName,
             IsPrimary = dto.IsPrimary,
             IsPrimaryPipelineTarget = dto.IsPrimaryPipelineTarget,
-            Type = legacyType,
             Owner = node,
         };
         list.Add(port);

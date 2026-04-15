@@ -9,28 +9,30 @@ using PoSHBlox.Models;
 namespace PoSHBlox.Services;
 
 /// <summary>
-/// Generates PowerShell scripts from a node graph.
+/// PowerShell code generator. Drives emission from an explicit exec-wire
+/// traversal. Data references resolve through the graph: wired input pins
+/// produce <c>-Param $upstreamVar</c>, unwired input pins produce the
+/// parameter's literal value.
 ///
-/// Key behaviors:
-///   - Linear chains collapse into a single pipeline
-///   - Function containers emit as named PowerShell functions
-///   - Variables are introduced at branching points AND container inputs
-///   - Container inputs flow through to zone children automatically
-///   - Control flow containers emit their PowerShell equivalents
+/// Pipeline collapse: when node A has <c>A.ExecOut → B.ExecIn</c> AND
+/// <c>A.PrimaryDataOutput → B.PrimaryPipelineTarget</c> AND A's primary-out has
+/// exactly one consumer AND A has no user-set OutputVariable, emit <c>A | B</c>
+/// instead of <c>$a = A; B -InputObject $a</c>. Chains extend greedily while
+/// each link still satisfies those conditions.
 ///
-/// Container input flow:
-///   When a container (if/else, foreach, etc.) has upstream input wired to its
-///   In port, the upstream result is captured as a variable. That variable is
-///   then piped into the first node of each zone's chain that has no other
-///   incoming connection. This is how data crosses the container boundary.
+/// ForEach.Item: a data wire from a ForEach's "Item" output compiles to <c>$_</c>
+/// inside its body; no variable is introduced for the iteration item.
 /// </summary>
 public class ScriptGenerator
 {
     private readonly ObservableCollection<GraphNode> _nodes;
     private readonly ObservableCollection<NodeConnection> _connections;
 
-    // Track variable assignments globally so nested scopes can reference parent vars
-    private readonly Dictionary<string, string> _globalVarMap = new();
+    /// <summary>node-id → assigned variable name (no $ prefix).</summary>
+    private readonly Dictionary<string, string> _varMap = new();
+
+    /// <summary>node-ids already emitted; guards converged-exec paths from double-emission.</summary>
+    private readonly HashSet<string> _emitted = new();
 
     public ScriptGenerator(
         ObservableCollection<GraphNode> nodes,
@@ -44,7 +46,8 @@ public class ScriptGenerator
 
     public string Generate()
     {
-        _globalVarMap.Clear();
+        _varMap.Clear();
+        _emitted.Clear();
 
         var sb = new StringBuilder();
         sb.AppendLine("# ===========================================");
@@ -55,240 +58,328 @@ public class ScriptGenerator
 
         var topLevel = _nodes.Where(n => n.ParentContainer == null).ToList();
 
-        // Phase 1: Emit function definitions
+        // Phase 1: function definitions.
         var functions = topLevel.Where(n => n.ContainerType == ContainerType.Function).ToList();
         if (functions.Count > 0)
         {
             sb.AppendLine("# ── Function Definitions ────────────────────");
             sb.AppendLine();
             foreach (var fn in functions)
+            {
                 EmitFunctionDefinition(sb, fn);
+                _emitted.Add(fn.Id);
+            }
         }
 
-        // Phase 2: Emit top-level execution (excluding function definitions)
-        var sorted = TopologicalSort(topLevel
+        // Phase 2: top-level exec walk (excluding function definitions).
+        var execables = topLevel
             .Where(n => n.ContainerType != ContainerType.Function)
-            .ToList());
-        if (sorted == null)
-        {
-            sb.AppendLine("# ERROR: Cycle detected in graph!");
-            return sb.ToString();
-        }
+            .ToList();
 
-        if (sorted.Count > 0)
+        if (execables.Count > 0)
         {
             sb.AppendLine("# ── Execution ───────────────────────────────");
             sb.AppendLine();
-            EmitScope(sb, sorted, indent: 0, inputVar: null);
+            EmitExecScope(sb, execables, indent: 0);
         }
 
         return sb.ToString();
     }
 
-    // ── Scope emission ─────────────────────────────────────────
+    // ── Scope walk ─────────────────────────────────────────────
 
     /// <summary>
-    /// Emit a set of topologically-sorted nodes within a scope.
-    /// inputVar: if non-null, this variable is available as implicit input
-    /// for any head node (no incoming connections) in this scope.
+    /// Walk a scope (a zone's children or the top-level set) starting from every
+    /// exec root — a node whose ExecIn has no in-scope incoming connection, or
+    /// that simply has no ExecIn pin (e.g. Get-Process with HasExecIn=false).
+    /// Emission is chain-aware: each emission may consume one or more nodes.
     /// </summary>
-    private void EmitScope(StringBuilder sb, List<GraphNode> sorted, int indent, string? inputVar)
+    private void EmitExecScope(StringBuilder sb, List<GraphNode> scope, int indent)
+    {
+        var scopeIds = scope.Select(n => n.Id).ToHashSet();
+
+        // Roots: ordered to match document order for stable output.
+        var roots = scope.Where(n => IsExecRoot(n, scopeIds)).ToList();
+
+        foreach (var root in roots)
+            WalkExec(sb, root, scopeIds, indent);
+
+        // Catch any nodes unreachable via exec (e.g. disconnected helpers).
+        // Emit them as standalone statements so the user sees them in output.
+        foreach (var n in scope)
+        {
+            if (_emitted.Contains(n.Id)) continue;
+            WalkExec(sb, n, scopeIds, indent);
+        }
+    }
+
+    /// <summary>
+    /// Starting at <paramref name="start"/>, greedily form a pipeline-collapsable
+    /// chain, emit it, then recurse on the exec successor of the last node.
+    /// Returns when the exec-successor is already emitted or leaves the scope.
+    /// </summary>
+    private void WalkExec(StringBuilder sb, GraphNode start, HashSet<string> scopeIds, int indent)
+    {
+        var current = start;
+        while (current != null && !_emitted.Contains(current.Id) && scopeIds.Contains(current.Id))
+        {
+            if (current.IsContainer)
+            {
+                EmitContainer(sb, current, indent);
+                _emitted.Add(current.Id);
+            }
+            else
+            {
+                var chain = BuildPipelineChain(current, scopeIds);
+                EmitChain(sb, chain, indent);
+                foreach (var c in chain) _emitted.Add(c.Id);
+                current = chain[^1];
+            }
+
+            current = ExecSuccessor(current, scopeIds);
+        }
+    }
+
+    // ── Pipeline chain construction ────────────────────────────
+
+    /// <summary>
+    /// Extend a chain from <paramref name="start"/> while each successive link
+    /// satisfies the collapse rule: exec→ lines up with primary-out→pipeline-target,
+    /// source has a single consumer of its primary-out, and no user OutputVariable.
+    /// </summary>
+    private List<GraphNode> BuildPipelineChain(GraphNode start, HashSet<string> scopeIds)
+    {
+        var chain = new List<GraphNode> { start };
+        var current = start;
+
+        while (true)
+        {
+            var next = ExecSuccessor(current, scopeIds);
+            if (next == null || next.IsContainer || _emitted.Contains(next.Id)) break;
+            if (!CanCollapseInto(current, next, scopeIds)) break;
+            chain.Add(next);
+            current = next;
+        }
+
+        return chain;
+    }
+
+    /// <summary>
+    /// Can <paramref name="b"/> receive <paramref name="a"/>'s primary output via
+    /// a single <c>|</c> rather than an explicit <c>$var</c> reference?
+    /// </summary>
+    private bool CanCollapseInto(GraphNode a, GraphNode b, HashSet<string> scopeIds)
+    {
+        if (!string.IsNullOrWhiteSpace(a.OutputVariable)) return false;
+
+        var primaryOut = a.PrimaryDataOutput;
+        var pipelineTarget = b.PrimaryPipelineTarget;
+        if (primaryOut == null || pipelineTarget == null) return false;
+
+        // a.primary-out must connect to b's primary pipeline target, and a.primary-out
+        // must have exactly one consumer (only b).
+        int outConsumers = _connections.Count(c =>
+            c.Source == primaryOut && scopeIds.Contains(c.Target.Owner!.Id));
+        if (outConsumers != 1) return false;
+
+        return _connections.Any(c => c.Source == primaryOut && c.Target == pipelineTarget);
+    }
+
+    // ── Emit a (possibly 1-long) pipeline chain ────────────────
+
+    private void EmitChain(StringBuilder sb, List<GraphNode> chain, int indent)
     {
         var pad = Indent(indent);
-        var scopeIds = new HashSet<string>(sorted.Select(n => n.Id));
 
-        var chains = BuildChains(sorted, scopeIds);
-        var emitted = new HashSet<string>();
-        var localVarMap = new Dictionary<string, string>();
+        // Pre-assign variable for every node in the chain so downstream nodes in
+        // the same scope can reference them. Pipeline-collapsed chains share the
+        // chain's single variable: downstream references to any chain member
+        // resolve to the last node's var.
+        string tailVar = MakeVariableNameForNode(chain[^1]);
+        foreach (var n in chain) _varMap[n.Id] = tailVar;
 
-        // First pass: figure out which chains/nodes need variables
-        // A chain needs a variable if:
-        //   1. Its last node feeds multiple downstream consumers, OR
-        //   2. Its last node feeds a control flow container (container needs a named ref)
-        foreach (var chain in chains)
+        // Chain expression.
+        var parts = new List<string>();
+        for (int i = 0; i < chain.Count; i++)
         {
-            var lastNode = chain[^1];
-            bool needsVar = CountDownstream(lastNode, scopeIds) > 1
-                         || HasContainerDownstream(lastNode, scopeIds);
-
-            if (needsVar)
-            {
-                string varName = MakeVariableName(chain);
-                foreach (var n in chain)
-                {
-                    localVarMap[n.Id] = varName;
-                    _globalVarMap[n.Id] = varName;
-                }
-            }
+            bool collapseInput = i > 0; // everyone but the head consumes | upstream
+            parts.Add(BuildNodeExpression(chain[i], collapseInput));
         }
+        string pipeline = string.Join(" | ", parts);
 
-        // Also assign variables for standalone nodes feeding containers
-        foreach (var node in sorted.Where(n => !n.IsContainer))
-        {
-            if (localVarMap.ContainsKey(node.Id)) continue;
-            if (HasContainerDownstream(node, scopeIds))
-            {
-                string varName = MakeVariableNameForNode(node);
-                localVarMap[node.Id] = varName;
-                _globalVarMap[node.Id] = varName;
-            }
-        }
-
-        // Build a lookup: node ID → chain it belongs to
-        var chainByNodeId = new Dictionary<string, List<GraphNode>>();
-        foreach (var chain in chains)
-            foreach (var n in chain)
-                chainByNodeId[n.Id] = chain;
-
-        // Second pass: emit in topological order (chains and containers interleaved)
-        // This ensures nodes connected to a container's output are emitted AFTER
-        // the container, not before.
-        foreach (var node in sorted)
-        {
-            if (emitted.Contains(node.Id)) continue;
-
-            if (node.IsContainer)
-            {
-                emitted.Add(node.Id);
-                string? containerInput = ResolveContainerInput(node, scopeIds, localVarMap, inputVar);
-                EmitContainer(sb, node, indent, containerInput);
-                sb.AppendLine();
-            }
-            else if (chainByNodeId.TryGetValue(node.Id, out var chain))
-            {
-                if (chain.Any(n => emitted.Contains(n.Id))) continue;
-                foreach (var n in chain) emitted.Add(n.Id);
-
-                var firstNode = chain[0];
-                var lastNode = chain[^1];
-
-                // Resolve upstream: check local var map, global var map, or implicit input
-                string? upstreamExpr = ResolveUpstream(firstNode, scopeIds, localVarMap)
-                                    ?? (CountIncoming(firstNode, scopeIds) == 0 ? inputVar : null);
-
-                string pipeline = BuildPipelineExpression(chain, upstreamExpr);
-
-                if (localVarMap.TryGetValue(lastNode.Id, out var assignVar))
-                    sb.AppendLine($"{pad}${assignVar} = {pipeline}");
-                else
-                    sb.AppendLine($"{pad}{pipeline}");
-
-                sb.AppendLine();
-            }
-        }
+        if (NeedsAssignment(chain[^1]))
+            sb.AppendLine($"{pad}${tailVar} = {pipeline}");
+        else
+            sb.AppendLine($"{pad}{pipeline}");
+        sb.AppendLine();
     }
 
     /// <summary>
-    /// Resolve what input expression a container should receive.
-    /// Checks: upstream variable → upstream in global map → scope's implicit input.
+    /// Build <c>Cmdlet -Param value -Other $upstream</c> (or bare ScriptBody for
+    /// non-cmdlet nodes). <paramref name="collapseInput"/> suppresses the primary
+    /// pipeline-target parameter — it's consumed by the preceding <c>|</c>.
     /// </summary>
-    private string? ResolveContainerInput(GraphNode container, HashSet<string> scopeIds,
-        Dictionary<string, string> localVarMap, string? scopeInputVar)
+    private string BuildNodeExpression(GraphNode node, bool collapseInput)
     {
-        var upstream = GetUpstreamNode(container, scopeIds);
-        if (upstream != null)
+        if (!node.IsCmdletNode)
+            return node.ScriptBody.Trim();
+
+        var args = new List<string>();
+
+        foreach (var param in node.Parameters.Where(p => !p.IsArgument))
         {
-            // Check local scope first, then global
-            if (localVarMap.TryGetValue(upstream.Id, out var localVar))
-                return "$" + localVar;
-            if (_globalVarMap.TryGetValue(upstream.Id, out var globalVar))
-                return "$" + globalVar;
-        }
-
-        // If no explicit upstream, inherit scope's implicit input
-        if (upstream == null && CountIncoming(container, scopeIds) == 0)
-            return scopeInputVar;
-
-        return null;
-    }
-
-    private string? ResolveUpstream(GraphNode node, HashSet<string> scopeIds,
-        Dictionary<string, string> localVarMap)
-    {
-        var upstream = GetUpstreamNode(node, scopeIds);
-        if (upstream == null) return null;
-
-        if (localVarMap.TryGetValue(upstream.Id, out var localVar))
-            return "$" + localVar;
-        if (_globalVarMap.TryGetValue(upstream.Id, out var globalVar))
-            return "$" + globalVar;
-
-        return null;
-    }
-
-    // ── Chain detection ────────────────────────────────────────
-
-    private List<List<GraphNode>> BuildChains(List<GraphNode> sorted, HashSet<string> scopeIds)
-    {
-        var chains = new List<List<GraphNode>>();
-        var assigned = new HashSet<string>();
-
-        foreach (var node in sorted)
-        {
-            if (assigned.Contains(node.Id)) continue;
-            if (node.IsContainer) continue;
-
-            int inCount = CountIncoming(node, scopeIds);
-            if (inCount > 0)
+            var pin = node.Inputs.FirstOrDefault(p => p.ParameterName == param.Name);
+            if (pin == null)
             {
-                var upstream = GetUpstreamNode(node, scopeIds);
-                if (upstream != null && CountDownstream(upstream, scopeIds) == 1
-                    && !IsControlFlowContainer(upstream))
-                    continue;
+                // Legacy / unpaired parameter — emit literal if present.
+                var lit = param.ToPowerShellArg();
+                if (!string.IsNullOrEmpty(lit)) args.Add(lit);
+                continue;
             }
 
-            var chain = new List<GraphNode> { node };
-            assigned.Add(node.Id);
+            if (collapseInput && pin.IsPrimaryPipelineTarget)
+                continue; // consumed by | upstream
 
-            var current = node;
-            while (true)
+            var upstream = FirstConnectionTargeting(pin);
+            if (upstream != null)
             {
-                var next = GetSingleDownstreamNode(current, scopeIds);
-                if (next == null) break;
-                if (assigned.Contains(next.Id)) break;
-                if (IsControlFlowContainer(next)) break;
-                if (CountIncoming(next, scopeIds) != 1) break;
-
-                chain.Add(next);
-                assigned.Add(next.Id);
-                current = next;
+                var refExpr = ResolveUpstreamRef(upstream.Source);
+                args.Add($"-{param.Name} {refExpr}");
             }
-
-            chains.Add(chain);
+            else
+            {
+                var lit = param.ToPowerShellArg();
+                if (!string.IsNullOrEmpty(lit)) args.Add(lit);
+            }
         }
 
-        return chains;
+        return args.Count > 0 ? $"{node.CmdletName} {string.Join(" ", args)}" : node.CmdletName;
     }
 
-    // ── Pipeline expression building ───────────────────────────
-
-    private string BuildPipelineExpression(List<GraphNode> chain, string? upstreamExpr)
+    /// <summary>
+    /// Resolve a wire's source pin to a PowerShell expression:
+    ///   - ForEach.Item → $_
+    ///   - anything else → $ of the source node's assigned variable.
+    /// </summary>
+    private string ResolveUpstreamRef(NodePort sourcePort)
     {
-        var segments = new List<string>();
+        var owner = sourcePort.Owner!;
+        if (owner.ContainerType == ContainerType.ForEach && sourcePort.Name == "Item")
+            return "$_";
 
-        if (!string.IsNullOrEmpty(upstreamExpr))
-            segments.Add(upstreamExpr);
+        if (_varMap.TryGetValue(owner.Id, out var name))
+            return "$" + name;
 
-        foreach (var node in chain)
-        {
-            segments.Add(BuildNodeExpression(node));
-        }
-
-        return string.Join(" | ", segments);
+        // Upstream hasn't been emitted yet (cycle or out-of-scope). Fall back to
+        // a predicted name so the script still parses — flag with a comment in Phase N.
+        var predicted = MakeVariableNameForNode(owner);
+        _varMap[owner.Id] = predicted;
+        return "$" + predicted;
     }
 
-    private static string BuildNodeExpression(GraphNode node)
+    /// <summary>Does this node need a <c>$var = ...</c> assignment?</summary>
+    private bool NeedsAssignment(GraphNode node)
     {
-        if (node.IsCmdletNode)
-        {
-            var args = FormatArgs(node);
-            return string.IsNullOrEmpty(args) ? node.CmdletName : $"{node.CmdletName} {args}";
-        }
+        if (!string.IsNullOrWhiteSpace(node.OutputVariable)) return true;
 
-        return node.ScriptBody.Trim();
+        // If any data output has a downstream consumer, we need the var.
+        foreach (var outPin in node.DataOutputs)
+        {
+            if (_connections.Any(c => c.Source == outPin)) return true;
+        }
+        return false;
     }
 
-    // ── Function container emission ────────────────────────────
+    // ── Container emission ─────────────────────────────────────
+
+    private void EmitContainer(StringBuilder sb, GraphNode container, int indent)
+    {
+        var pad = Indent(indent);
+
+        switch (container.ContainerType)
+        {
+            case ContainerType.IfElse:   EmitIfElse(sb, container, pad, indent);   break;
+            case ContainerType.ForEach:  EmitForEach(sb, container, pad, indent);  break;
+            case ContainerType.TryCatch: EmitTryCatch(sb, container, pad, indent); break;
+            case ContainerType.While:    EmitWhile(sb, container, pad, indent);    break;
+            case ContainerType.Label:    EmitLabel(sb, container, indent);         break;
+            case ContainerType.Function: EmitFunctionDefinition(sb, container);    break;
+            default:
+                sb.AppendLine($"{pad}# WARNING: Unknown container type '{container.ContainerType}'");
+                break;
+        }
+        sb.AppendLine();
+    }
+
+    private void EmitIfElse(StringBuilder sb, GraphNode c, string pad, int indent)
+    {
+        var condition = GetParamValue(c, "Condition", "$true");
+        sb.AppendLine($"{pad}if ({condition}) {{");
+        EmitZone(sb, FindZone(c, "Then"), indent + 1);
+        sb.AppendLine($"{pad}}}");
+
+        var elseZone = FindZone(c, "Else");
+        if (elseZone != null && elseZone.Children.Count > 0)
+        {
+            sb.AppendLine($"{pad}else {{");
+            EmitZone(sb, elseZone, indent + 1);
+            sb.AppendLine($"{pad}}}");
+        }
+    }
+
+    private void EmitForEach(StringBuilder sb, GraphNode c, string pad, int indent)
+    {
+        // Collection source comes from the "Source" data input pin. Its upstream's
+        // primary-out resolves to the pipeline prefix.
+        var sourcePin = c.Inputs.FirstOrDefault(p => p.Name == "Source");
+        string prefix = "";
+        if (sourcePin != null)
+        {
+            var upstream = FirstConnectionTargeting(sourcePin);
+            if (upstream != null)
+                prefix = ResolveUpstreamRef(upstream.Source) + " | ";
+        }
+
+        sb.AppendLine($"{pad}{prefix}ForEach-Object {{");
+        EmitZone(sb, FindZone(c, "Body"), indent + 1);
+        sb.AppendLine($"{pad}}}");
+    }
+
+    private void EmitTryCatch(StringBuilder sb, GraphNode c, string pad, int indent)
+    {
+        sb.AppendLine($"{pad}try {{");
+        EmitZone(sb, FindZone(c, "Try"), indent + 1);
+        sb.AppendLine($"{pad}}}");
+        sb.AppendLine($"{pad}catch {{");
+        EmitZone(sb, FindZone(c, "Catch"), indent + 1);
+        sb.AppendLine($"{pad}}}");
+    }
+
+    private void EmitWhile(StringBuilder sb, GraphNode c, string pad, int indent)
+    {
+        var condition = GetParamValue(c, "Condition", "$true");
+        sb.AppendLine($"{pad}while ({condition}) {{");
+        EmitZone(sb, FindZone(c, "Body"), indent + 1);
+        sb.AppendLine($"{pad}}}");
+    }
+
+    private void EmitLabel(StringBuilder sb, GraphNode c, int indent)
+    {
+        // Pass-through: label zones just wrap their content.
+        EmitZone(sb, FindZone(c, "Content"), indent);
+    }
+
+    private void EmitZone(StringBuilder sb, ContainerZone? zone, int indent)
+    {
+        if (zone == null || zone.Children.Count == 0)
+        {
+            sb.AppendLine($"{Indent(indent)}# (empty)");
+            return;
+        }
+        EmitExecScope(sb, zone.Children.ToList(), indent);
+    }
+
+    // ── Function emission (V1-compatible shape, cleaned up for V2) ──
 
     private void EmitFunctionDefinition(StringBuilder sb, GraphNode fnNode)
     {
@@ -300,7 +391,6 @@ public class ScriptGenerator
 
         sb.AppendLine($"function {fnName} {{");
 
-        // OutputType attribute (optional)
         if (!string.IsNullOrWhiteSpace(returnType))
             sb.AppendLine($"    [OutputType([{returnType}])]");
 
@@ -317,36 +407,34 @@ public class ScriptGenerator
                 if (attrs.Count > 0)
                     sb.AppendLine($"        [Parameter({string.Join(", ", attrs)})]");
 
-                var typeName = arg.PowerShellTypeName;
                 var comma = i < arguments.Count - 1 ? "," : "";
                 var defaultVal = !string.IsNullOrWhiteSpace(arg.DefaultValue) && arg.Type != ParamType.Bool
                     ? $" = \"{arg.DefaultValue}\""
                     : "";
-                sb.AppendLine($"        [{typeName}]${arg.Name}{defaultVal}{comma}");
+                sb.AppendLine($"        [{arg.PowerShellTypeName}]${arg.Name}{defaultVal}{comma}");
                 if (i < arguments.Count - 1) sb.AppendLine();
             }
             sb.AppendLine("    )");
 
-            // If any pipeline argument exists, wrap body in process{}
             var pipelineArg = arguments.FirstOrDefault(a => a.IsPipelineInput);
             if (pipelineArg != null)
             {
                 sb.AppendLine("    process {");
-                EmitZoneAsScope(sb, bodyZone, indent: 2, inputVar: "$" + pipelineArg.Name);
+                EmitZone(sb, bodyZone, indent: 2);
                 if (!string.IsNullOrWhiteSpace(returnVar))
                     sb.AppendLine($"        return ${returnVar}");
                 sb.AppendLine("    }");
             }
             else
             {
-                EmitZoneAsScope(sb, bodyZone, indent: 1, inputVar: null);
+                EmitZone(sb, bodyZone, indent: 1);
                 if (!string.IsNullOrWhiteSpace(returnVar))
                     sb.AppendLine($"    return ${returnVar}");
             }
         }
         else
         {
-            EmitZoneAsScope(sb, bodyZone, indent: 1, inputVar: null);
+            EmitZone(sb, bodyZone, indent: 1);
             if (!string.IsNullOrWhiteSpace(returnVar))
                 sb.AppendLine($"    return ${returnVar}");
         }
@@ -355,217 +443,37 @@ public class ScriptGenerator
         sb.AppendLine();
     }
 
-    // ── Control flow container emission ────────────────────────
+    // ── Exec-graph helpers ─────────────────────────────────────
 
-    /// <summary>
-    /// containerInput: the expression referencing the data wired into this container's
-    /// In port. Gets passed to zone children as their implicit input.
-    /// </summary>
-    private void EmitContainer(StringBuilder sb, GraphNode container, int indent, string? containerInput)
+    private bool IsExecRoot(GraphNode n, HashSet<string> scopeIds)
     {
-        var pad = Indent(indent);
-
-        switch (container.ContainerType)
-        {
-            case ContainerType.IfElse:
-                EmitIfElse(sb, container, pad, indent, containerInput);
-                break;
-            case ContainerType.ForEach:
-                EmitForEach(sb, container, pad, indent, containerInput);
-                break;
-            case ContainerType.TryCatch:
-                EmitTryCatch(sb, container, pad, indent, containerInput);
-                break;
-            case ContainerType.While:
-                EmitWhile(sb, container, pad, indent, containerInput);
-                break;
-            case ContainerType.Function:
-                EmitFunctionDefinition(sb, container);
-                break;
-            case ContainerType.Label:
-                EmitZoneAsScope(sb, FindZone(container, "Content"), indent, containerInput);
-                break;
-            default:
-                sb.AppendLine($"{pad}# WARNING: Unknown container type '{container.ContainerType}'");
-                break;
-        }
+        // A node with no ExecIn pin (HasExecIn=false) is always a root.
+        var execIn = n.ExecInPort;
+        if (execIn == null) return true;
+        return !_connections.Any(c =>
+            c.Target == execIn && scopeIds.Contains(c.Source.Owner!.Id));
     }
 
-    private void EmitIfElse(StringBuilder sb, GraphNode container, string pad, int indent, string? containerInput)
+    /// <summary>Follow the single outgoing exec wire from <paramref name="n"/>'s ExecOut.</summary>
+    private GraphNode? ExecSuccessor(GraphNode n, HashSet<string> scopeIds)
     {
-        var condition = GetParamValue(container, "Condition", "$true");
-        var thenZone = FindZone(container, "Then");
-        var elseZone = FindZone(container, "Else");
-
-        sb.AppendLine($"{pad}if ({condition}) {{");
-        EmitZoneAsScope(sb, thenZone, indent + 1, containerInput);
-        sb.AppendLine($"{pad}}}");
-
-        if (elseZone != null && elseZone.Children.Count > 0)
-        {
-            sb.AppendLine($"{pad}else {{");
-            EmitZoneAsScope(sb, elseZone, indent + 1, containerInput);
-            sb.AppendLine($"{pad}}}");
-        }
+        var execOut = n.ExecOutPort;
+        if (execOut == null) return null;
+        var conn = _connections.FirstOrDefault(c =>
+            c.Source == execOut && scopeIds.Contains(c.Target.Owner!.Id));
+        return conn?.Target.Owner;
     }
 
-    private void EmitForEach(StringBuilder sb, GraphNode container, string pad, int indent, string? containerInput)
-    {
-        var bodyZone = FindZone(container, "Body");
+    private NodeConnection? FirstConnectionTargeting(NodePort pin)
+        => _connections.FirstOrDefault(c => c.Target == pin);
 
-        if (!string.IsNullOrEmpty(containerInput))
-            sb.AppendLine($"{pad}{containerInput} | ForEach-Object {{");
-        else
-            sb.AppendLine($"{pad}ForEach-Object {{");
+    // ── Naming helpers (unchanged from V1) ─────────────────────
 
-        // Don't auto-pipe $_ into zone children. Inside ForEach-Object, $_ is
-        // already a scoped variable that nodes can reference in their parameters
-        // (e.g. -Object "$_"). Auto-piping produces broken code like "$_ | Write-Host".
-        EmitZoneAsScope(sb, bodyZone, indent + 1, null);
-        sb.AppendLine($"{pad}}}");
-    }
-
-    private void EmitTryCatch(StringBuilder sb, GraphNode container, string pad, int indent, string? containerInput)
-    {
-        var tryZone = FindZone(container, "Try");
-        var catchZone = FindZone(container, "Catch");
-
-        sb.AppendLine($"{pad}try {{");
-        EmitZoneAsScope(sb, tryZone, indent + 1, containerInput);
-        sb.AppendLine($"{pad}}}");
-
-        sb.AppendLine($"{pad}catch {{");
-        EmitZoneAsScope(sb, catchZone, indent + 1, null);
-        sb.AppendLine($"{pad}}}");
-    }
-
-    private void EmitWhile(StringBuilder sb, GraphNode container, string pad, int indent, string? containerInput)
-    {
-        var condition = GetParamValue(container, "Condition", "$true");
-        var bodyZone = FindZone(container, "Body");
-
-        sb.AppendLine($"{pad}while ({condition}) {{");
-        EmitZoneAsScope(sb, bodyZone, indent + 1, containerInput);
-        sb.AppendLine($"{pad}}}");
-    }
-
-    /// <summary>
-    /// Emit a zone's children with the full chain-collapsing logic.
-    /// inputVar flows through as implicit input for head nodes.
-    /// </summary>
-    private void EmitZoneAsScope(StringBuilder sb, ContainerZone? zone, int indent, string? inputVar)
-    {
-        if (zone == null || zone.Children.Count == 0)
-        {
-            sb.AppendLine($"{Indent(indent)}# (empty)");
-            return;
-        }
-
-        var sorted = TopologicalSort(zone.Children.ToList());
-        if (sorted == null)
-        {
-            sb.AppendLine($"{Indent(indent)}# ERROR: Cycle detected in zone '{zone.Name}'!");
-            return;
-        }
-
-        EmitScope(sb, sorted, indent, inputVar);
-    }
-
-    // ── Graph analysis helpers ─────────────────────────────────
-
-    private int CountDownstream(GraphNode node, HashSet<string> scopeIds)
-        => _connections.Count(c =>
-            c.Source.Owner == node && scopeIds.Contains(c.Target.Owner!.Id));
-
-    private int CountIncoming(GraphNode node, HashSet<string> scopeIds)
-        => _connections.Count(c =>
-            c.Target.Owner == node && scopeIds.Contains(c.Source.Owner!.Id));
-
-    /// <summary>
-    /// Does this node feed into any control flow container in the scope?
-    /// If so, it needs a variable (containers reference input by variable, not pipeline).
-    /// </summary>
-    private bool HasContainerDownstream(GraphNode node, HashSet<string> scopeIds)
-        => _connections.Any(c =>
-            c.Source.Owner == node
-            && scopeIds.Contains(c.Target.Owner!.Id)
-            && IsControlFlowContainer(c.Target.Owner!));
-
-    private GraphNode? GetSingleDownstreamNode(GraphNode node, HashSet<string> scopeIds)
-    {
-        var downstream = _connections
-            .Where(c => c.Source.Owner == node && scopeIds.Contains(c.Target.Owner!.Id))
-            .Select(c => c.Target.Owner!)
-            .Distinct()
-            .ToList();
-        return downstream.Count == 1 ? downstream[0] : null;
-    }
-
-    private GraphNode? GetUpstreamNode(GraphNode node, HashSet<string> scopeIds)
-    {
-        var upstream = _connections
-            .Where(c => c.Target.Owner == node && scopeIds.Contains(c.Source.Owner!.Id))
-            .Select(c => c.Source.Owner!)
-            .Distinct()
-            .ToList();
-        return upstream.Count == 1 ? upstream[0] : null;
-    }
-
-    // ── Topological sort ───────────────────────────────────────
-
-    private List<GraphNode>? TopologicalSort(List<GraphNode> nodes)
-    {
-        var nodeIds = new HashSet<string>(nodes.Select(n => n.Id));
-        var result = new List<GraphNode>();
-        var visited = new HashSet<string>();
-        var visiting = new HashSet<string>();
-
-        bool Visit(GraphNode node)
-        {
-            if (visiting.Contains(node.Id)) return false;
-            if (visited.Contains(node.Id)) return true;
-            visiting.Add(node.Id);
-
-            foreach (var dep in _connections
-                .Where(c => c.Target.Owner == node && nodeIds.Contains(c.Source.Owner!.Id))
-                .Select(c => c.Source.Owner!)
-                .Distinct())
-            {
-                if (!Visit(dep)) return false;
-            }
-
-            visiting.Remove(node.Id);
-            visited.Add(node.Id);
-            result.Add(node);
-            return true;
-        }
-
-        foreach (var node in nodes)
-            if (!Visit(node)) return null;
-
-        return result;
-    }
-
-    // ── Naming helpers ─────────────────────────────────────────
-
-    /// <summary>
-    /// Get the variable name for a chain. Uses the first node's identity.
-    /// </summary>
-    private static string MakeVariableName(List<GraphNode> chain)
-        => MakeVariableNameForNode(chain[0]);
-
-    /// <summary>
-    /// Get the variable name for a node.
-    /// Priority: user-set OutputVariable → auto-generated Title_ShortId.
-    /// The short ID suffix guarantees uniqueness even with duplicate titles.
-    /// </summary>
     private static string MakeVariableNameForNode(GraphNode node)
     {
-        // If user explicitly named the output variable, use it as-is
         if (!string.IsNullOrWhiteSpace(node.OutputVariable))
             return SanitizeVariableName(node.OutputVariable);
 
-        // Auto-generate: Title_ShortId (first 4 chars of the node's unique ID)
         var baseName = node.ContainerType == ContainerType.Function
             ? node.Parameters.FirstOrDefault(p => p.Name == "FunctionName")?.EffectiveValue ?? "Function"
             : node.Title;
@@ -577,23 +485,12 @@ public class ScriptGenerator
     {
         var parts = name.Split('-', ' ', '.', '_');
         var result = string.Join("",
-            parts.Select(p =>
-                p.Length > 0 ? char.ToUpper(p[0]) + p[1..] : ""));
-
+            parts.Select(p => p.Length > 0 ? char.ToUpper(p[0]) + p[1..] : ""));
         result = Regex.Replace(result, @"[^a-zA-Z0-9]", "");
         return string.IsNullOrEmpty(result) ? "Result" : result;
     }
 
-    // ── Utility helpers ────────────────────────────────────────
-
-    private static bool IsControlFlowContainer(GraphNode node)
-        => node.IsContainer;
-
-    private static string FormatArgs(GraphNode node)
-        => string.Join(" ",
-            node.Parameters
-                .Select(p => p.ToPowerShellArg())
-                .Where(a => !string.IsNullOrEmpty(a)));
+    // ── Utility ────────────────────────────────────────────────
 
     private static string GetParamValue(GraphNode node, string paramName, string fallback)
         => node.Parameters.FirstOrDefault(p => p.Name == paramName)?.EffectiveValue ?? fallback;

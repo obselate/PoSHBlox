@@ -33,9 +33,6 @@ public partial class NodePort : ObservableObject
     /// </summary>
     public bool IsPrimaryPipelineTarget { get; set; }
 
-    /// <summary>Legacy V1 field — preserved for serializer migration, removed in Step 9.</summary>
-    public PortType Type { get; set; } = PortType.Pipeline;
-
     public GraphNode? Owner { get; set; }
 
     [ObservableProperty] private double _anchorX;

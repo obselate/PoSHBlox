@@ -98,9 +98,6 @@ public class PblxPort
     /// <summary>V2: input-side flag — accepts upstream via pipeline (ValueFromPipeline).</summary>
     public bool IsPrimaryPipelineTarget { get; set; }
 
-    /// <summary>V1 legacy PortType. Dropped in Step 9.</summary>
-    public string Type { get; set; } = "Pipeline";
-
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extensions { get; set; }
 }
@@ -134,13 +131,9 @@ public class PblxConnection
     public string SourceNodeId { get; set; } = "";
     public string TargetNodeId { get; set; } = "";
 
-    /// <summary>V2: pin IDs survive reordering / template updates.</summary>
+    /// <summary>Pin IDs survive reordering / template updates.</summary>
     public string SourcePortId { get; set; } = "";
     public string TargetPortId { get; set; } = "";
-
-    /// <summary>V1 legacy index-based addressing. Used only during migration.</summary>
-    public int SourcePortIndex { get; set; } = -1;
-    public int TargetPortIndex { get; set; } = -1;
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? Extensions { get; set; }
