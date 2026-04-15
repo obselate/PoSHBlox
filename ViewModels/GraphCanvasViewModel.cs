@@ -81,7 +81,31 @@ public partial class GraphCanvasViewModel : ObservableObject
 
         SeedExampleGraph();
         RefreshWiredState();
+        RefreshParameterSetVisibility();
         IsDirty = false;
+    }
+
+    /// <summary>
+    /// Sync <see cref="NodeParameter.IsInActiveSet"/> on every parameter so the
+    /// properties panel hides rows outside the active set. No-op for nodes whose
+    /// cmdlet doesn't declare sets (KnownParameterSets empty).
+    /// </summary>
+    private void RefreshParameterSetVisibility()
+    {
+        foreach (var node in Nodes)
+        {
+            bool nodeHasSets = node.KnownParameterSets.Length > 0;
+            foreach (var p in node.Parameters)
+            {
+                // Common params (no declared sets) always in scope. Otherwise the
+                // active set must appear in the param's sets list.
+                bool inScope = !nodeHasSets
+                            || p.ParameterSets.Length == 0
+                            || p.ParameterSets.Contains(node.ActiveParameterSet,
+                                   StringComparer.OrdinalIgnoreCase);
+                p.IsInActiveSet = inScope;
+            }
+        }
     }
 
     /// <summary>
@@ -371,6 +395,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         ProjectSerializer.RebuildGraph(doc, this);
         _suppressDirty = false;
         RefreshWiredState();
+        RefreshParameterSetVisibility();
         IsDirty = false;
         Palette.SyncFunctionTemplates();
     }
@@ -430,6 +455,10 @@ public partial class GraphCanvasViewModel : ObservableObject
         // parameter — refresh so the chip stays accurate.
         if (e.PropertyName == nameof(GraphNode.Title))
             RefreshWiredState();
+
+        // Active-set switch changes which params render + which are mandatory.
+        if (e.PropertyName == nameof(GraphNode.ActiveParameterSet))
+            RefreshParameterSetVisibility();
     }
 
     private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -454,6 +483,7 @@ public partial class GraphCanvasViewModel : ObservableObject
                 p.PropertyChanged -= OnParamPropertyChanged;
 
         RefreshWiredState();
+        RefreshParameterSetVisibility();
         Palette.SyncFunctionTemplates();
     }
 

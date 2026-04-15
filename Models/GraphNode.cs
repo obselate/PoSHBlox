@@ -46,6 +46,9 @@ public partial class GraphNode : ObservableObject
     /// <summary>Currently-active parameter set. Empty when <see cref="KnownParameterSets"/> is empty.</summary>
     [ObservableProperty] private string _activeParameterSet = "";
 
+    /// <summary>True when the cmdlet declares more than one set — drives the picker's visibility.</summary>
+    public bool HasMultipleSets => KnownParameterSets.Length > 1;
+
     // ── Ports & parameters ─────────────────────────────────────
     public ObservableCollection<NodePort> Inputs { get; } = new();
     public ObservableCollection<NodePort> Outputs { get; } = new();

@@ -29,6 +29,18 @@ public partial class NodeParameter : ObservableObject
     /// <summary>Sets in which this param is mandatory. Falls back to <see cref="IsMandatory"/> when empty.</summary>
     public string[] MandatoryInSets { get; set; } = [];
 
+    /// <summary>
+    /// Maintained by the view model: true when the param belongs to the node's
+    /// currently-active parameter set (or when the param doesn't declare any
+    /// sets — common params are always in scope).
+    /// </summary>
+    [ObservableProperty] private bool _isInActiveSet = true;
+
+    /// <summary>Composite visibility gate used by the properties-panel ItemTemplate.</summary>
+    public bool ShouldRenderInPanel => !IsArgument && IsInActiveSet;
+
+    partial void OnIsInActiveSetChanged(bool value) => OnPropertyChanged(nameof(ShouldRenderInPanel));
+
     /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
     public GraphNode? Owner { get; set; }
 

@@ -370,11 +370,28 @@
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Margin="0,2,0,4" />
 
+                                            <!-- Parameter set picker — only visible when the cmdlet declares multiple sets. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasMultipleSets}"
+                                                        Spacing="3" Margin="0,0,0,6">
+                                                <TextBlock Text="Parameter Set" FontSize="11"
+                                                           Foreground="{DynamicResource TextMutedBrush}" />
+                                                <ComboBox ItemsSource="{Binding SelectedNode.KnownParameterSets}"
+                                                          SelectedItem="{Binding SelectedNode.ActiveParameterSet, Mode=TwoWay}"
+                                                          Background="{DynamicResource BgPrimaryBrush}"
+                                                          Foreground="{DynamicResource TextTertiaryBrush}"
+                                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                          Padding="8,5" CornerRadius="3"
+                                                          FontFamily="{DynamicResource FontMono}" FontSize="12"
+                                                          HorizontalAlignment="Stretch"
+                                                          HorizontalContentAlignment="Left"
+                                                          VerticalContentAlignment="Center" />
+                                            </StackPanel>
+
                                             <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <StackPanel Spacing="3" Margin="0,0,0,8"
-                                                                    IsVisible="{Binding !IsArgument}">
+                                                                    IsVisible="{Binding ShouldRenderInPanel}">
                                                             <!-- Header (hidden for Bool — the CheckBox label replaces it) -->
                                                             <StackPanel Orientation="Horizontal" Spacing="4"
                                                                         IsVisible="{Binding !IsBool}">
