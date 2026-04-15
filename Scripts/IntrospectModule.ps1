@@ -91,54 +91,63 @@ if (-not (Get-Module -Name $actualName)) {
     } catch { }
 }
 
-# If Import-Module really did fail, try to trigger PowerShell's on-demand
-# module auto-loading by running Get-Command on a known exported command
-# from the module's manifest. Auto-loading has more tolerance for type
-# conflicts than explicit Import-Module; this is the reliable escape hatch
-# for modules like Microsoft.PowerShell.Security whose .types.ps1xml
-# conflicts with types already registered at engine startup.
+# Declared exports from the manifest — used both for the auto-load probe
+# below and as a last-resort enumeration source if Get-Command -Module keeps
+# returning empty.
+$manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
+$declaredExports = @()
+if ($manifest -and $manifest.ExportedCommands -and $manifest.ExportedCommands.Count -gt 0) {
+    $declaredExports = @($manifest.ExportedCommands.Keys)
+}
+if ($declaredExports.Count -eq 0 -and $manifest -and $manifest.Path -and (Test-Path $manifest.Path)) {
+    try {
+        $data = Import-PowerShellDataFile -Path $manifest.Path -ErrorAction Stop
+        if ($data.CmdletsToExport)   { $declaredExports += @($data.CmdletsToExport) }
+        if ($data.FunctionsToExport) { $declaredExports += @($data.FunctionsToExport) }
+        $declaredExports = $declaredExports | Where-Object { $_ -and $_ -notmatch '^[\*\?]+$' }
+    } catch { }
+}
+
+# If Get-Command -Module is still empty, hit one declared export with
+# Get-Command <name> — PS's on-demand auto-loader is more tolerant of
+# type conflicts than explicit Import-Module.
 if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
 {
-    $manifest = Get-Module -ListAvailable -Name $actualName -ErrorAction SilentlyContinue | Select-Object -First 1
-    $probe = $null
-
-    # Prefer the live ExportedCommands, but Get-Module -ListAvailable can
-    # return empty ExportedCommands for modules whose manifest exports via
-    # wildcard or needs loading to expand. Fall back to parsing the .psd1
-    # directly with Import-PowerShellDataFile — that sees CmdletsToExport
-    # and FunctionsToExport verbatim without any module-load side effect.
-    if ($manifest -and $manifest.ExportedCommands -and $manifest.ExportedCommands.Count -gt 0) {
-        $probe = $manifest.ExportedCommands.Keys | Select-Object -First 1
-    }
-    if (-not $probe -and $manifest -and $manifest.Path -and (Test-Path $manifest.Path)) {
-        try {
-            $data = Import-PowerShellDataFile -Path $manifest.Path -ErrorAction Stop
-            $exports = @()
-            if ($data.CmdletsToExport)   { $exports += @($data.CmdletsToExport) }
-            if ($data.FunctionsToExport) { $exports += @($data.FunctionsToExport) }
-            # Skip wildcard-only exports; we need a concrete name.
-            $probe = $exports | Where-Object { $_ -and $_ -notmatch '^[\*\?]+$' } | Select-Object -First 1
-        } catch { }
-    }
-
+    $probe = $declaredExports | Select-Object -First 1
     if ($probe) {
         Get-Command $probe -ErrorAction SilentlyContinue *>$null
     }
 }
 
-# Final verification. Either the module loaded, or Get-Command -Module returns
-# commands that are otherwise reachable — both are enough to proceed.
-if (-not (Get-Module -Name $actualName) -and
-    -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue)) {
-    Write-Error "Failed to import module '$actualName' and no commands available."
+# Collect the commands we will introspect. Preferred: Get-Command -Module,
+# which picks up everything that belongs to the module including dynamically
+# added functions. Fallback: iterate declared exports individually — each
+# Get-Command <name> call triggers auto-load if the command isn't reachable
+# yet, and returns CommandInfo objects we can pass to the enumeration loop.
+$commands = @(Get-Command -Module $actualName -CommandType Cmdlet,Function -ErrorAction SilentlyContinue | Sort-Object Name)
+if ($commands.Count -eq 0 -and $declaredExports.Count -gt 0) {
+    $collected = @()
+    foreach ($name in $declaredExports) {
+        $c = Get-Command $name -ErrorAction SilentlyContinue
+        if ($c) { $collected += $c }
+    }
+    $commands = @($collected | Sort-Object Name)
+}
+
+if ($commands.Count -eq 0) {
+    $diag = "Get-Module=$((Get-Module -Name $actualName | Measure-Object).Count), " +
+            "Get-Command -Module=$((Get-Command -Module $actualName -ErrorAction SilentlyContinue | Measure-Object).Count), " +
+            "declaredExports=$($declaredExports.Count), " +
+            "manifest=$(if ($manifest) { 'yes' } else { 'no' })"
+    Write-Error "Failed to introspect module '$actualName' — no commands reachable. [$diag]"
     exit 1
 }
 
 # Write resolved name to stderr so C# can read it (not mixed into JSON stdout)
 [Console]::Error.WriteLine("RESOLVED:$actualName")
 
-$commands = Get-Command -Module $actualName -CommandType Cmdlet,Function | Sort-Object Name
+# $commands was resolved above during the import / probe / fallback sequence.
 
 $results = @()
 
