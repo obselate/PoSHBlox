@@ -30,6 +30,7 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     // ── Sub-ViewModels ─────────────────────────────────────────
     public NodePaletteViewModel Palette { get; } = new();
+    public QuickAddPopupViewModel QuickAdd { get; }
 
     // ── Canvas transform ───────────────────────────────────────
     [ObservableProperty] private double _panX;
@@ -71,6 +72,7 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public GraphCanvasViewModel()
     {
+        QuickAdd = new QuickAddPopupViewModel(Palette);
         Palette.SetGraphNodes(Nodes);
         Nodes.CollectionChanged += OnNodesChanged;
         Connections.CollectionChanged += (_, _) =>
@@ -304,6 +306,68 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         if (SelectedNode == null || SelectedNode.IsContainer) return;
         SelectedNode.IsCollapsed = !SelectedNode.IsCollapsed;
+    }
+
+    /// <summary>
+    /// Spawn a template from the quick-add popup at the recorded cursor position,
+    /// auto-wiring from the pending source pin when present. Used by the popup
+    /// Commit action and by the pin-drag-on-empty-space trigger.
+    /// </summary>
+    public void CommitQuickAdd(NodeTemplate template)
+    {
+        if (template == null) return;
+        var x = QuickAdd.X;
+        var y = QuickAdd.Y;
+        var source = QuickAdd.SourcePort;
+
+        var node = NodeFactory.CreateFromTemplate(template, x, y);
+        Nodes.Add(node);
+        SelectNode(node);
+        Palette.NoteSpawn(template);
+
+        if (source != null) AutoWire(source, node);
+
+        QuickAdd.Close();
+    }
+
+    /// <summary>
+    /// Connect a fresh <paramref name="node"/> to the pending wire source on
+    /// its most sensible pin. Exec-from-output ↔ target's ExecIn; data-from-
+    /// output ↔ PrimaryPipelineTarget (or first compatible data input); also
+    /// best-effort chain the exec wire when both ends have one. Input-side
+    /// drags (user grabbed an input pin) go in the opposite direction.
+    /// </summary>
+    private void AutoWire(NodePort source, GraphNode node)
+    {
+        if (source.Direction == PortDirection.Output)
+        {
+            if (source.Kind == PortKind.Exec)
+            {
+                if (node.ExecInPort != null) AddConnection(source, node.ExecInPort);
+                return;
+            }
+            // Data output → primary pipeline target preferred, fall back to
+            // the first compatible data input.
+            var tgt = node.PrimaryPipelineTarget
+                   ?? node.DataInputs.FirstOrDefault(p => PortCompatibility.CanConnect(source, p));
+            if (tgt != null) AddConnection(source, tgt);
+
+            // Chain exec too if both sides have exec pins — keeps pipeline
+            // collapse eligible when the user later wants it.
+            if (source.Owner?.ExecOutPort is { } srcExecOut && node.ExecInPort != null)
+                AddConnection(srcExecOut, node.ExecInPort);
+            return;
+        }
+
+        // Input-direction drag — user grabbed an input pin looking for a producer.
+        if (source.Kind == PortKind.Exec)
+        {
+            if (node.ExecOutPort != null) AddConnection(node.ExecOutPort, source);
+            return;
+        }
+        var producer = node.PrimaryDataOutput
+                    ?? node.DataOutputs.FirstOrDefault(p => PortCompatibility.CanConnect(p, source));
+        if (producer != null) AddConnection(producer, source);
     }
 
     private static NodePort ClonePort(NodePort p, GraphNode owner) => new()

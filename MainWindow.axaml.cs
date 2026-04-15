@@ -52,11 +52,17 @@ public partial class MainWindow : AppWindow
 
         // Subscribe to VM changes — DataContext may already be set from XAML
         if (DataContext is GraphCanvasViewModel vm)
+        {
             vm.PropertyChanged += OnViewModelPropertyChanged;
+            vm.QuickAdd.PropertyChanged += OnQuickAddPropertyChanged;
+        }
         DataContextChanged += (_, _) =>
         {
             if (DataContext is GraphCanvasViewModel v)
+            {
                 v.PropertyChanged += OnViewModelPropertyChanged;
+                v.QuickAdd.PropertyChanged += OnQuickAddPropertyChanged;
+            }
         };
     }
 
@@ -156,6 +162,13 @@ public partial class MainWindow : AppWindow
                 case Key.OemQuestion when !inTextBox:
                 case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:  // '?'
                     vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
+                    e.Handled = true;
+                    break;
+
+                // Tab — open the quick-add popup at the cursor (empty-canvas invocation).
+                // Only fires when focus isn't in a TextBox so it doesn't steal Tab navigation.
+                case Key.Tab when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    OpenQuickAddAtPointer(vm);
                     e.Handled = true;
                     break;
 
@@ -480,4 +493,90 @@ public partial class MainWindow : AppWindow
 
     private static string GenerateScript(GraphCanvasViewModel vm)
         => new ScriptGenerator(vm.Nodes, vm.Connections).Generate();
+
+    // ── Quick-add popup handlers ───────────────────────────────
+
+    /// <summary>
+    /// Open the quick-add popup at the current pointer position (relative to
+    /// the canvas). Used by Tab and by the "Quick add..." context-menu item
+    /// when there's no pending wire drag.
+    /// </summary>
+    private void OpenQuickAddAtPointer(GraphCanvasViewModel vm)
+    {
+        var pos = GraphCanvas.CurrentPointerPosition;
+        vm.QuickAdd.OpenAt(pos.X, pos.Y, source: null);
+    }
+
+    private void OnQuickAddPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Focus the search box once the popup becomes visible — caret inside,
+        // first key goes straight to filtering.
+        if (e.PropertyName == nameof(QuickAddPopupViewModel.IsOpen)
+            && sender is QuickAddPopupViewModel vm && vm.IsOpen)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                QuickAddSearchBox.Focus();
+                QuickAddSearchBox.SelectAll();
+            }, DispatcherPriority.Input);
+        }
+    }
+
+    private void OnQuickAddPanelPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Clicks inside the popup must not bubble to the backdrop's close handler.
+        e.Handled = true;
+    }
+
+    private void OnQuickAddBackgroundPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click-through on the transparent backdrop cancels the popup.
+        // Clicks inside the panel itself don't bubble here (the panel Border
+        // has a non-transparent Background, which blocks PointerPressed).
+        if (DataContext is GraphCanvasViewModel vm)
+        {
+            GraphCanvas.CancelDrag(); // drop any pending wire drag too
+            vm.QuickAdd.Close();
+        }
+    }
+
+    private void OnQuickAddCategoryClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: TemplateCategory cat })
+            cat.IsExpanded = !cat.IsExpanded;
+    }
+
+    private void OnQuickAddTemplateClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+        if (sender is not Button { Tag: NodeTemplate template }) return;
+        vm.CommitQuickAdd(template);
+    }
+
+    private void OnQuickAddSearchKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                GraphCanvas.CancelDrag();
+                vm.QuickAdd.Close();
+                e.Handled = true;
+                break;
+
+            case Key.Enter:
+                // Commit first visible template.
+                var firstCat = vm.QuickAdd.FilteredCategories
+                    .FirstOrDefault(c => c.IsExpanded && c.Templates.Count > 0)
+                    ?? vm.QuickAdd.FilteredCategories.FirstOrDefault(c => c.Templates.Count > 0);
+                var first = firstCat?.Templates.FirstOrDefault();
+                if (first != null)
+                {
+                    vm.CommitQuickAdd(first);
+                    e.Handled = true;
+                }
+                break;
+        }
+    }
 }

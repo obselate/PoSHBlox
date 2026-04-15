@@ -642,6 +642,130 @@
 
     </DockPanel>
 
+    <!-- ══════ Quick-add popup (Tab / wire drop on empty / right-click → Quick add). ══════
+         Placed anchored at the cursor via Margin bound to QuickAdd.X / .Y. -->
+    <Border IsVisible="{Binding QuickAdd.IsOpen}"
+            Background="Transparent"
+            PointerPressed="OnQuickAddBackgroundPressed">
+        <Border x:Name="QuickAddPanel"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Margin="{Binding QuickAdd.CursorMargin}"
+                Width="380" MaxHeight="480"
+                Background="{DynamicResource BgPrimaryBrush}"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                BorderThickness="1" CornerRadius="6"
+                Padding="8"
+                BoxShadow="0 4 12 0 #99000000"
+                PointerPressed="OnQuickAddPanelPressed">
+            <DockPanel LastChildFill="True">
+                <!-- Chip row: compatibility chip (when drag-initiated) + tag chips -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,6">
+                    <ToggleButton IsChecked="{Binding QuickAdd.CompatibleOnly, Mode=TwoWay}"
+                                  IsVisible="{Binding QuickAdd.HasSourcePort}"
+                                  Content="{Binding QuickAdd.CompatibilityChipLabel}"
+                                  Classes="tagChip"
+                                  Padding="8,3" CornerRadius="10"
+                                  FontSize="10"
+                                  FontFamily="{DynamicResource FontMono}" />
+                    <ItemsControl ItemsSource="{Binding QuickAdd.TagChips}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                              Content="{Binding Label}"
+                                              Classes="tagChip"
+                                              Padding="8,3" CornerRadius="10"
+                                              FontSize="10"
+                                              FontFamily="{DynamicResource FontMono}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Search box: focused on open, first key goes here -->
+                <TextBox DockPanel.Dock="Top" x:Name="QuickAddSearchBox"
+                         Text="{Binding QuickAdd.SearchText, Mode=TwoWay}"
+                         Watermark="Type to filter..."
+                         Background="{DynamicResource BgSecondaryBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                         Padding="8,6" CornerRadius="3" FontSize="12"
+                         Margin="0,0,0,6"
+                         KeyDown="OnQuickAddSearchKeyDown" />
+
+                <!-- Results: categorized collapsible rows, auto-expanded when search is active -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding QuickAdd.FilteredCategories}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,1">
+                                    <Button Click="OnQuickAddCategoryClicked" Tag="{Binding}"
+                                            Background="Transparent" BorderThickness="0"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left"
+                                            Padding="6,4" Margin="0,1" CornerRadius="3" Cursor="Hand">
+                                        <Button.Resources>
+                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                        </Button.Resources>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Width="3" CornerRadius="1.5"
+                                                    Background="{Binding CategoryBrush}"
+                                                    VerticalAlignment="Stretch" />
+                                            <TextBlock Text="&#x25BC;" FontSize="9"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding IsExpanded}" />
+                                            <TextBlock Text="&#x25B6;" FontSize="9"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding !IsExpanded}" />
+                                            <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding Templates.Count, StringFormat='({0})'}"
+                                                       FontSize="10" Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <ItemsControl ItemsSource="{Binding Templates}"
+                                                  IsVisible="{Binding IsExpanded}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="OnQuickAddTemplateClicked"
+                                                        Tag="{Binding}"
+                                                        Background="Transparent"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Left"
+                                                        Padding="14,4,6,4" Margin="0,1" CornerRadius="3"
+                                                        Cursor="Hand">
+                                                    <Button.Resources>
+                                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                                    </Button.Resources>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontSize="12"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="10"
+                                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="340" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Border>
+
     <!-- ══════ Cheat sheet overlay (toggled by ?) — last child so it renders on top. ══════ -->
     <Border IsVisible="{Binding IsCheatSheetOpen}"
             Background="#CC060D16">
@@ -667,7 +791,7 @@
                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
 
                 <!-- Two columns: shortcut ∷ description -->
-                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                       RowSpacing="4">
                     <TextBlock Grid.Row="0"  Grid.Column="0" Text="Ctrl+N"       Classes="cheatKey"/>
                     <TextBlock Grid.Row="0"  Grid.Column="1" Text="New graph"    Classes="cheatLabel"/>
@@ -689,6 +813,8 @@
                     <TextBlock Grid.Row="8"  Grid.Column="1" Text="Duplicate selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="14" Grid.Column="0" Text="C"            Classes="cheatKey"/>
                     <TextBlock Grid.Row="14" Grid.Column="1" Text="Collapse / expand selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="15" Grid.Column="0" Text="Tab"          Classes="cheatKey"/>
+                    <TextBlock Grid.Row="15" Grid.Column="1" Text="Quick add popup at cursor (or drag wire onto empty space)" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="9"  Grid.Column="0" Text="Del / Backspace" Classes="cheatKey"/>
                     <TextBlock Grid.Row="9"  Grid.Column="1" Text="Delete selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="F"            Classes="cheatKey"/>

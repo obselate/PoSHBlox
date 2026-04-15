@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using PoSHBlox.Models;
 using PoSHBlox.Rendering;
 using PoSHBlox.ViewModels;
@@ -44,6 +45,20 @@ public class NodeGraphCanvas : Control
 
     private bool _isResizingContainer;
     private GraphNode? _resizeNode;
+
+    /// <summary>Most recent pointer position in canvas-local coords — used to anchor quick-add on Tab.</summary>
+    private Point _lastPointerLocal;
+
+    /// <summary>Pointer position translated into the visual-root's coordinate space (good for positioning popups).</summary>
+    public Point CurrentPointerPosition
+    {
+        get
+        {
+            if (this.GetVisualRoot() is Visual root)
+                return TranslatePoint(_lastPointerLocal, root) ?? _lastPointerLocal;
+            return _lastPointerLocal;
+        }
+    }
 
     public NodeGraphCanvas()
     {
@@ -218,11 +233,19 @@ public class NodeGraphCanvas : Control
     {
         ShowFlyout(new List<(string, Action?, bool)>
         {
-            ("Add blank node",    () => _vm!.AddNode(),                      false),
-            ("",                  null,                                      true),
-            ("Reset view         Ctrl+0", () => _vm!.ResetView(),            false),
-            ("Zoom to fit all    F",      () => ZoomToFit(selectionOnly: false), false),
+            ("Quick add...      Tab", () => OpenQuickAddAtCursor(),          false),
+            ("Add blank node",        () => _vm!.AddNode(),                  false),
+            ("",                      null,                                  true),
+            ("Reset view        Ctrl+0", () => _vm!.ResetView(),             false),
+            ("Zoom to fit all   F",      () => ZoomToFit(selectionOnly: false), false),
         });
+    }
+
+    private void OpenQuickAddAtCursor()
+    {
+        if (_vm == null) return;
+        var pt = CurrentPointerPosition;
+        _vm.QuickAdd.OpenAt(pt.X, pt.Y, source: null);
     }
 
     private void ShowFlyout(IList<(string Label, Action? Action, bool IsSeparator)> items)
@@ -256,6 +279,7 @@ public class NodeGraphCanvas : Control
 
         var screenPos = e.GetPosition(this);
         var canvasPos = ScreenToCanvas(screenPos);
+        _lastPointerLocal = screenPos;
 
         if (_isPanning)
         {
@@ -354,8 +378,25 @@ public class NodeGraphCanvas : Control
                    (c.Source == _wireStartPort && c.Target == targetPort)
                 || (c.Source == targetPort && c.Target == _wireStartPort));
 
-            if (!committed && _reroutingOriginal != null)
-                _vm.Connections.Add(_reroutingOriginal);
+            if (!committed)
+            {
+                if (_reroutingOriginal != null)
+                {
+                    // Reroute drop-off: restore the original wire (existing behavior).
+                    _vm.Connections.Add(_reroutingOriginal);
+                }
+                else
+                {
+                    // Fresh wire drag released on empty space → open the quick-add
+                    // popup anchored at the cursor with the source pin captured.
+                    // Auto-wire happens in CommitQuickAdd if the user picks a result.
+                    var localPos = e.GetPosition(this);
+                    var windowPos = this.GetVisualRoot() is Visual root
+                        ? (TranslatePoint(localPos, root) ?? localPos)
+                        : localPos;
+                    _vm.QuickAdd.OpenAt(windowPos.X, windowPos.Y, _wireStartPort);
+                }
+            }
         }
 
         // Snap dropped node into container zone (only if it actually moved)
