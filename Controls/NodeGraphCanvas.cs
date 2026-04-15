@@ -35,6 +35,12 @@ public class NodeGraphCanvas : Control
     private NodePort? _wireStartPort;
     private Point _wireEndPoint;
 
+    /// <summary>
+    /// Non-null while rerouting an existing wire: the removed original connection,
+    /// restored on release if the drop lands anywhere but a compatible pin.
+    /// </summary>
+    private NodeConnection? _reroutingOriginal;
+
     private bool _isResizingContainer;
     private GraphNode? _resizeNode;
 
@@ -97,12 +103,30 @@ public class NodeGraphCanvas : Control
                 return;
             }
 
-            // Check port hit (start wire drag)
+            // Check port hit (start wire drag — or reroute an existing wire if
+            // the pressed pin already has a connection).
             var port = HitPort(canvasPos);
             if (port != null)
             {
+                var existing = _vm.Connections.FirstOrDefault(c =>
+                    c.Source == port || c.Target == port);
+
+                if (existing != null)
+                {
+                    // Pick up the existing wire at this end. Anchor the far end;
+                    // the free end follows the cursor. Original is restored on
+                    // release if no valid target is hit.
+                    _wireStartPort = existing.Source == port ? existing.Target : existing.Source;
+                    _reroutingOriginal = existing;
+                    _vm.Connections.Remove(existing);
+                }
+                else
+                {
+                    _wireStartPort = port;
+                    _reroutingOriginal = null;
+                }
+
                 _isDraggingWire = true;
-                _wireStartPort = port;
                 _wireEndPoint = canvasPos;
                 e.Handled = true;
                 return;
@@ -221,7 +245,7 @@ public class NodeGraphCanvas : Control
         base.OnPointerReleased(e);
         if (_vm == null) return;
 
-        // Complete wire connection
+        // Complete wire connection (new draw, or reroute commit / cancel).
         if (_isDraggingWire && _wireStartPort != null)
         {
             var canvasPos = ScreenToCanvas(e.GetPosition(this));
@@ -234,6 +258,16 @@ public class NodeGraphCanvas : Control
                 else if (_wireStartPort.Direction == PortDirection.Input && targetPort.Direction == PortDirection.Output)
                     _vm.AddConnection(targetPort, _wireStartPort);
             }
+
+            // Did the intended wire actually land? (AddConnection silently rejects
+            // incompatible kinds/types and dups — a successful commit leaves the
+            // pair present, even if 1:N replacement kept Connections.Count flat.)
+            bool committed = targetPort != null && _vm.Connections.Any(c =>
+                   (c.Source == _wireStartPort && c.Target == targetPort)
+                || (c.Source == targetPort && c.Target == _wireStartPort));
+
+            if (!committed && _reroutingOriginal != null)
+                _vm.Connections.Add(_reroutingOriginal);
         }
 
         // Snap dropped node into container zone (only if it actually moved)
@@ -251,6 +285,7 @@ public class NodeGraphCanvas : Control
         _dragNode = null;
         _isDraggingWire = false;
         _wireStartPort = null;
+        _reroutingOriginal = null;
         _isResizingContainer = false;
         _resizeNode = null;
     }
