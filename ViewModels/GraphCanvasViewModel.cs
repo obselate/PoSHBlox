@@ -79,12 +79,32 @@ public partial class GraphCanvasViewModel : ObservableObject
         {
             MarkDirty();
             RefreshWiredState();
+            RefreshValidation();
         };
 
         SeedExampleGraph();
         RefreshWiredState();
         RefreshParameterSetVisibility();
+        RefreshValidation();
         IsDirty = false;
+    }
+
+    /// <summary>
+    /// Populate <see cref="GraphNode.Issues"/> across all nodes from the current
+    /// graph state. Called on the same change hooks that drive RefreshWiredState
+    /// — connection changes, param-value changes, active-set flips, node/param
+    /// collection mutations. Validator runs once per refresh over the whole
+    /// graph; cheap enough for typical sizes.
+    /// </summary>
+    private void RefreshValidation()
+    {
+        var issues = GraphValidator.Validate(Nodes, Connections);
+        foreach (var node in Nodes)
+        {
+            node.Issues.Clear();
+            if (issues.TryGetValue(node.Id, out var list))
+                foreach (var i in list) node.Issues.Add(i);
+        }
     }
 
     /// <summary>
@@ -468,6 +488,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         _suppressDirty = false;
         RefreshWiredState();
         RefreshParameterSetVisibility();
+        RefreshValidation();
         IsDirty = false;
         Palette.SyncFunctionTemplates();
     }
@@ -530,7 +551,10 @@ public partial class GraphCanvasViewModel : ObservableObject
 
         // Active-set switch changes which params render + which are mandatory.
         if (e.PropertyName == nameof(GraphNode.ActiveParameterSet))
+        {
             RefreshParameterSetVisibility();
+            RefreshValidation();
+        }
     }
 
     private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -539,6 +563,8 @@ public partial class GraphCanvasViewModel : ObservableObject
         {
             MarkDirty();
             Palette.SyncFunctionTemplates();
+            // Filling in a mandatory param's value clears its issue. Re-validate.
+            RefreshValidation();
         }
     }
 
@@ -556,6 +582,7 @@ public partial class GraphCanvasViewModel : ObservableObject
 
         RefreshWiredState();
         RefreshParameterSetVisibility();
+        RefreshValidation();
         Palette.SyncFunctionTemplates();
     }
 

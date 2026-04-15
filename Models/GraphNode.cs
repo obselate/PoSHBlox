@@ -54,6 +54,16 @@ public partial class GraphNode : ObservableObject
     public ObservableCollection<NodePort> Outputs { get; } = new();
     public ObservableCollection<NodeParameter> Parameters { get; } = new();
 
+    /// <summary>
+    /// Validation findings attached to this node. Populated by the VM from
+    /// <see cref="PoSHBlox.Services.GraphValidator"/>; the renderer + properties
+    /// panel bind to it for the red border, warning badge, and issue list.
+    /// </summary>
+    public ObservableCollection<GraphIssue> Issues { get; } = new();
+
+    public bool HasIssues => Issues.Count > 0;
+    public bool HasErrors => Issues.Any(i => i.Severity == IssueSeverity.Error);
+
     // ── Container support ──────────────────────────────────────
     public ContainerType ContainerType { get; set; } = ContainerType.None;
     public bool IsContainer => ContainerType != ContainerType.None;
@@ -85,6 +95,14 @@ public partial class GraphNode : ObservableObject
     // ── Constructor ────────────────────────────────────────────
     public GraphNode()
     {
+        // Keep HasIssues / HasErrors observable — the collection itself mutates
+        // without firing PropertyChanged on the derived bools; ColChanged does.
+        Issues.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasIssues));
+            OnPropertyChanged(nameof(HasErrors));
+        };
+
         // V2 default shape: ExecIn (top-left), ExecOut (top-right),
         // one primary data output of type Any.
         Inputs.Add(new NodePort
