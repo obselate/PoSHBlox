@@ -84,7 +84,7 @@ public class NodeGraphRenderer
 
     private static bool IsNodeVisible(GraphNode node, Rect viewport)
     {
-        double w = node.IsContainer ? node.ContainerWidth : node.Width;
+        double w = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
         double h = node.IsContainer ? node.ContainerHeight : node.Height;
         var nodeRect = new Rect(node.X, node.Y, w, h);
         return viewport.Intersects(nodeRect);
@@ -144,7 +144,8 @@ public class NodeGraphRenderer
     private void DrawNode(DrawingContext ctx, GraphNode node, NodePort? wireStartPort = null)
     {
         double hh = GraphNode.HeaderHeight;
-        var rect = new Rect(node.X, node.Y, node.Width, node.Height);
+        double width = NodeLayout.GetEffectiveWidth(node);
+        var rect = new Rect(node.X, node.Y, width, node.Height);
         var catColor = GraphTheme.GetCategoryColor(node.Category);
         bool inContainer = node.ParentContainer != null;
 
@@ -164,7 +165,7 @@ public class NodeGraphRenderer
         // Header band with gradient overlay
         using (ctx.PushClip(new RoundedRect(rect, GraphTheme.NodeCornerRadius)))
         {
-            var headerRect = new Rect(node.X, node.Y, node.Width, hh);
+            var headerRect = new Rect(node.X, node.Y, width, hh);
             ctx.DrawRectangle(new SolidColorBrush(catColor), null, headerRect);
             ctx.DrawRectangle(MakeHeaderGradient(), null, headerRect);
         }
@@ -178,14 +179,14 @@ public class NodeGraphRenderer
         // upcoming context menu.
         var chevronGlyph = node.IsCollapsed ? "\u25B8" : "\u25BE"; // ▸ / ▾
         var chevron = MakeText(chevronGlyph, 11, FontWeight.Normal, GraphTheme.TextSecondary);
-        ctx.DrawText(chevron, new Point(node.X + node.Width - 18, node.Y + (hh - chevron.Height) / 2));
+        ctx.DrawText(chevron, new Point(node.X + width - 18, node.Y + (hh - chevron.Height) / 2));
 
         // Collapsed-hint row: "+N hidden" centered under the visible data rows.
         if (node.HiddenDataInputCount > 0)
         {
             var hint = MakeText($"+{node.HiddenDataInputCount} hidden", 10, FontWeight.Normal, GraphTheme.HudText);
             double hintY = node.Y + node.Height - hint.Height - 8;
-            ctx.DrawText(hint, new Point(node.X + (node.Width - hint.Width) / 2, hintY));
+            ctx.DrawText(hint, new Point(node.X + (width - hint.Width) / 2, hintY));
         }
 
         // Ports
@@ -428,7 +429,7 @@ public class NodeGraphRenderer
     public static Point GetPortPosition(GraphNode node, NodePort port)
     {
         double headerH = node.IsContainer ? GraphNode.ContainerHeaderHeight : GraphNode.HeaderHeight;
-        double width = node.IsContainer ? node.ContainerWidth : node.Width;
+        double width = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
 
         if (port.Kind == PortKind.Exec)
         {

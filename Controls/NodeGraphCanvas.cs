@@ -423,7 +423,8 @@ public class NodeGraphCanvas : Control
         {
             var n = _vm.Nodes[i];
             if (n.IsContainer) continue;
-            if (canvasPos.X >= n.X && canvasPos.X <= n.X + n.Width &&
+            double nw = NodeLayout.GetEffectiveWidth(n);
+            if (canvasPos.X >= n.X && canvasPos.X <= n.X + nw &&
                 canvasPos.Y >= n.Y && canvasPos.Y <= n.Y + n.Height)
                 return n;
         }
@@ -552,7 +553,7 @@ public class NodeGraphCanvas : Control
 
         double minX = set.Min(n => n.X);
         double minY = set.Min(n => n.Y);
-        double maxX = set.Max(n => n.X + (n.IsContainer ? n.ContainerWidth : n.Width));
+        double maxX = set.Max(n => n.X + (n.IsContainer ? n.ContainerWidth : NodeLayout.GetEffectiveWidth(n)));
         double maxY = set.Max(n => n.Y + (n.IsContainer ? n.ContainerHeight : n.Height));
 
         const double pad = 80;
