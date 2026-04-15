@@ -312,7 +312,7 @@ public partial class MainWindow : AppWindow
 
             // Strip PowerShell 7+ module paths from PSModulePath so PS 5.1
             // doesn't load PS 7 modules whose type data conflicts with PS 5.1.
-            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath))
+            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath) && modulePath is not null)
             {
                 var filtered = string.Join(";", modulePath.Split(';')
                     .Where(p => !Regex.IsMatch(p, @"\\powershell\\\d", RegexOptions.IgnoreCase)));

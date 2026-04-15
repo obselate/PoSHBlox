@@ -444,8 +444,10 @@ public class NodeGraphCanvas : Control
 
         if (_isLassoArmed)
         {
-            double dist2 = (canvasPos - _lassoStart).Length;
-            if (dist2 > 4)   // ~4px threshold to distinguish click-to-deselect from drag
+            // ~4px threshold (squared) to distinguish a stationary click from a drag.
+            double dx = canvasPos.X - _lassoStart.X;
+            double dy = canvasPos.Y - _lassoStart.Y;
+            if (dx * dx + dy * dy > 16)
             {
                 _isLassoing = true;
                 _isLassoArmed = false;
