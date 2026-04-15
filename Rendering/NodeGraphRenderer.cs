@@ -288,23 +288,52 @@ public class NodeGraphRenderer
     {
         var pos = GetPortPosition(node, port);
         bool isInput = port.Direction == PortDirection.Input;
-        var color = isInput ? GraphTheme.PortInput : GraphTheme.PortOutput;
 
-        // Outer ring
+        if (port.Kind == PortKind.Exec)
+        {
+            DrawExecTriangle(ctx, pos);
+            return;
+        }
+
+        var color = GraphTheme.GetDataTypeColor(port.DataType);
+
+        // Outer ring + inner dot, colored by data type.
         ctx.DrawEllipse(new SolidColorBrush(GraphTheme.PortCenter),
             new Pen(new SolidColorBrush(color), 2),
             pos, GraphTheme.PortRadius, GraphTheme.PortRadius);
-
-        // Inner dot
         ctx.DrawEllipse(new SolidColorBrush(color), null,
             pos, GraphTheme.PortDotRadius, GraphTheme.PortDotRadius);
 
-        // Label
+        // Label — skip for unnamed pins (e.g. ForEach's synthesized Source).
+        if (string.IsNullOrEmpty(port.Name)) return;
+
         var label = MakeText(port.Name, 10, FontWeight.Normal, GraphTheme.PortLabel);
         double labelX = isInput
             ? pos.X + GraphTheme.PortRadius + 6
             : pos.X - GraphTheme.PortRadius - label.Width - 6;
         ctx.DrawText(label, new Point(labelX, pos.Y - label.Height / 2));
+    }
+
+    /// <summary>
+    /// Right-pointing filled triangle at <paramref name="pos"/>. Blueprint-style
+    /// exec-pin glyph. Both input (left edge) and output (right edge) point right
+    /// to cue data-flow direction.
+    /// </summary>
+    private static void DrawExecTriangle(DrawingContext ctx, Point pos)
+    {
+        double size = GraphTheme.PortRadius + 1;
+        double tipX = pos.X + size;
+        double baseX = pos.X - size;
+        var geo = new StreamGeometry();
+        using (var g = geo.Open())
+        {
+            g.BeginFigure(new Point(baseX, pos.Y - size), true);
+            g.LineTo(new Point(tipX, pos.Y));
+            g.LineTo(new Point(baseX, pos.Y + size));
+            g.EndFigure(true);
+        }
+        var brush = new SolidColorBrush(GraphTheme.ExecPin);
+        ctx.DrawGeometry(brush, new Pen(brush, 1.5), geo);
     }
 
     // ── Wires ──────────────────────────────────────────────────
@@ -340,21 +369,37 @@ public class NodeGraphRenderer
     // ── Geometry helpers (public for hit testing) ──────────────
 
     /// <summary>
-    /// Calculate absolute position of a port on the canvas.
+    /// Calculate absolute position of a port on the canvas. V2 layout:
+    ///   - Exec pins ride in the header (input left edge, output right edge).
+    ///   - Data pins occupy body rows, indexed within DataInputs/DataOutputs only.
     /// Used by both rendering and hit testing.
     /// </summary>
     public static Point GetPortPosition(GraphNode node, NodePort port)
     {
         double headerH = node.IsContainer ? GraphNode.ContainerHeaderHeight : GraphNode.HeaderHeight;
         double width = node.IsContainer ? node.ContainerWidth : node.Width;
-        int idx = port.Direction == PortDirection.Input
-            ? node.Inputs.IndexOf(port)
-            : node.Outputs.IndexOf(port);
 
-        double x = port.Direction == PortDirection.Input ? node.X : node.X + width;
-        double y = node.Y + headerH + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
+        if (port.Kind == PortKind.Exec)
+        {
+            // Seated in the header band, offset slightly inward from each edge.
+            double inset = 10;
+            double x = port.Direction == PortDirection.Input ? node.X + inset : node.X + width - inset;
+            double y = node.Y + headerH / 2;
+            return new Point(x, y);
+        }
 
-        return new Point(x, y);
+        // Data pin: index within DataInputs or DataOutputs only (ignoring exec pins).
+        int idx = 0, i = 0;
+        var list = port.Direction == PortDirection.Input ? node.DataInputs : node.DataOutputs;
+        foreach (var p in list)
+        {
+            if (ReferenceEquals(p, port)) { idx = i; break; }
+            i++;
+        }
+
+        double xd = port.Direction == PortDirection.Input ? node.X : node.X + width;
+        double yd = node.Y + headerH + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
+        return new Point(xd, yd);
     }
 
     /// <summary>
