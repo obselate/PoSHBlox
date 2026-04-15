@@ -155,11 +155,18 @@ public class NodeGraphRenderer
                 GraphTheme.NodeCornerRadius));
 
         // Body
-        var borderColor = node.IsSelected ? GraphTheme.NodeSelectedBorder
+        // Border priority: selection > error > warning > default. Validation
+        // borders win over the "inside container" tint but lose to explicit
+        // selection so the user can always see what they've clicked on.
+        var borderColor =
+            node.IsSelected ? GraphTheme.NodeSelectedBorder
+            : node.HasErrors ? GraphTheme.NodeErrorBorder
+            : node.HasIssues ? GraphTheme.NodeWarningBorder
             : inContainer ? catColor
             : GraphTheme.NodeBorder;
+        double borderThickness = node.IsSelected ? 2.5 : (node.HasIssues ? 2.0 : 1.0);
         ctx.DrawRectangle(new SolidColorBrush(GraphTheme.NodeBackground),
-            new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1),
+            new Pen(new SolidColorBrush(borderColor), borderThickness),
             new RoundedRect(rect, GraphTheme.NodeCornerRadius));
 
         // Header band with gradient overlay
@@ -180,6 +187,15 @@ public class NodeGraphRenderer
         var chevronGlyph = node.IsCollapsed ? "\u25B8" : "\u25BE"; // ▸ / ▾
         var chevron = MakeText(chevronGlyph, 11, FontWeight.Normal, GraphTheme.TextSecondary);
         ctx.DrawText(chevron, new Point(node.X + width - 18, node.Y + (hh - chevron.Height) / 2));
+
+        // Validation badge — sits left of the chevron when the node has issues.
+        // Color mirrors the border (red for errors, amber for warning-only).
+        if (node.HasIssues)
+        {
+            var badgeColor = node.HasErrors ? GraphTheme.NodeErrorBorder : GraphTheme.NodeWarningBorder;
+            var badge = MakeText("\u26A0", 12, FontWeight.Bold, badgeColor);   // ⚠
+            ctx.DrawText(badge, new Point(node.X + width - 38, node.Y + (hh - badge.Height) / 2));
+        }
 
         // Collapsed-hint row: "+N hidden" centered under the visible data rows.
         if (node.HiddenDataInputCount > 0)

@@ -24,6 +24,9 @@ public static class NodeLayout
     /// <summary>Padding reserved at each side of the title for the header chevron.</summary>
     private const double HeaderChevronReserve = 24;
 
+    /// <summary>Extra reserve when a validation badge sits left of the chevron.</summary>
+    private const double HeaderBadgeReserve = 20;
+
     /// <summary>
     /// Width the renderer should use for a regular (non-container) node. Containers
     /// pass through — their width is user-resizable and handled separately.
@@ -32,8 +35,11 @@ public static class NodeLayout
     {
         if (node.IsContainer) return node.ContainerWidth;
 
-        // Title drives the header's minimum width: text + side padding + chevron reserve.
-        double titleRequired = MeasureWidth(node.Title, 13, FontWeight.Bold) + 28 + HeaderChevronReserve;
+        // Title drives the header's minimum width: text + side padding + chevron
+        // reserve + optional badge reserve when the node has validation issues.
+        double titleRequired = MeasureWidth(node.Title, 13, FontWeight.Bold)
+                             + 28 + HeaderChevronReserve
+                             + (node.HasIssues ? HeaderBadgeReserve : 0);
 
         // Each body row has a left pin, a left label, a gutter, a right label, a right pin.
         // Find the widest row across inputs and outputs (aligned by row index).

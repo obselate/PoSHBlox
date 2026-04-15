@@ -407,6 +407,26 @@
 
                                             <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
 
+                                            <!-- Validation issues for the selected node. Hidden when empty. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasIssues}" Margin="0,0,0,6">
+                                                <TextBlock Text="ISSUES" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextDeleteLightBrush}"
+                                                           Margin="0,2,0,4" />
+                                                <ItemsControl ItemsSource="{Binding SelectedNode.Issues}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource BgDeleteTintBrush}"
+                                                                    CornerRadius="3" Padding="8,4" Margin="0,0,0,3">
+                                                                <TextBlock Text="{Binding Message}"
+                                                                           TextWrapping="Wrap" FontSize="11"
+                                                                           Foreground="{DynamicResource TextDeleteLightBrush}" />
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
+                                            </StackPanel>
+
                                             <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Margin="0,2,0,4" />

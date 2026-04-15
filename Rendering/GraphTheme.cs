@@ -25,6 +25,8 @@ public static class GraphTheme
     public static readonly Color NodeBorder        = Color.FromRgb(28, 52, 80);       // #1C3450
     public static readonly Color NodeSelectedBorder = Color.FromRgb(91, 168, 154);    // #5BA89A teal
     public static readonly Color NodeShadow        = Color.FromArgb(102, 0, 0, 0);    // ~40% black
+    public static readonly Color NodeErrorBorder   = Color.FromRgb(209, 84, 84);      // #D15454 soft red
+    public static readonly Color NodeWarningBorder = Color.FromRgb(212, 148, 58);     // #D4943A amber (same as WirePending)
     public const double NodeCornerRadius = 8;
     public const double NodeShadowOffset = 4;
 
