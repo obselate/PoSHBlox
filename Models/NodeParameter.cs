@@ -36,6 +36,15 @@ public partial class NodeParameter : ObservableObject
     /// </summary>
     [ObservableProperty] private bool _isInActiveSet = true;
 
+    /// <summary>
+    /// Maintained by the view model: true when the param is mandatory given
+    /// the node's current parameter set. Falls back to <see cref="IsMandatory"/>
+    /// when the param declares no per-set mandatory flags (legacy / non-set
+    /// cmdlets). The properties panel's red asterisk and the validator's
+    /// missing-mandatory check both read this.
+    /// </summary>
+    [ObservableProperty] private bool _isEffectivelyMandatory;
+
     /// <summary>Composite visibility gate used by the properties-panel ItemTemplate.</summary>
     public bool ShouldRenderInPanel => !IsArgument && IsInActiveSet;
 

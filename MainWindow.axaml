@@ -440,7 +440,7 @@
                                                                            Foreground="{DynamicResource TextPrimaryBrush}" />
                                                                 <TextBlock Text="*" FontSize="12" FontWeight="Bold"
                                                                            Foreground="{DynamicResource TextDeleteBrush}"
-                                                                           IsVisible="{Binding IsMandatory}" />
+                                                                           IsVisible="{Binding IsEffectivelyMandatory}" />
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>

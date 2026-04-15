@@ -106,6 +106,13 @@ public partial class GraphCanvasViewModel : ObservableObject
                             || p.ParameterSets.Contains(node.ActiveParameterSet,
                                    StringComparer.OrdinalIgnoreCase);
                 p.IsInActiveSet = inScope;
+
+                // Mandatory-per-set: when MandatoryInSets has entries, the param
+                // is mandatory iff the active set is in the list. Fall back to
+                // the flat IsMandatory when no per-set data is present.
+                p.IsEffectivelyMandatory = p.MandatoryInSets.Length > 0
+                    ? p.MandatoryInSets.Contains(node.ActiveParameterSet, StringComparer.OrdinalIgnoreCase)
+                    : p.IsMandatory;
             }
         }
     }
