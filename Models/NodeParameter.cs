@@ -19,6 +19,16 @@ public partial class NodeParameter : ObservableObject
     /// <summary>true = [Parameter(ValueFromPipeline)]</summary>
     public bool IsPipelineInput { get; set; }
 
+    /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
+    public GraphNode? Owner { get; set; }
+
+    /// <summary>
+    /// The data-input pin paired with this parameter (Owner.Inputs with matching ParameterName).
+    /// Null if the parameter has no paired pin (function arguments, legacy nodes).
+    /// </summary>
+    public NodePort? InputPort =>
+        Owner?.Inputs.FirstOrDefault(p => p.ParameterName == Name);
+
     /// <summary>Maps ParamType to PowerShell type accelerator for function signatures.</summary>
     public string PowerShellTypeName => Type switch
     {
@@ -27,6 +37,9 @@ public partial class NodeParameter : ObservableObject
         ParamType.Bool => "switch",
         ParamType.StringArray => "string[]",
         ParamType.ScriptBlock => "scriptblock",
+        ParamType.Credential => "PSCredential",
+        ParamType.HashTable => "hashtable",
+        ParamType.Collection => "object[]",
         _ => "object",
     };
 
