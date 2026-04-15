@@ -1,0 +1,124 @@
+{
+  "description": "Reference manifest for Templates/Builtin/*.json. Run with `PoSHBlox --regen-manifest scripts/builtin-catalog.json` on a Windows host that has the listed modules available. Control-flow / annotation / custom catalogs are hand-curated (not introspectable) and are not listed here.",
+  "targets": [
+    {
+      "outputFile": "Templates/Builtin/FileFolder.json",
+      "category": "File / Folder",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [
+            "Get-ChildItem",
+            "Copy-Item",
+            "Move-Item",
+            "Remove-Item",
+            "Get-Content",
+            "Set-Content"
+          ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Security",
+          "cmdlets": [ "Get-Acl" ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/ProcessService.json",
+      "category": "Process / Service",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [
+            "Get-Process",
+            "Stop-Process",
+            "Get-Service",
+            "Start-Service",
+            "Stop-Service",
+            "Restart-Service"
+          ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/Registry.json",
+      "category": "Registry",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [
+            "Get-ItemProperty",
+            "Set-ItemProperty",
+            "New-Item",
+            "Remove-ItemProperty"
+          ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/NetworkRemote.json",
+      "category": "Network / Remote",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [ "Test-Connection" ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Core",
+          "cmdlets": [ "Invoke-Command" ]
+        },
+        {
+          "module": "NetTCPIP",
+          "cmdlets": [ "Test-NetConnection", "Get-NetIPAddress" ]
+        },
+        {
+          "module": "NetAdapter",
+          "cmdlets": [ "Get-NetAdapter" ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/StringData.json",
+      "category": "String / Data",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Core",
+          "cmdlets": [ "Where-Object", "ForEach-Object" ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": [
+            "Select-Object",
+            "Sort-Object",
+            "Group-Object",
+            "Export-Csv",
+            "ConvertTo-Json",
+            "Select-String",
+            "Measure-Object"
+          ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/Output.json",
+      "category": "Output",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": [
+            "Write-Host",
+            "Write-Output",
+            "Write-Warning",
+            "Write-Error",
+            "Write-Verbose",
+            "Format-Table",
+            "Format-List"
+          ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Core",
+          "cmdlets": [ "Out-Host", "Out-Null" ]
+        }
+      ]
+    }
+  ]
+}

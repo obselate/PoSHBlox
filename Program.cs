@@ -11,12 +11,16 @@ class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        // Dev tool: `PoSHBlox --regen-builtin <Module> <OutputFile> [--category "Name"] [--only Cmd1,Cmd2]`
-        // Runs headless (no GUI, no Avalonia), regenerates a Templates/Builtin/*.json
-        // catalog from a live PowerShell module, preserves curated defaults, exits.
-        if (args.Length > 0 && args[0] == "--regen-builtin")
+        // Dev tools run headless (no GUI, no Avalonia):
+        //   --regen-builtin  <Module> <OutputFile> [--category "Name"] [--only Cmd1,Cmd2]
+        //   --regen-manifest <ManifestFile> [--dry-run]
+        if (args.Length > 0)
         {
-            return RunRegen(args);
+            switch (args[0])
+            {
+                case "--regen-builtin":  return RunRegenSingle(args);
+                case "--regen-manifest": return RunRegenManifest(args);
+            }
         }
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
@@ -29,15 +33,16 @@ class Program
             .WithInterFont()
             .LogToTrace();
 
-    private static int RunRegen(string[] args)
+    private static int RunRegenSingle(string[] args)
     {
         if (args.Length < 3)
         {
             Console.Error.WriteLine(
-                "usage: PoSHBlox --regen-builtin <ModuleName> <OutputFile> [--category \"Name\"] [--only Cmd1,Cmd2,...]\n" +
+                "usage: PoSHBlox --regen-builtin <ModuleName> <OutputFile> [--category \"Name\"] [--only Cmd1,Cmd2,...] [--dry-run]\n" +
                 "  <OutputFile>   path to write, e.g. Templates/Builtin/FileFolder.json\n" +
                 "  --category     category string stored in the file; defaults to the existing file's category if present\n" +
-                "  --only         comma-separated cmdlet names to include (default: all discovered)");
+                "  --only         comma-separated cmdlet names to include (default: all discovered)\n" +
+                "  --dry-run      report what would happen without writing the file");
             return 1;
         }
 
@@ -45,6 +50,7 @@ class Program
         var output = args[2];
         string? category = null;
         HashSet<string>? only = null;
+        bool dryRun = false;
 
         for (int i = 3; i < args.Length; i++)
         {
@@ -59,6 +65,9 @@ class Program
                     only = args[++i].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
                     break;
+                case "--dry-run":
+                    dryRun = true;
+                    break;
                 default:
                     Console.Error.WriteLine($"unknown flag: {args[i]}");
                     return 1;
@@ -71,6 +80,37 @@ class Program
             OutputPath = output,
             CategoryName = category,
             OnlyCmdlets = only,
-        }).GetAwaiter().GetResult();
+        }, dryRun).GetAwaiter().GetResult();
+    }
+
+    private static int RunRegenManifest(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.Error.WriteLine(
+                "usage: PoSHBlox --regen-manifest <ManifestFile> [--dry-run]\n" +
+                "  <ManifestFile>  JSON manifest listing targets (output files + source modules + cmdlet filters).\n" +
+                "                  See scripts/builtin-catalog.json for the reference manifest.\n" +
+                "  --dry-run       report what would happen without writing any file");
+            return 1;
+        }
+
+        var manifestPath = args[1];
+        bool dryRun = false;
+
+        for (int i = 2; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "--dry-run":
+                    dryRun = true;
+                    break;
+                default:
+                    Console.Error.WriteLine($"unknown flag: {args[i]}");
+                    return 1;
+            }
+        }
+
+        return TemplateRegenerator.RegenerateFromManifestAsync(manifestPath, dryRun).GetAwaiter().GetResult();
     }
 }
