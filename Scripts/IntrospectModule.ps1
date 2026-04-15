@@ -48,31 +48,53 @@ function Map-ParamType {
     }
 }
 
-# Resolve module: try exact match first, then wildcard
+# Resolve module. Three paths in priority order:
+#   1. Get-Module -ListAvailable — normal modules on disk.
+#   2. Wildcard match against the same.
+#   3. Get-Command -Module — catches built-in snap-ins (Microsoft.PowerShell.Core
+#      et al in Windows PowerShell 5.1) that Get-Module can't see but whose
+#      cmdlets are always importable.
 $resolved = Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue
 if (-not $resolved) {
     $resolved = Get-Module -ListAvailable -Name "*$ModuleName*" -ErrorAction SilentlyContinue
 }
 
-if (-not $resolved) {
-    Write-Error "No modules found matching '$ModuleName'."
-    exit 1
+$actualName = $null
+if ($resolved) {
+    $uniqueNames = $resolved | Select-Object -ExpandProperty Name -Unique
+    if ($uniqueNames.Count -gt 1) {
+        $list = ($uniqueNames | Sort-Object) -join ', '
+        Write-Error "Multiple modules match '$ModuleName': $list  -- please be more specific."
+        exit 1
+    }
+    $actualName = $uniqueNames | Select-Object -First 1
+} else {
+    # Snap-in / always-loaded module fallback. If any command is published
+    # under this module name, take the name as given and rely on cmdlet
+    # availability rather than module import.
+    $existing = Get-Command -Module $ModuleName -CommandType Cmdlet,Function -ErrorAction SilentlyContinue
+    if ($existing) {
+        $actualName = $ModuleName
+    } else {
+        Write-Error "No modules found matching '$ModuleName'."
+        exit 1
+    }
 }
 
-$uniqueNames = $resolved | Select-Object -ExpandProperty Name -Unique
-
-if ($uniqueNames.Count -gt 1) {
-    $list = ($uniqueNames | Sort-Object) -join ', '
-    Write-Error "Multiple modules match '$ModuleName': $list  -- please be more specific."
-    exit 1
+# Import if not already loaded. Swallow non-fatal errors/warnings — some
+# modules (notably Microsoft.PowerShell.Security on 5.1) raise TypeData
+# re-registration warnings that get promoted to terminating errors under
+# -ErrorAction Stop even though the module itself loads fine. We verify
+# success post-hoc with Get-Module / Get-Command.
+if (-not (Get-Module -Name $actualName)) {
+    try {
+        Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
+    } catch { }
 }
 
-$actualName = $uniqueNames | Select-Object -First 1
-
-try {
-    Import-Module $actualName -ErrorAction Stop
-} catch {
-    Write-Error "Failed to import module '$actualName': $_"
+if (-not (Get-Module -Name $actualName) -and
+    -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue)) {
+    Write-Error "Failed to import module '$actualName' and no commands available."
     exit 1
 }
 
