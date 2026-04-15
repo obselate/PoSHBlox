@@ -445,7 +445,26 @@
                                                           FontFamily="{DynamicResource FontMono}" FontSize="12"
                                                           HorizontalAlignment="Stretch"
                                                           HorizontalContentAlignment="Left"
-                                                          VerticalContentAlignment="Center" />
+                                                          VerticalContentAlignment="Center">
+                                                    <!-- Highlight the currently-selected item inside the dropdown so
+                                                         users can see which set is active at a glance. FluentAvalonia's
+                                                         defaults for ComboBoxItem don't pop against our dark tokens. -->
+                                                    <ComboBox.Styles>
+                                                        <Style Selector="ComboBoxItem">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+                                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextFileBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+                                                        </Style>
+                                                    </ComboBox.Styles>
+                                                </ComboBox>
                                             </StackPanel>
 
                                             <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">

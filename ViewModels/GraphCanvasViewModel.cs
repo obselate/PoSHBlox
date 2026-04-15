@@ -518,6 +518,12 @@ public partial class GraphCanvasViewModel : ObservableObject
             // Nodes list is now empty so nothing to unsubscribe.
         }
 
+        // Fresh nodes need their params' IsInActiveSet / IsEffectivelyMandatory
+        // computed, and the graph needs revalidating (a freshly-spawned node is
+        // usually an orphan + has missing mandatory params until wired up).
+        RefreshWiredState();
+        RefreshParameterSetVisibility();
+        RefreshValidation();
         Palette.SyncFunctionTemplates();
     }
 
