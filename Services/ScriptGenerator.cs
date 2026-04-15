@@ -226,7 +226,7 @@ public class ScriptGenerator
 
         var args = new List<string>();
 
-        foreach (var param in node.Parameters.Where(p => !p.IsArgument))
+        foreach (var param in node.Parameters.Where(p => !p.IsArgument && IsParamInActiveSet(node, p)))
         {
             var pin = node.Inputs.FirstOrDefault(p => p.ParameterName == param.Name);
             if (pin == null)
@@ -466,6 +466,18 @@ public class ScriptGenerator
 
     private NodeConnection? FirstConnectionTargeting(NodePort pin)
         => _connections.FirstOrDefault(c => c.Target == pin);
+
+    /// <summary>
+    /// Is <paramref name="param"/> active for this node's currently-selected
+    /// parameter set? Legacy nodes (no declared sets) and common params (no
+    /// per-param set list) are always active.
+    /// </summary>
+    private static bool IsParamInActiveSet(GraphNode node, NodeParameter param)
+    {
+        if (node.KnownParameterSets.Length == 0) return true;
+        if (param.ParameterSets.Length == 0) return true;
+        return param.ParameterSets.Contains(node.ActiveParameterSet, StringComparer.OrdinalIgnoreCase);
+    }
 
     // ── Naming helpers (unchanged from V1) ─────────────────────
 
