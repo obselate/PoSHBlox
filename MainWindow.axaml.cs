@@ -498,13 +498,13 @@ public partial class MainWindow : AppWindow
 
     /// <summary>
     /// Open the quick-add popup at the current pointer position (relative to
-    /// the canvas). Used by Tab and by the "Quick add..." context-menu item
-    /// when there's no pending wire drag.
+    /// the canvas). Routes through the canvas so window-edge clamping applies
+    /// equally whether the trigger came from Tab, the context menu, or a wire
+    /// drop on empty space.
     /// </summary>
     private void OpenQuickAddAtPointer(GraphCanvasViewModel vm)
     {
-        var pos = GraphCanvas.CurrentPointerPosition;
-        vm.QuickAdd.OpenAt(pos.X, pos.Y, source: null);
+        GraphCanvas.OpenQuickAddAtCursor();
     }
 
     private void OnQuickAddPropertyChanged(object? sender, PropertyChangedEventArgs e)

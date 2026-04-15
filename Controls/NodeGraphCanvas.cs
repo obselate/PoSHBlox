@@ -241,11 +241,44 @@ public class NodeGraphCanvas : Control
         });
     }
 
-    private void OpenQuickAddAtCursor()
+    /// <summary>
+    /// Open the quick-add popup at the current pointer position, clamped so the
+    /// panel stays inside the window. Both Tab and the "Quick add..." menu item
+    /// route through here.
+    /// </summary>
+    public void OpenQuickAddAtCursor(NodePort? source = null)
     {
         if (_vm == null) return;
-        var pt = CurrentPointerPosition;
-        _vm.QuickAdd.OpenAt(pt.X, pt.Y, source: null);
+        OpenQuickAddAt(CurrentPointerPosition, source);
+    }
+
+    /// <summary>Clamp <paramref name="windowPoint"/> to keep the popup inside the window, then open.</summary>
+    public void OpenQuickAddAt(Point windowPoint, NodePort? source)
+    {
+        if (_vm == null) return;
+
+        // Match the XAML-declared size. If we ever make this dynamic the clamp
+        // can read it from the control once rendered, but constants are fine
+        // and avoid a first-frame layout-dependency.
+        const double popupW = 380;
+        const double popupH = 480;
+        const double pad = 8;
+
+        double rootW = 1280, rootH = 720;
+        if (this.GetVisualRoot() is Control root)
+        {
+            rootW = root.Bounds.Width;
+            rootH = root.Bounds.Height;
+        }
+
+        double x = windowPoint.X;
+        double y = windowPoint.Y;
+        if (x + popupW + pad > rootW) x = rootW - popupW - pad;
+        if (y + popupH + pad > rootH) y = rootH - popupH - pad;
+        if (x < pad) x = pad;
+        if (y < pad) y = pad;
+
+        _vm.QuickAdd.OpenAt(x, y, source);
     }
 
     private void ShowFlyout(IList<(string Label, Action? Action, bool IsSeparator)> items)
@@ -394,7 +427,7 @@ public class NodeGraphCanvas : Control
                     var windowPos = this.GetVisualRoot() is Visual root
                         ? (TranslatePoint(localPos, root) ?? localPos)
                         : localPos;
-                    _vm.QuickAdd.OpenAt(windowPos.X, windowPos.Y, _wireStartPort);
+                    OpenQuickAddAt(windowPos, _wireStartPort);
                 }
             }
         }
