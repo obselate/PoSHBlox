@@ -836,7 +836,7 @@
                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
 
                 <!-- Two columns: shortcut ∷ description -->
-                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                       RowSpacing="4">
                     <TextBlock Grid.Row="0"  Grid.Column="0" Text="Ctrl+N"       Classes="cheatKey"/>
                     <TextBlock Grid.Row="0"  Grid.Column="1" Text="New graph"    Classes="cheatLabel"/>
@@ -860,6 +860,10 @@
                     <TextBlock Grid.Row="14" Grid.Column="1" Text="Collapse / expand selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="15" Grid.Column="0" Text="Tab"          Classes="cheatKey"/>
                     <TextBlock Grid.Row="15" Grid.Column="1" Text="Quick add popup at cursor (or drag wire onto empty space)" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="16" Grid.Column="0" Text="Ctrl+Z"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="16" Grid.Column="1" Text="Undo"         Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="17" Grid.Column="0" Text="Ctrl+Y"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="17" Grid.Column="1" Text="Redo (also Ctrl+Shift+Z)" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="9"  Grid.Column="0" Text="Del / Backspace" Classes="cheatKey"/>
                     <TextBlock Grid.Row="9"  Grid.Column="1" Text="Delete selected node" Classes="cheatLabel"/>
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="F"            Classes="cheatKey"/>

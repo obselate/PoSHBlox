@@ -155,10 +155,12 @@ public class NodeGraphCanvas : Control
                 {
                     // Pick up the existing wire at this end. Anchor the far end;
                     // the free end follows the cursor. Original is restored on
-                    // release if no valid target is hit.
+                    // release if no valid target is hit. Records the removal so
+                    // committed reroutes are two-step-undoable (first undo =
+                    // remove the new wire, second undo = restore the original).
                     _wireStartPort = existing.Source == port ? existing.Target : existing.Source;
                     _reroutingOriginal = existing;
-                    _vm.Connections.Remove(existing);
+                    _vm.RemoveConnection(existing);
                 }
                 else
                 {
@@ -277,7 +279,7 @@ public class NodeGraphCanvas : Control
     {
         ShowFlyout(new List<(string, Action?, bool)>
         {
-            ("Delete wire",       () => _vm!.Connections.Remove(conn), false),
+            ("Delete wire",       () => _vm!.RemoveConnection(conn), false),
         });
     }
 
@@ -509,7 +511,11 @@ public class NodeGraphCanvas : Control
                 if (_reroutingOriginal != null)
                 {
                     // Reroute drop-off: restore the original wire (existing behavior).
+                    // The press-path recorded its removal; since we're canceling the
+                    // whole interaction, pop that entry so the user's undo history
+                    // doesn't show a phantom "Remove wire" they didn't do.
                     _vm.Connections.Add(_reroutingOriginal);
+                    _vm.Undo.PopUndo();
                 }
                 else
                 {
@@ -533,7 +539,30 @@ public class NodeGraphCanvas : Control
             double dx = _dragNode.X - _dragStartPos.X;
             double dy = _dragNode.Y - _dragStartPos.Y;
             if (dx * dx + dy * dy > 25) // moved more than ~5px
+            {
                 TrySnapToZone(_dragNode);
+
+                // Record one undo entry for the whole drag (across all selected
+                // nodes if this was a multi-drag). Captures each node's start
+                // and end positions so undo restores them atomically.
+                var moved = _multiDragStart
+                    .Select(kv => (node: kv.Key, start: kv.Value, end: new Point(kv.Key.X, kv.Key.Y)))
+                    .Where(m => m.start != m.end)
+                    .ToList();
+                if (moved.Count > 0)
+                {
+                    _vm.Undo.Record(
+                        undo: () =>
+                        {
+                            foreach (var m in moved) { m.node.X = m.start.X; m.node.Y = m.start.Y; }
+                        },
+                        redo: () =>
+                        {
+                            foreach (var m in moved) { m.node.X = m.end.X; m.node.Y = m.end.Y; }
+                        },
+                        label: moved.Count == 1 ? "Move node" : $"Move {moved.Count} nodes");
+                }
+            }
         }
 
         // Commit lasso selection, or treat the un-dragged press as a deselect.
@@ -879,7 +908,10 @@ public class NodeGraphCanvas : Control
     public void CancelDrag()
     {
         if (_isDraggingWire && _reroutingOriginal != null && _vm != null)
+        {
             _vm.Connections.Add(_reroutingOriginal);
+            _vm.Undo.PopUndo();  // cancel the press-path's Remove record
+        }
 
         _isPanning = false;
         _isDraggingNode = false;

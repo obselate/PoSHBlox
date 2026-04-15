@@ -31,6 +31,7 @@ public partial class GraphCanvasViewModel : ObservableObject
     // ── Sub-ViewModels ─────────────────────────────────────────
     public NodePaletteViewModel Palette { get; } = new();
     public QuickAddPopupViewModel QuickAdd { get; }
+    public UndoStack Undo { get; } = new();
 
     // ── Canvas transform ───────────────────────────────────────
     [ObservableProperty] private double _panX;
@@ -206,6 +207,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         PanY = 0;
         Zoom = 1.0;
         _suppressDirty = false;
+        Undo.Clear();
         IsDirty = false;
     }
 
@@ -217,6 +219,7 @@ public partial class GraphCanvasViewModel : ObservableObject
             -PanY / Zoom + 300);
         Nodes.Add(node);
         SelectNode(node);
+        RecordNodeAddition(node, "Add node");
     }
 
     [RelayCommand]
@@ -232,6 +235,38 @@ public partial class GraphCanvasViewModel : ObservableObject
         Nodes.Add(node);
         SelectNode(node);
         Palette.NoteSpawn(template);
+        RecordNodeAddition(node, $"Add {template.Name}");
+    }
+
+    /// <summary>
+    /// Push an undo entry for a newly-added node. Undo removes the node and
+    /// any connections that touch it at that moment (the only ones that could
+    /// exist immediately after spawn are auto-wires from the quick-add path).
+    /// Redo reinstates the node plus those connections.
+    /// </summary>
+    private void RecordNodeAddition(GraphNode node, string label)
+    {
+        // Connections touching the node at recording time — captured lazily
+        // on undo rather than here so auto-wired connections created right
+        // after Add are also covered.
+        Undo.Record(
+            undo: () =>
+            {
+                var toRemove = Connections
+                    .Where(c => c.Source.Owner == node || c.Target.Owner == node)
+                    .ToList();
+                foreach (var c in toRemove) Connections.Remove(c);
+                if (node.ParentZone != null) node.ParentZone.Children.Remove(node);
+                Nodes.Remove(node);
+            },
+            redo: () =>
+            {
+                Nodes.Add(node);
+                // Connections + zone membership aren't re-added here because
+                // subsequent actions in the redo history will restore them
+                // as they replay in order.
+            },
+            label: label);
     }
 
     [RelayCommand]
@@ -254,22 +289,51 @@ public partial class GraphCanvasViewModel : ObservableObject
             }
         }
 
-        foreach (var node in toDelete)
-        {
-            // Remove connections touching this node.
-            var conns = Connections
-                .Where(c => c.Source.Owner == node || c.Target.Owner == node)
-                .ToList();
-            foreach (var c in conns)
-                Connections.Remove(c);
+        // Capture everything needed to restore the delete on undo: the nodes
+        // themselves (preserved by reference), the connections touching them,
+        // and each node's zone membership.
+        var deletedNodes = toDelete.ToList();
+        var deletedConns = Connections
+            .Where(c => toDelete.Contains(c.Source.Owner!) || toDelete.Contains(c.Target.Owner!))
+            .ToList();
+        var zoneMembership = deletedNodes
+            .Where(n => n.ParentZone != null)
+            .Select(n => (node: n, container: n.ParentContainer!, zone: n.ParentZone!))
+            .ToList();
 
+        foreach (var node in deletedNodes)
+        {
             if (node.ParentZone != null)
                 node.ParentZone.Children.Remove(node);
-
             Nodes.Remove(node);
         }
+        foreach (var c in deletedConns) Connections.Remove(c);
 
         ClearSelection();
+
+        Undo.Record(
+            undo: () =>
+            {
+                foreach (var n in deletedNodes) Nodes.Add(n);
+                foreach (var (n, container, zone) in zoneMembership)
+                {
+                    n.ParentContainer = container;
+                    n.ParentZone = zone;
+                    if (!zone.Children.Contains(n)) zone.Children.Add(n);
+                }
+                foreach (var c in deletedConns) Connections.Add(c);
+            },
+            redo: () =>
+            {
+                foreach (var c in deletedConns) Connections.Remove(c);
+                foreach (var n in deletedNodes)
+                {
+                    if (n.ParentZone != null)
+                        n.ParentZone.Children.Remove(n);
+                    Nodes.Remove(n);
+                }
+            },
+            label: deletedNodes.Count == 1 ? "Delete node" : $"Delete {deletedNodes.Count} nodes");
     }
 
     private static void CollectDescendants(GraphNode container, List<GraphNode> result)
@@ -282,6 +346,12 @@ public partial class GraphCanvasViewModel : ObservableObject
                     CollectDescendants(child, result);
             }
     }
+
+    [RelayCommand]
+    public void PerformUndo() => Undo.Undo();
+
+    [RelayCommand]
+    public void PerformRedo() => Undo.Redo();
 
     [RelayCommand]
     public void ResetView()
@@ -315,6 +385,17 @@ public partial class GraphCanvasViewModel : ObservableObject
             Nodes.Add(dup);
             AddToSelection(dup);
         }
+
+        Undo.Record(
+            undo: () =>
+            {
+                foreach (var d in dupes) Nodes.Remove(d);
+            },
+            redo: () =>
+            {
+                foreach (var d in dupes) Nodes.Add(d);
+            },
+            label: dupes.Count == 1 ? "Duplicate node" : $"Duplicate {dupes.Count} nodes");
     }
 
     /// <summary>
@@ -397,7 +478,10 @@ public partial class GraphCanvasViewModel : ObservableObject
         Nodes.Add(node);
         SelectNode(node);
         Palette.NoteSpawn(template);
+        RecordNodeAddition(node, $"Add {template.Name}");
 
+        // AutoWire goes through AddConnection which records its own entries;
+        // each wire ends up as a separate undo step after the node add.
         if (source != null) AutoWire(source, node);
 
         QuickAdd.Close();
@@ -559,22 +643,55 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (source.Direction != PortDirection.Output || target.Direction != PortDirection.Input) return;
         if (!PortCompatibility.CanConnect(source, target)) return;
 
+        // Capture any wires displaced by 1:N rules so undo can restore them
+        // alongside removing the new wire.
+        var displaced = new List<NodeConnection>();
         if (source.Kind == PortKind.Data)
         {
-            // Data input accepts exactly one upstream. Replace any existing wire.
+            // Data input accepts exactly one upstream.
             foreach (var c in Connections.Where(c => c.Target == target).ToList())
+            {
+                displaced.Add(c);
                 Connections.Remove(c);
+            }
         }
         else // PortKind.Exec
         {
             // ExecOut fires exactly one successor. ExecIn accepts many (N→1 merge).
             foreach (var c in Connections.Where(c => c.Source == source).ToList())
+            {
+                displaced.Add(c);
                 Connections.Remove(c);
+            }
         }
 
         if (Connections.Any(c => c.Source == source && c.Target == target)) return;
 
-        Connections.Add(new NodeConnection { Source = source, Target = target });
+        var conn = new NodeConnection { Source = source, Target = target };
+        Connections.Add(conn);
+
+        Undo.Record(
+            undo: () =>
+            {
+                Connections.Remove(conn);
+                foreach (var d in displaced) Connections.Add(d);
+            },
+            redo: () =>
+            {
+                foreach (var d in displaced) Connections.Remove(d);
+                Connections.Add(conn);
+            },
+            label: "Add wire");
+    }
+
+    /// <summary>Remove a connection with undo support.</summary>
+    public void RemoveConnection(NodeConnection conn)
+    {
+        if (!Connections.Remove(conn)) return;
+        Undo.Record(
+            undo: () => Connections.Add(conn),
+            redo: () => Connections.Remove(conn),
+            label: "Remove wire");
     }
 
     public void RemoveConnectionsForPort(NodePort port)
@@ -602,6 +719,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         RefreshWiredState();
         RefreshParameterSetVisibility();
         RefreshValidation();
+        Undo.Clear();
         IsDirty = false;
         Palette.SyncFunctionTemplates();
     }

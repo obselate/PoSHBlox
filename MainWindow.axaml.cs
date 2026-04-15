@@ -131,6 +131,19 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
+                // Ctrl+Z — undo
+                case Key.Z when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    vm.PerformUndo();
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+Y or Ctrl+Shift+Z — redo
+                case Key.Y when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                case Key.Z when !inTextBox && e.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift):
+                    vm.PerformRedo();
+                    e.Handled = true;
+                    break;
+
                 // C — collapse / expand selected node
                 case Key.C when !inTextBox && e.KeyModifiers == KeyModifiers.None:
                     vm.ToggleCollapseSelected();
