@@ -50,15 +50,6 @@ public class NodeTemplate
     /// <summary>V2: which set a node spawns with. Null = first of KnownParameterSets (if any).</summary>
     public string? DefaultParameterSet { get; set; }
 
-    // ── [Legacy V1] ────────────────────────────────────────────
-    // Kept so existing Templates/Builtin/*.json and Samples/*.pblx still load.
-    // NodeFactory ignores these when V2 fields are present, falls back otherwise.
-    // Removed in Step 9 after all templates are regenerated via the introspector.
-    public int InputCount { get; set; } = 1;
-    public int OutputCount { get; set; } = 1;
-    public string[] InputNames { get; set; } = ["In"];
-    public string[] OutputNames { get; set; } = ["Out"];
-
     public List<ParameterDef> Parameters { get; set; } = [];
 }
 

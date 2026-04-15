@@ -143,10 +143,12 @@ public partial class NodePaletteViewModel : ObservableObject
                     Category = "Functions",
                     Description = $"Call {fnName}",
                     CmdletName = fnName,
-                    InputCount = 1,
-                    OutputCount = 1,
-                    InputNames = ["In"],
-                    OutputNames = ["Out"],
+                    // V2 shape: user functions get standard exec pins and a
+                    // single primary Any-typed output. NodeFactory builds the
+                    // per-parameter data inputs from Parameters automatically.
+                    HasExecIn = true,
+                    HasExecOut = true,
+                    DataOutputs = [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
                     Parameters = args.Select(a => new ParameterDef
                     {
                         Name = a.Name,
