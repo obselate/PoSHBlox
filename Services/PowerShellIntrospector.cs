@@ -76,6 +76,12 @@ public class DiscoveredCmdlet
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public List<DiscoveredParameter> Parameters { get; set; } = [];
+
+    // ── V2 fields (from enhanced IntrospectModule.ps1) ─────────
+    public bool HasExecIn { get; set; } = true;
+    public bool HasExecOut { get; set; } = true;
+    public string? PrimaryPipelineParameter { get; set; }
+    public List<DataOutputDef> DataOutputs { get; set; } = [];
 }
 
 public class DiscoveredParameter
@@ -86,4 +92,7 @@ public class DiscoveredParameter
     public string DefaultValue { get; set; } = "";
     public string Description { get; set; } = "";
     public string[] ValidValues { get; set; } = [];
+
+    /// <summary>V2: <c>[Parameter(ValueFromPipeline)]</c> — promotes the paired pin to primary pipeline target.</summary>
+    public bool IsPipelineInput { get; set; }
 }

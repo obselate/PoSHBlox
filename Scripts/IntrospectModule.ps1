@@ -12,6 +12,42 @@ $CommonParams = @(
     'OutBuffer','PipelineVariable','Confirm','WhatIf'
 )
 
+function Map-ParamType {
+    param([System.Reflection.ParameterInfo]$pi, [System.Management.Automation.ParameterMetadata]$pm)
+    $t = $pm.ParameterType
+    $name = $t.Name
+
+    if ($pm.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }) {
+        return 'Enum'
+    }
+
+    switch -Regex ($name) {
+        '^SwitchParameter$'                             { return 'Bool' }
+        '^Boolean$'                                     { return 'Bool' }
+        '^Int(16|32|64)?$'                              { return 'Int' }
+        '^UInt(16|32|64)?$'                             { return 'Int' }
+        '^Byte$'                                        { return 'Int' }
+        '^Double$|^Single$|^Decimal$'                   { return 'Int' } # numeric bucket
+        '^String\[\]$'                                  { return 'StringArray' }
+        '^Object\[\]$'                                  { return 'Collection' }
+        '^.*\[\]$'                                      { return 'Collection' }
+        '^ScriptBlock$'                                 { return 'ScriptBlock' }
+        '^PSCredential$'                                { return 'Credential' }
+        '^Hashtable$'                                   { return 'HashTable' }
+        '^String$'                                      {
+            # Path-ish heuristic — if the param name hints path, type as Path
+            if ($pm.Name -match '^(Path|LiteralPath|Destination|FilePath|OutputPath|WorkingDirectory|LogPath|SourcePath)$') {
+                return 'Path'
+            }
+            return 'String'
+        }
+        default {
+            if ($t.IsEnum) { return 'Enum' }
+            return 'Object'
+        }
+    }
+}
+
 # Resolve module: try exact match first, then wildcard
 $resolved = Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue
 if (-not $resolved) {
@@ -23,7 +59,6 @@ if (-not $resolved) {
     exit 1
 }
 
-# Deduplicate by name (same module can appear in multiple paths)
 $uniqueNames = $resolved | Select-Object -ExpandProperty Name -Unique
 
 if ($uniqueNames.Count -gt 1) {
@@ -61,67 +96,88 @@ foreach ($cmd in $commands) {
     } catch { }
 
     $params = @()
+    $primaryPipelineParam = $null
     foreach ($p in $cmd.Parameters.GetEnumerator()) {
         $paramName = $p.Key
         if ($paramName -in $CommonParams) { continue }
 
         $paramInfo = $p.Value
-        $paramType = "String"
+        $paramType = Map-ParamType -pi $null -pm $paramInfo
         $validVals = @()
         $isMandatory = $false
         $defaultValue = ""
+        $isPipelineInput = $false
 
-        # Determine type mapping
-        $typeName = $paramInfo.ParameterType.Name
-        switch ($typeName) {
-            'SwitchParameter' { $paramType = "Bool" }
-            'Int32'           { $paramType = "Int" }
-            'Int64'           { $paramType = "Int" }
-            'Boolean'         { $paramType = "Bool" }
-            'String[]'        { $paramType = "StringArray" }
-            'ScriptBlock'     { $paramType = "ScriptBlock" }
-            'PSCredential'    { $paramType = "Credential" }
-            default {
-                if ($paramInfo.ParameterType.IsEnum) {
-                    $paramType = "Enum"
-                    $validVals = [System.Enum]::GetNames($paramInfo.ParameterType)
-                } elseif ($typeName -match 'String') {
-                    $paramType = "String"
-                }
-            }
-        }
-
-        # Check ValidateSet attribute
+        # ValidateSet overrides the mapped type to Enum.
         $validateSet = $paramInfo.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
         if ($validateSet) {
             $paramType = "Enum"
             $validVals = $validateSet.ValidValues
+        } elseif ($paramInfo.ParameterType.IsEnum) {
+            $validVals = [System.Enum]::GetNames($paramInfo.ParameterType)
         }
 
-        # Check mandatory
-        $mandatoryAttr = $paramInfo.Attributes | Where-Object {
-            $_ -is [System.Management.Automation.ParameterAttribute] -and $_.Mandatory
+        # Parameter attributes: Mandatory + ValueFromPipeline.
+        $paramAttrs = $paramInfo.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }
+        foreach ($attr in $paramAttrs) {
+            if ($attr.Mandatory) { $isMandatory = $true }
+            if ($attr.ValueFromPipeline) { $isPipelineInput = $true }
         }
-        if ($mandatoryAttr) { $isMandatory = $true }
 
-        $helpMsg = ($paramInfo.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] } | Select-Object -First 1).HelpMessage
+        $helpMsg = ($paramAttrs | Select-Object -First 1).HelpMessage
         if (-not $helpMsg) { $helpMsg = "" }
 
+        if ($isPipelineInput -and -not $primaryPipelineParam) {
+            $primaryPipelineParam = $paramName
+        }
+
         $params += @{
-            name         = $paramName
-            type         = $paramType
-            isMandatory  = $isMandatory
-            defaultValue = $defaultValue
-            description  = $helpMsg
-            validValues  = @($validVals)
+            name            = $paramName
+            type            = $paramType
+            isMandatory     = $isMandatory
+            defaultValue    = $defaultValue
+            description     = $helpMsg
+            validValues     = @($validVals)
+            isPipelineInput = $isPipelineInput
+        }
+    }
+
+    # Output types → V2 DataOutputs. If the cmdlet declares OutputType, name
+    # the primary after the last segment of the first declared type; otherwise
+    # fall back to a single primary "Out" of type Any.
+    $dataOutputs = @()
+    $outputTypes = @()
+    try {
+        $outputTypes = $cmd.OutputType
+    } catch { }
+
+    if ($outputTypes -and $outputTypes.Count -gt 0) {
+        $first = $outputTypes | Select-Object -First 1
+        $typeName = if ($first.Type) { $first.Type.Name } else { "$($first.Name)" }
+        $shortName = ($typeName -split '\.')[-1]
+        if (-not $shortName) { $shortName = "Out" }
+        $dataOutputs += @{
+            name      = $shortName
+            type      = "Any"
+            isPrimary = $true
+        }
+    } else {
+        $dataOutputs += @{
+            name      = "Out"
+            type      = "Any"
+            isPrimary = $true
         }
     }
 
     $results += @{
-        name        = $cmd.Name
-        description = $synopsis
-        parameters  = $params
+        name                      = $cmd.Name
+        description               = $synopsis
+        parameters                = $params
+        hasExecIn                 = $true
+        hasExecOut                = $true
+        primaryPipelineParameter  = $primaryPipelineParam
+        dataOutputs               = $dataOutputs
     }
 }
 
-$results | ConvertTo-Json -Depth 5 -Compress
+$results | ConvertTo-Json -Depth 6 -Compress
