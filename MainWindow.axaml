@@ -484,16 +484,23 @@
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
                                                             <!-- Per-parameter help. Truncated to ~2 lines in-panel; full
-                                                                 text surfaces on hover so long Get-Help descriptions
-                                                                 don't blow out the panel while staying discoverable. -->
+                                                                 text surfaces on hover via a wrapping TextBlock tooltip
+                                                                 so long Get-Help descriptions don't blow out the panel
+                                                                 while staying discoverable. -->
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                                        TextWrapping="Wrap"
                                                                        MaxLines="2"
                                                                        TextTrimming="CharacterEllipsis"
-                                                                       ToolTip.Tip="{Binding Description}"
                                                                        ToolTip.ShowDelay="300"
-                                                                       IsVisible="{Binding !IsBool}" />
+                                                                       IsVisible="{Binding !IsBool}">
+                                                                <ToolTip.Tip>
+                                                                    <TextBlock Text="{Binding Description}"
+                                                                               TextWrapping="Wrap"
+                                                                               MaxWidth="400"
+                                                                               FontSize="12" />
+                                                                </ToolTip.Tip>
+                                                            </TextBlock>
 
                                                             <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
                                                             <Border IsVisible="{Binding IsWired}"
