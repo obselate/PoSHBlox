@@ -746,7 +746,10 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (e.Action == NotifyCollectionChangedAction.Reset)
         {
             // Clear was called — can't enumerate old items, they're gone.
-            // Nodes list is now empty so nothing to unsubscribe.
+            // Nodes list is now empty so nothing to unsubscribe. Drop the
+            // _lastValues snapshot too; any lingering keys point at orphaned
+            // parameters from the previous document.
+            _lastValues.Clear();
         }
 
         // Fresh nodes need their params' IsInActiveSet / IsEffectivelyMandatory
@@ -760,11 +763,21 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     private static readonly string[] IgnoredNodeProps = [nameof(GraphNode.IsSelected)];
 
+    /// <summary>
+    /// Snapshot of each parameter's last-seen Value, kept so param-value changes
+    /// can record undo entries with both the previous and new values. Populated
+    /// on subscribe, updated whenever a Value PropertyChanged fires.
+    /// </summary>
+    private readonly Dictionary<NodeParameter, string> _lastValues = new();
+
     private void SubscribeNode(GraphNode node)
     {
         node.PropertyChanged += OnNodePropertyChanged;
         foreach (var p in node.Parameters)
+        {
             p.PropertyChanged += OnParamPropertyChanged;
+            _lastValues[p] = p.Value;
+        }
         node.Parameters.CollectionChanged += OnNodeParamsChanged;
     }
 
@@ -772,7 +785,10 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         node.PropertyChanged -= OnNodePropertyChanged;
         foreach (var p in node.Parameters)
+        {
             p.PropertyChanged -= OnParamPropertyChanged;
+            _lastValues.Remove(p);
+        }
         node.Parameters.CollectionChanged -= OnNodeParamsChanged;
     }
 
@@ -796,12 +812,32 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(NodeParameter.Value))
+        if (e.PropertyName == nameof(NodeParameter.Value) && sender is NodeParameter p)
         {
+            // Pull old value from the last-seen snapshot, update to new.
+            var oldValue = _lastValues.TryGetValue(p, out var prev) ? prev : "";
+            var newValue = p.Value;
+            _lastValues[p] = newValue;
+
             MarkDirty();
             Palette.SyncFunctionTemplates();
             // Filling in a mandatory param's value clears its issue. Re-validate.
             RefreshValidation();
+
+            // Record with a coalesce key so rapid keystrokes on the same param
+            // collapse into a single undo entry. Undo replays via the same
+            // setter, which re-enters this handler with _suppressed=true on
+            // the stack, so no double-record. _lastValues still updates each
+            // time so the snapshot stays consistent with the live value.
+            if (oldValue == newValue) return;    // no-op change, skip
+            var coalesceKey = p.Owner != null
+                ? $"value:{p.Owner.Id}:{p.Name}"
+                : $"value:{p.Name}";
+            Undo.Record(
+                undo: () => { p.Value = oldValue; },
+                redo: () => { p.Value = newValue; },
+                label: $"Edit {p.Name}",
+                coalesceKey: coalesceKey);
         }
     }
 
@@ -811,11 +847,17 @@ public partial class GraphCanvasViewModel : ObservableObject
 
         if (e.NewItems != null)
             foreach (NodeParameter p in e.NewItems)
+            {
                 p.PropertyChanged += OnParamPropertyChanged;
+                _lastValues[p] = p.Value;
+            }
 
         if (e.OldItems != null)
             foreach (NodeParameter p in e.OldItems)
+            {
                 p.PropertyChanged -= OnParamPropertyChanged;
+                _lastValues.Remove(p);
+            }
 
         RefreshWiredState();
         RefreshParameterSetVisibility();
