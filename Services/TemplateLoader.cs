@@ -16,15 +16,13 @@ public static class TemplateLoader
 {
     private static readonly JsonSerializerOptions Options = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions WriteOptions = new()
     {
         WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public static List<NodeTemplate> LoadAll()

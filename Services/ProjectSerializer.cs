@@ -24,9 +24,8 @@ public static class ProjectSerializer
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     /// <summary>

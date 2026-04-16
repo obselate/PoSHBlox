@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Avalonia;
@@ -15,11 +16,12 @@ namespace PoSHBlox.Rendering;
 /// </summary>
 public class NodeGraphRenderer
 {
-    // Reusable pen/brush instances to reduce allocations in the render loop
-    private readonly SolidColorBrush _bgBrush = new(GraphTheme.Background);
-    private readonly SolidColorBrush _gridDotBrush = new(GraphTheme.GridMinor);
-    private readonly SolidColorBrush _gridDotMajorBrush = new(GraphTheme.GridMajor);
-    private readonly Pen _wirePen = new(new SolidColorBrush(GraphTheme.Wire), GraphTheme.WireThickness);
+    // Shared brush/pen pools — every Draw* call reuses these instead of
+    // allocating per-frame. Keyed by (ARGB, thickness, dashKind) so any
+    // unique tuple still shares a single instance across frames.
+    private readonly Dictionary<uint, SolidColorBrush> _brushCache = new();
+    private readonly Dictionary<(uint Argb, long ThkBits, int DashKind), Pen> _penCache = new();
+    private LinearGradientBrush? _headerGradient;
 
     // Margin added to the viewport for culling (world-space units).
     // Covers port labels (~80px), shadows, selection borders, and breathing room.
@@ -33,7 +35,7 @@ public class NodeGraphRenderer
         bool isDraggingNode = false, GraphNode? dragNode = null,
         bool isLassoing = false, Point lassoStart = default, Point lassoEnd = default)
     {
-        ctx.DrawRectangle(_bgBrush, null, bounds);
+        ctx.DrawRectangle(BrushFor(GraphTheme.Background), null, bounds);
         DrawGrid(ctx, bounds, vm);
 
         // Compute the visible viewport in world-space coordinates, with generous margin
@@ -80,7 +82,7 @@ public class NodeGraphRenderer
     /// Dashed selection rectangle. Thin outline + faint fill so users can see
     /// through it to the nodes they're about to select.
     /// </summary>
-    private static void DrawLassoRect(DrawingContext ctx, Point a, Point b)
+    private void DrawLassoRect(DrawingContext ctx, Point a, Point b)
     {
         double x = Math.Min(a.X, b.X);
         double y = Math.Min(a.Y, b.Y);
@@ -88,8 +90,8 @@ public class NodeGraphRenderer
         double h = Math.Abs(b.Y - a.Y);
         if (w < 1 && h < 1) return;
 
-        var fill   = new SolidColorBrush(Color.FromArgb(28, 91, 168, 154));   // faint teal
-        var stroke = new Pen(new SolidColorBrush(GraphTheme.NodeSelectedBorder), 1.0) { DashStyle = DashStyle.Dash };
+        var fill   = BrushFor(Color.FromArgb(28, 91, 168, 154));   // faint teal
+        var stroke = PenFor(GraphTheme.NodeSelectedBorder, 1.0, DashStyle.Dash);
         ctx.DrawRectangle(fill, stroke, new Rect(x, y, w, h));
     }
 
@@ -154,7 +156,7 @@ public class NodeGraphRenderer
                 double y = row * sg + vm.PanY;
                 bool major = majorCol && row % GraphTheme.GridMajorEvery == 0;
 
-                var brush = major ? _gridDotMajorBrush : _gridDotBrush;
+                var brush = BrushFor(major ? GraphTheme.GridMajor : GraphTheme.GridMinor);
                 double r = major ? GraphTheme.GridDotMajorRadius : GraphTheme.GridDotRadius;
                 ctx.DrawEllipse(brush, null, new Point(x, y), r, r);
             }
@@ -172,7 +174,7 @@ public class NodeGraphRenderer
         bool inContainer = node.ParentContainer != null;
 
         // Shadow
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.NodeShadow), null,
+        ctx.DrawRectangle(BrushFor(GraphTheme.NodeShadow), null,
             new RoundedRect(rect.Translate(new Vector(GraphTheme.NodeShadowOffset, GraphTheme.NodeShadowOffset)),
                 GraphTheme.NodeCornerRadius));
 
@@ -187,16 +189,16 @@ public class NodeGraphRenderer
             : inContainer ? catColor
             : GraphTheme.NodeBorder;
         double borderThickness = node.IsSelected ? 2.5 : (node.HasIssues ? 2.0 : 1.0);
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.NodeBackground),
-            new Pen(new SolidColorBrush(borderColor), borderThickness),
+        ctx.DrawRectangle(BrushFor(GraphTheme.NodeBackground),
+            PenFor(borderColor, borderThickness),
             new RoundedRect(rect, GraphTheme.NodeCornerRadius));
 
         // Header band with gradient overlay
         using (ctx.PushClip(new RoundedRect(rect, GraphTheme.NodeCornerRadius)))
         {
             var headerRect = new Rect(node.X, node.Y, width, hh);
-            ctx.DrawRectangle(new SolidColorBrush(catColor), null, headerRect);
-            ctx.DrawRectangle(MakeHeaderGradient(), null, headerRect);
+            ctx.DrawRectangle(BrushFor(catColor), null, headerRect);
+            ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
         // Title + category badge
@@ -227,8 +229,8 @@ public class NodeGraphRenderer
             double chipY = node.Y + (hh - chipSize) / 2;
 
             ctx.DrawRectangle(
-                new SolidColorBrush(GraphTheme.NodeBackground),
-                new Pen(new SolidColorBrush(badgeColor), 1),
+                BrushFor(GraphTheme.NodeBackground),
+                PenFor(badgeColor, 1),
                 new RoundedRect(new Rect(chipX, chipY, chipSize, chipSize), 3));
 
             // Center the glyph inside the chip.
@@ -261,25 +263,24 @@ public class NodeGraphRenderer
         var rect = new Rect(node.X, node.Y, node.ContainerWidth, node.ContainerHeight);
 
         // Shadow
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.ContainerShadow), null,
+        ctx.DrawRectangle(BrushFor(GraphTheme.ContainerShadow), null,
             new RoundedRect(rect.Translate(new Vector(GraphTheme.ContainerShadowOffset, GraphTheme.ContainerShadowOffset)),
                 GraphTheme.ContainerCornerRadius));
 
         // Body (dashed for control flow, solid for functions and labels)
         var borderColor = node.IsSelected ? GraphTheme.NodeSelectedBorder : catColor;
         bool solidBorder = node.ContainerType is ContainerType.Function or ContainerType.Label;
-        var borderPen = solidBorder
-            ? new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1.5)
-            : new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1.5) { DashStyle = DashStyle.Dash };
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.ContainerBg), borderPen,
+        double thk = node.IsSelected ? 2.5 : 1.5;
+        var borderPen = solidBorder ? PenFor(borderColor, thk) : PenFor(borderColor, thk, DashStyle.Dash);
+        ctx.DrawRectangle(BrushFor(GraphTheme.ContainerBg), borderPen,
             new RoundedRect(rect, GraphTheme.ContainerCornerRadius));
 
         // Header band
         using (ctx.PushClip(new RoundedRect(rect, GraphTheme.ContainerCornerRadius)))
         {
             var headerRect = new Rect(node.X, node.Y, node.ContainerWidth, hh);
-            ctx.DrawRectangle(new SolidColorBrush(catColor), null, headerRect);
-            ctx.DrawRectangle(MakeHeaderGradient(), null, headerRect);
+            ctx.DrawRectangle(BrushFor(catColor), null, headerRect);
+            ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
         // Title + badge
@@ -310,9 +311,9 @@ public class NodeGraphRenderer
         // Zone background — use highlight color and solid teal border when a node is being dragged over
         var bgColor = highlight ? GraphTheme.ZoneDropHighlight : GraphTheme.ZoneBg;
         var borderPen = highlight
-            ? new Pen(new SolidColorBrush(GraphTheme.NodeSelectedBorder), 1.5)
-            : new Pen(new SolidColorBrush(GraphTheme.ZoneBorder), 1) { DashStyle = DashStyle.Dot };
-        ctx.DrawRectangle(new SolidColorBrush(bgColor), borderPen,
+            ? PenFor(GraphTheme.NodeSelectedBorder, 1.5)
+            : PenFor(GraphTheme.ZoneBorder, 1, DashStyle.Dot);
+        ctx.DrawRectangle(BrushFor(bgColor), borderPen,
             new RoundedRect(new Rect(zx, zy, zw, zh), 6));
 
         // Zone label — omit on Label containers (single zone, no semantic
@@ -329,12 +330,17 @@ public class NodeGraphRenderer
         // Empty hint
         if (zone.Children.Count == 0)
         {
-            var hint = new FormattedText("Drop nodes here", CultureInfo.CurrentCulture,
-                FlowDirection.LeftToRight, new Typeface(GraphTheme.FontFamily, FontStyle.Italic),
-                11, new SolidColorBrush(GraphTheme.ZoneHint));
+            var hint = EmptyZoneHint();
             ctx.DrawText(hint, new Point(zx + (zw - hint.Width) / 2, zy + (zh - hint.Height) / 2));
         }
     }
+
+    // Constant text; rebuild once per hint-color change (effectively once).
+    private FormattedText? _emptyZoneHint;
+    private FormattedText EmptyZoneHint()
+        => _emptyZoneHint ??= new FormattedText("Drop nodes here", CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight, new Typeface(GraphTheme.FontFamily, FontStyle.Italic),
+            11, BrushFor(GraphTheme.ZoneHint));
 
     /// <summary>
     /// Check if a point (in canvas space) is inside a container zone.
@@ -345,7 +351,7 @@ public class NodeGraphRenderer
         return px >= zx && px <= zx + zw && py >= zy && py <= zy + zh;
     }
 
-    private static void DrawResizeGrip(DrawingContext ctx, GraphNode node)
+    private void DrawResizeGrip(DrawingContext ctx, GraphNode node)
     {
         double hx = node.X + node.ContainerWidth;
         double hy = node.Y + node.ContainerHeight;
@@ -359,7 +365,7 @@ public class NodeGraphRenderer
             g.LineTo(new Point(hx, hy - gs));
             g.EndFigure(true);
         }
-        ctx.DrawGeometry(new SolidColorBrush(GraphTheme.ResizeGrip), null, geo);
+        ctx.DrawGeometry(BrushFor(GraphTheme.ResizeGrip), null, geo);
     }
 
     // ── Ports ──────────────────────────────────────────────────
@@ -399,10 +405,10 @@ public class NodeGraphRenderer
         var centerColor = Color.FromArgb(alpha, GraphTheme.PortCenter.R, GraphTheme.PortCenter.G, GraphTheme.PortCenter.B);
 
         // Outer ring + inner dot, colored by data type.
-        ctx.DrawEllipse(new SolidColorBrush(centerColor),
-            new Pen(new SolidColorBrush(color), 2),
+        ctx.DrawEllipse(BrushFor(centerColor),
+            PenFor(color, 2),
             pos, GraphTheme.PortRadius, GraphTheme.PortRadius);
-        ctx.DrawEllipse(new SolidColorBrush(color), null,
+        ctx.DrawEllipse(BrushFor(color), null,
             pos, GraphTheme.PortDotRadius, GraphTheme.PortDotRadius);
 
         // Label — skip for unnamed pins (e.g. ForEach's synthesized Source).
@@ -421,7 +427,7 @@ public class NodeGraphRenderer
     /// exec-pin glyph. Both input (left edge) and output (right edge) point right
     /// to cue data-flow direction. Alpha controls dim-state during wire drags.
     /// </summary>
-    private static void DrawExecTriangle(DrawingContext ctx, Point pos, byte alpha = 255)
+    private void DrawExecTriangle(DrawingContext ctx, Point pos, byte alpha = 255)
     {
         double size = GraphTheme.PortRadius + 1;
         double tipX = pos.X + size;
@@ -435,8 +441,7 @@ public class NodeGraphRenderer
             g.EndFigure(true);
         }
         var color = Color.FromArgb(alpha, GraphTheme.ExecPin.R, GraphTheme.ExecPin.G, GraphTheme.ExecPin.B);
-        var brush = new SolidColorBrush(color);
-        ctx.DrawGeometry(brush, new Pen(brush, 1.5), geo);
+        ctx.DrawGeometry(BrushFor(color), PenFor(color, 1.5), geo);
     }
 
     // ── Wires ──────────────────────────────────────────────────
@@ -445,7 +450,7 @@ public class NodeGraphRenderer
     {
         var start = GetPortPosition(conn.Source.Owner!, conn.Source);
         var end = GetPortPosition(conn.Target.Owner!, conn.Target);
-        ctx.DrawGeometry(null, _wirePen, MakeBezier(start, end));
+        ctx.DrawGeometry(null, PenFor(GraphTheme.Wire, GraphTheme.WireThickness), MakeBezier(start, end));
     }
 
     private void DrawPendingWire(DrawingContext ctx, NodePort startPort, Point endPoint)
@@ -461,10 +466,7 @@ public class NodeGraphRenderer
             ? GraphTheme.ExecPin
             : GraphTheme.GetDataTypeColor(startPort.DataType);
 
-        var pen = new Pen(new SolidColorBrush(wireColor), GraphTheme.WireThickness)
-        {
-            DashStyle = DashStyle.Dash,
-        };
+        var pen = PenFor(wireColor, GraphTheme.WireThickness, DashStyle.Dash);
         ctx.DrawGeometry(null, pen, MakeBezier(start, end));
     }
 
@@ -476,7 +478,7 @@ public class NodeGraphRenderer
             $"Zoom: {vm.Zoom:P0}  |  Nodes: {vm.Nodes.Count}  |  Middle-click: Pan  |  Scroll: Zoom  |  Right-click wire: Delete",
             11, FontWeight.Normal, GraphTheme.HudText);
 
-        ctx.DrawRectangle(new SolidColorBrush(GraphTheme.HudBg), null,
+        ctx.DrawRectangle(BrushFor(GraphTheme.HudBg), null,
             new Rect(0, bounds.Height - 28, bounds.Width, 28));
         ctx.DrawText(text, new Point(10, bounds.Height - 22));
     }
@@ -564,7 +566,7 @@ public class NodeGraphRenderer
         return geo;
     }
 
-    private static LinearGradientBrush MakeHeaderGradient() => new()
+    private LinearGradientBrush HeaderGradient() => _headerGradient ??= new LinearGradientBrush
     {
         StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
         EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
@@ -583,8 +585,36 @@ public class NodeGraphRenderer
         return depth;
     }
 
-    private static FormattedText MakeText(string text, double size, FontWeight weight, Color color)
+    private FormattedText MakeText(string text, double size, FontWeight weight, Color color)
         => new(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
             new Typeface(GraphTheme.FontFamily, FontStyle.Normal, weight),
-            size, new SolidColorBrush(color));
+            size, BrushFor(color));
+
+    // ── Brush / Pen pool ───────────────────────────────────────
+
+    private SolidColorBrush BrushFor(Color c)
+    {
+        uint key = ((uint)c.A << 24) | ((uint)c.R << 16) | ((uint)c.G << 8) | c.B;
+        if (!_brushCache.TryGetValue(key, out var brush))
+            _brushCache[key] = brush = new SolidColorBrush(c);
+        return brush;
+    }
+
+    private Pen PenFor(Color c, double thickness, DashStyle? dash = null)
+    {
+        uint colorKey = ((uint)c.A << 24) | ((uint)c.R << 16) | ((uint)c.G << 8) | c.B;
+        long thkBits = BitConverter.DoubleToInt64Bits(thickness);
+        int dashKind = dash == null ? 0
+            : ReferenceEquals(dash, DashStyle.Dash) ? 1
+            : ReferenceEquals(dash, DashStyle.Dot) ? 2
+            : 3;
+        var key = (colorKey, thkBits, dashKind);
+        if (!_penCache.TryGetValue(key, out var pen))
+        {
+            pen = new Pen(BrushFor(c), thickness);
+            if (dash != null) pen.DashStyle = dash;
+            _penCache[key] = pen;
+        }
+        return pen;
+    }
 }

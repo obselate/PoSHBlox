@@ -189,7 +189,6 @@
     <SolidColorBrush x:Key="TextDeleteLightBrush" Color="{StaticResource CoreRedWarning300}" />
 
     <!-- Font families -->
-    <FontFamily x:Key="FontSans">Inter, Segoe UI, sans-serif</FontFamily>
     <FontFamily x:Key="FontMono">avares://PoSHBlox/Assets/Fonts#JetBrains Mono, Cascadia Code, Consolas, monospace</FontFamily>
 
     <!-- Override FluentAvalonia's default content font so all controls use JetBrains Mono -->

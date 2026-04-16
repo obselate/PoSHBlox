@@ -21,8 +21,7 @@ public static class PowerShellIntrospector
 {
     private static readonly JsonSerializerOptions Options = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     private static string? _resolvedHost;

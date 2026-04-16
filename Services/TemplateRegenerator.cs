@@ -23,18 +23,16 @@ public static class TemplateRegenerator
 {
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() },
         ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true,
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions WriteOptions = new()
     {
         WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public class Options

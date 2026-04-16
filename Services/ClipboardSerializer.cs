@@ -31,9 +31,8 @@ public static class ClipboardSerializer
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public sealed class Payload
