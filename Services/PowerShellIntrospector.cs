@@ -11,59 +11,34 @@ namespace PoSHBlox.Services;
 
 /// <summary>
 /// Launches PowerShell to introspect a module's cmdlets and parameters.
-/// Prefers PowerShell 7 (pwsh.exe) when available, falls back to Windows
-/// PowerShell 5.1 (powershell.exe). Many modern modules ship .NET Core
-/// assemblies that 5.1 can't load — hitting pwsh first fixes that class
-/// of failure (Microsoft.PowerShell.Security on 5.1 is the canonical
-/// case where the .dll is built for net5+ and the 5.1 import errors).
+/// Host selection is delegated to <see cref="PowerShellHostRegistry"/> so Run
+/// and Introspect share one resolver — pwsh 7+ when present, 5.1 as fallback.
+/// The resolved host id is stamped into <see cref="IntrospectionResult.HostId"/>
+/// so catalog writers can record which host produced the metadata.
 /// </summary>
 public static class PowerShellIntrospector
 {
     private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options);
 
-    private static string? _resolvedHost;
-
     /// <summary>
-    /// Resolve the PowerShell host to use. pwsh.exe on PATH wins; falls back
-    /// to powershell.exe for environments without PS 7 installed. Cached so
-    /// repeated invocations (e.g. manifest regen across many modules) don't
-    /// re-probe the PATH.
+    /// Introspect <paramref name="moduleName"/>. When <paramref name="host"/>
+    /// is null the registry's default (pwsh-preferred) is used.
     /// </summary>
-    private static string ResolvePowerShellHost()
-    {
-        if (_resolvedHost != null) return _resolvedHost;
-        _resolvedHost = LocateOnPath("pwsh.exe") ? "pwsh.exe" : "powershell.exe";
-        Console.Out.WriteLine($"[regen]   using host '{_resolvedHost}'");
-        return _resolvedHost;
-    }
-
-    private static bool LocateOnPath(string exe)
-    {
-        var path = Environment.GetEnvironmentVariable("PATH");
-        if (string.IsNullOrEmpty(path)) return false;
-        foreach (var dir in path.Split(Path.PathSeparator))
-        {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(dir) && File.Exists(Path.Combine(dir, exe)))
-                    return true;
-            }
-            catch { /* ignore invalid PATH entries */ }
-        }
-        return false;
-    }
-
-    public static async Task<IntrospectionResult> IntrospectModuleAsync(string moduleName)
+    public static async Task<IntrospectionResult> IntrospectModuleAsync(string moduleName, PowerShellHost? host = null)
     {
         var scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "IntrospectModule.ps1");
 
         if (!File.Exists(scriptPath))
             throw new FileNotFoundException("Introspection script not found.", scriptPath);
 
-        var host = ResolvePowerShellHost();
+        host ??= PowerShellHostRegistry.Default
+            ?? throw new InvalidOperationException("No PowerShell host detected on PATH (pwsh.exe or powershell.exe).");
+
+        Console.Out.WriteLine($"[regen]   using host '{host.DisplayName}' ({host.Executable})");
+
         var psi = new ProcessStartInfo
         {
-            FileName = host,
+            FileName = host.Executable,
             Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" -ModuleName \"{moduleName}\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -92,16 +67,20 @@ public static class PowerShellIntrospector
             resolvedName = resolvedLine.Substring("RESOLVED:".Length).Trim();
 
         if (string.IsNullOrWhiteSpace(stdout))
-            return new IntrospectionResult { ResolvedModuleName = resolvedName, Cmdlets = [] };
+            return new IntrospectionResult { ResolvedModuleName = resolvedName, HostId = host.Id, Cmdlets = [] };
 
         var cmdlets = JsonSerializer.Deserialize<List<DiscoveredCmdlet>>(stdout, Options) ?? [];
-        return new IntrospectionResult { ResolvedModuleName = resolvedName, Cmdlets = cmdlets };
+        return new IntrospectionResult { ResolvedModuleName = resolvedName, HostId = host.Id, Cmdlets = cmdlets };
     }
 }
 
 public class IntrospectionResult
 {
     public string ResolvedModuleName { get; set; } = "";
+
+    /// <summary>Id of the host that produced this result (e.g. <c>"pwsh-7.4.1"</c>).</summary>
+    public string HostId { get; set; } = "";
+
     public List<DiscoveredCmdlet> Cmdlets { get; set; } = [];
 }
 

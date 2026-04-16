@@ -147,8 +147,12 @@ if ($commands.Count -eq 0) {
     exit 1
 }
 
-# Write resolved name to stderr so C# can read it (not mixed into JSON stdout)
+# Write resolved name + host provenance to stderr so C# can read them (not
+# mixed into JSON stdout). HOST helps standalone runs identify their version
+# without re-invoking PS and cross-checks what C# thinks it launched.
+$edition = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
 [Console]::Error.WriteLine("RESOLVED:$actualName")
+[Console]::Error.WriteLine("HOST:$edition-$($PSVersionTable.PSVersion)")
 
 # $commands was resolved above during the import / probe / fallback sequence.
 

@@ -138,7 +138,7 @@ If you're comfortable with C# and want to work on the core:
 
 - **Code generation** lives in `Services/ScriptGenerator.cs` — it walks exec wires from each exec-root, assigns variables per node, and collapses pipeline-eligible chains (`A.ExecOut→B.ExecIn` + `A.PrimaryDataOutput→B.PrimaryPipelineTarget`, single consumer, no user-set OutputVariable) into `A | B`. ForEach's `Item` data pin compiles to `$_`. Read through it and trace a simple graph before making changes.
 - **Template loading** is in `Services/TemplateLoader.cs` — reads JSON from `Templates/Builtin/` and `Templates/Custom/`. Malformed files are skipped with a debug trace.
-- **Module introspection** is `Services/PowerShellIntrospector.cs` + `Scripts/IntrospectModule.ps1` — launches PowerShell 5.1 to discover cmdlets in installed modules.
+- **Module introspection** is `Services/PowerShellIntrospector.cs` + `Scripts/IntrospectModule.ps1` — launches PowerShell (pwsh 7+ preferred, 5.1 as fallback) to discover cmdlets in installed modules. Host resolution lives in `Services/PowerShellHost.cs`, shared with the Run button.
 - **Rendering** is in `Rendering/NodeGraphRenderer.cs` — custom DrawingContext rendering for nodes, wires, and the canvas.
 - **ViewModels** use CommunityToolkit.Mvvm with `[ObservableProperty]` and `[RelayCommand]`.
 
@@ -165,7 +165,7 @@ Keep PRs focused. One feature or fix per PR.
 - **More cmdlet templates** — especially for popular modules (Az, AWS, Exchange, VMware, etc.)
 - **Code generation edge cases** — nested pipelines, splatting, advanced parameter sets
 - **UX improvements** — auto-arrange, minimap, undo/redo
-- **Import dialog improvements** — progress bar for large modules, `pwsh` support for cross-platform
+- **Import dialog improvements** — module picker populated from `Get-Module -ListAvailable`, progress bar for large modules, cross-platform support
 - **Template validation** — catch malformed JSON with useful error messages instead of silent skips
 - **Documentation** — usage guides, tutorial content, wiki pages
 - **Testing** — unit tests for code generation, integration tests for template loading

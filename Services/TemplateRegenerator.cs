@@ -66,7 +66,8 @@ public static class TemplateRegenerator
         var cmdletsResult = await IntrospectAndFilterAsync(opts.ModuleName, opts.OnlyCmdlets);
         if (cmdletsResult.ExitCode != 0) return cmdletsResult.ExitCode;
 
-        return await WriteCatalogAsync(opts.OutputPath, category, cmdletsResult.Cmdlets, existing, dryRun);
+        var hosts = cmdletsResult.HostId is { Length: > 0 } ? new List<string> { cmdletsResult.HostId } : [];
+        return await WriteCatalogAsync(opts.OutputPath, category, cmdletsResult.Cmdlets, hosts, existing, dryRun);
     }
 
     // ── Manifest entry (used by --regen-manifest) ──────────────
@@ -154,6 +155,7 @@ public static class TemplateRegenerator
         // can override earlier ones if the same cmdlet name appears — last write wins.
         var merged = new List<DiscoveredCmdlet>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var hosts = new List<string>();
         foreach (var source in target.Sources)
         {
             var only = source.Cmdlets is { Count: > 0 }
@@ -161,6 +163,9 @@ public static class TemplateRegenerator
                 : null;
             var result = await IntrospectAndFilterAsync(source.Module, only);
             if (result.ExitCode != 0) return result.ExitCode;
+
+            if (result.HostId is { Length: > 0 } && !hosts.Contains(result.HostId))
+                hosts.Add(result.HostId);
 
             foreach (var c in result.Cmdlets)
             {
@@ -174,7 +179,7 @@ public static class TemplateRegenerator
             return 4;
         }
 
-        return await WriteCatalogAsync(target.OutputFile, category, merged, existing, dryRun);
+        return await WriteCatalogAsync(target.OutputFile, category, merged, hosts, existing, dryRun);
     }
 
     // ── Shared pipeline pieces ─────────────────────────────────
@@ -195,7 +200,7 @@ public static class TemplateRegenerator
         }
     }
 
-    private record struct IntrospectResult(int ExitCode, List<DiscoveredCmdlet> Cmdlets);
+    private record struct IntrospectResult(int ExitCode, List<DiscoveredCmdlet> Cmdlets, string HostId);
 
     private static async Task<IntrospectResult> IntrospectAndFilterAsync(string module, HashSet<string>? only)
     {
@@ -208,7 +213,7 @@ public static class TemplateRegenerator
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[regen]   introspection failed for '{module}': {ex.Message}");
-            return new IntrospectResult(3, []);
+            return new IntrospectResult(3, [], "");
         }
 
         var cmdlets = only is { Count: > 0 }
@@ -222,13 +227,14 @@ public static class TemplateRegenerator
                 Console.Error.WriteLine($"[regen]   warning: {missing.Count} requested cmdlet(s) not found in '{module}': {string.Join(", ", missing)}");
         }
 
-        return new IntrospectResult(0, cmdlets);
+        return new IntrospectResult(0, cmdlets, result.HostId);
     }
 
     private static async Task<int> WriteCatalogAsync(
         string outputPath,
         string category,
         List<DiscoveredCmdlet> cmdlets,
+        List<string> introspectedHosts,
         TemplateCatalogDto? existing,
         bool dryRun)
     {
@@ -239,6 +245,7 @@ public static class TemplateRegenerator
         {
             Version = 2,
             Category = category,
+            IntrospectedHosts = introspectedHosts,
         };
 
         foreach (var cmdlet in cmdlets)

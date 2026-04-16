@@ -16,6 +16,9 @@ public partial class ImportModuleViewModel : ObservableObject
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private string _statusMessage = "";
 
+    /// <summary>Host id from the last successful scan — stamped into the saved catalog.</summary>
+    private string _lastScanHostId = "";
+
     public ObservableCollection<SelectableCmdlet> DiscoveredCmdlets { get; } = new();
 
     [RelayCommand]
@@ -34,6 +37,7 @@ public partial class ImportModuleViewModel : ObservableObject
         try
         {
             var result = await PowerShellIntrospector.IntrospectModuleAsync(ModuleName.Trim());
+            _lastScanHostId = result.HostId;
 
             foreach (var c in result.Cmdlets)
             {
@@ -90,6 +94,7 @@ public partial class ImportModuleViewModel : ObservableObject
         {
             Version = 2,
             Category = CategoryName.Trim(),
+            IntrospectedHosts = string.IsNullOrEmpty(_lastScanHostId) ? [] : [_lastScanHostId],
         };
 
         foreach (var cmdlet in selected)

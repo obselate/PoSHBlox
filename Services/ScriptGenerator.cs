@@ -60,7 +60,7 @@ public class ScriptGenerator
 
         var sb = new StringBuilder();
         sb.AppendLine("# ===========================================");
-        sb.AppendLine("# Auto-generated PowerShell 5.1 Script");
+        sb.AppendLine("# Auto-generated PowerShell Script");
         sb.AppendLine($"# Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         sb.AppendLine("# ===========================================");
         sb.AppendLine();

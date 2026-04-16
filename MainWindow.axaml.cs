@@ -336,16 +336,27 @@ public partial class MainWindow : AppWindow
             var tempPath = Path.Combine(Path.GetTempPath(), $"PoSHBlox_{Guid.NewGuid():N}.ps1");
             File.WriteAllText(tempPath, script);
 
+            var host = PowerShellHostRegistry.Default;
+            if (host == null)
+            {
+                Debug.WriteLine("Failed to run script: no PowerShell host detected on PATH.");
+                return;
+            }
+
             var psi = new ProcessStartInfo
             {
-                FileName = "powershell.exe",
+                FileName = host.Executable,
                 Arguments = $"-NoProfile -NoExit -ExecutionPolicy Bypass -File \"{tempPath}\"",
                 UseShellExecute = false,
             };
 
-            // Strip PowerShell 7+ module paths from PSModulePath so PS 5.1
-            // doesn't load PS 7 modules whose type data conflicts with PS 5.1.
-            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath) && modulePath is not null)
+            // Strip PowerShell 7+ module paths from PSModulePath when running under
+            // Windows PowerShell 5.1 — 5.1 otherwise loads PS 7 modules whose type
+            // data conflicts with its own. Only needed under "powershell" edition;
+            // pwsh consumes its own side of PSModulePath cleanly.
+            if (string.Equals(host.Edition, "powershell", StringComparison.OrdinalIgnoreCase)
+                && psi.Environment.TryGetValue("PSModulePath", out var modulePath)
+                && modulePath is not null)
             {
                 var filtered = string.Join(";", modulePath.Split(';')
                     .Where(p => !Regex.IsMatch(p, @"\\powershell\\\d", RegexOptions.IgnoreCase)));
