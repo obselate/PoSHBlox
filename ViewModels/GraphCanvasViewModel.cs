@@ -833,9 +833,13 @@ public partial class GraphCanvasViewModel : ObservableObject
             var coalesceKey = p.Owner != null
                 ? $"value:{p.Owner.Id}:{p.Name}"
                 : $"value:{p.Name}";
+            var owner = p.Owner;
             Undo.Record(
-                undo: () => { p.Value = oldValue; },
-                redo: () => { p.Value = newValue; },
+                // Select the owning node on replay so the properties panel
+                // surfaces the reverted / reapplied value — otherwise the
+                // user sees nothing change and the undo feels invisible.
+                undo: () => { p.Value = oldValue; if (owner != null) SelectNode(owner); },
+                redo: () => { p.Value = newValue; if (owner != null) SelectNode(owner); },
                 label: $"Edit {p.Name}",
                 coalesceKey: coalesceKey);
         }
