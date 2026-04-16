@@ -17,6 +17,12 @@
     </uiw:AppWindow.DataContext>
 
     <uiw:AppWindow.Styles>
+        <!-- Allow tooltips to be wider than FluentAvalonia's default so
+             per-parameter help descriptions render in full on hover. -->
+        <Style Selector="ToolTip">
+            <Setter Property="MaxWidth" Value="500" />
+        </Style>
+
         <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
         <Style Selector="TextBlock.cheatKey">
             <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
