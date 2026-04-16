@@ -52,6 +52,16 @@ public static class NodeFactory
         CopyParameters(node, template);
         ConfigurePorts(node, template);
 
+        // Cmdlets like Where-Object declare 15+ parameters across many sets.
+        // Even with parameter-set filtering, the expanded node is a giant
+        // scrolling wall on first spawn. Default to collapsed when the
+        // template would produce a lot of data-input rows — users see only
+        // mandatory / pipeline-primary / valued params, and expand with C or
+        // the chevron if they need the rest.
+        const int AutoCollapseThreshold = 8;
+        if (node.DataInputs.Count() >= AutoCollapseThreshold)
+            node.IsCollapsed = true;
+
         return node;
     }
 

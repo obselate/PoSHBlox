@@ -156,7 +156,14 @@ public partial class GraphNode : ObservableObject
 
     private bool IsDataInputVisibleWhenCollapsed(NodePort port)
     {
-        if (string.IsNullOrEmpty(port.ParameterName)) return true;  // unpaired data inputs
+        // Unpaired data inputs (e.g. ForEach's Source) always stay visible.
+        if (string.IsNullOrEmpty(port.ParameterName)) return true;
+
+        // Primary pipeline target is where upstream data lands — keep it visible
+        // even when collapsed so users don't lose the main input affordance on
+        // cmdlets like Write-Host where Object is the message field.
+        if (port.IsPrimaryPipelineTarget) return true;
+
         var param = Parameters.FirstOrDefault(p => p.Name == port.ParameterName);
         if (param == null) return true;
         return param.IsMandatory || param.IsWired || !string.IsNullOrWhiteSpace(param.Value);
