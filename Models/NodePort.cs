@@ -1,10 +1,10 @@
-using System;
+using PoSHBlox.Services;
 
 namespace PoSHBlox.Models;
 
 public class NodePort
 {
-    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
+    public string Id { get; init; } = IdMint.ShortGuid();
     public string Name { get; set; } = "";
     public PortDirection Direction { get; set; }
 

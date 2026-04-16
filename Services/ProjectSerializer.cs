@@ -269,19 +269,20 @@ public static class ProjectSerializer
         vm.ClampZoom();
     }
 
-    private static void AddPortFromDto(
-        GraphNode node,
-        System.Collections.ObjectModel.ObservableCollection<NodePort> list,
-        PblxPort dto,
-        PortDirection dir,
-        Dictionary<string, NodePort> portMap)
+    /// <summary>
+    /// Build a live <see cref="NodePort"/> from its DTO with an explicit id.
+    /// Shared with <see cref="ClipboardSerializer"/>, which mints fresh ids for
+    /// paste; project load preserves the disk id (or mints when missing for
+    /// very old files that didn't serialize port ids).
+    /// </summary>
+    internal static NodePort PortFromDto(GraphNode node, PblxPort dto, PortDirection dir, string id)
     {
         Enum.TryParse<PortKind>(dto.Kind, ignoreCase: true, out var kind);
         Enum.TryParse<ParamType>(dto.DataType, ignoreCase: true, out var dtype);
 
-        var port = new NodePort
+        return new NodePort
         {
-            Id = string.IsNullOrEmpty(dto.Id) ? Guid.NewGuid().ToString("N")[..8] : dto.Id,
+            Id = id,
             Name = dto.Name,
             Direction = dir,
             Kind = kind,
@@ -291,6 +292,17 @@ public static class ProjectSerializer
             IsPrimaryPipelineTarget = dto.IsPrimaryPipelineTarget,
             Owner = node,
         };
+    }
+
+    private static void AddPortFromDto(
+        GraphNode node,
+        System.Collections.ObjectModel.ObservableCollection<NodePort> list,
+        PblxPort dto,
+        PortDirection dir,
+        Dictionary<string, NodePort> portMap)
+    {
+        var id = string.IsNullOrEmpty(dto.Id) ? IdMint.ShortGuid() : dto.Id;
+        var port = PortFromDto(node, dto, dir, id);
         list.Add(port);
         portMap[port.Id] = port;
     }

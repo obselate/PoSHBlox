@@ -1,8 +1,8 @@
 using System;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using FluentAvalonia.UI.Windowing;
+using PoSHBlox.Rendering;
 
 namespace PoSHBlox.Views;
 
@@ -19,7 +19,7 @@ public partial class ImportModuleWindow : AppWindow
 
         Opened += (_, _) =>
         {
-            PlatformFeatures?.SetWindowBorderColor(Color.Parse("#0B1929"));
+            PlatformFeatures?.SetWindowBorderColor(GraphTheme.WindowBorder);
         };
     }
 

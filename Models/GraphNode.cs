@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PoSHBlox.Services;
 
 namespace PoSHBlox.Models;
 
 public partial class GraphNode : ObservableObject
 {
-    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
+    public string Id { get; init; } = IdMint.ShortGuid();
 
     // ── Core identity ──────────────────────────────────────────
     [ObservableProperty] private string _title = "New Node";

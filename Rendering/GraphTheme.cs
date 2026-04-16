@@ -13,6 +13,7 @@ public static class GraphTheme
 {
     // ── Canvas ─────────────────────────────────────────────────
     public static readonly Color Background       = Color.FromRgb(6, 13, 22);        // #060D16
+    public static readonly Color WindowBorder     = Color.FromRgb(11, 25, 41);       // #0B1929 AppWindow chrome edge
     public static readonly Color GridMinor         = Color.FromArgb(128, 28, 52, 80); // #1C3450 ~50% alpha
     public static readonly Color GridMajor         = Color.FromRgb(28, 52, 80);       // #1C3450
     public const double GridSize = 30;

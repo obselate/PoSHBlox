@@ -19,6 +19,7 @@ using Avalonia.VisualTree;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Windowing;
 using PoSHBlox.Models;
+using PoSHBlox.Rendering;
 using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
 using PoSHBlox.Views;
@@ -44,7 +45,7 @@ public partial class MainWindow : AppWindow
 
         Opened += (_, _) =>
         {
-            PlatformFeatures?.SetWindowBorderColor(Color.Parse("#0B1929"));
+            PlatformFeatures?.SetWindowBorderColor(GraphTheme.WindowBorder);
             StripCommandBarTransitions();
         };
 

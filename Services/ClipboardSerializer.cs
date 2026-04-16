@@ -138,7 +138,7 @@ public static class ClipboardSerializer
             {
                 // init-only Id ⇒ must be set in the initializer; mint fresh
                 // so paste-into-same-graph doesn't collide with originals.
-                Id = Guid.NewGuid().ToString("N")[..8],
+                Id = IdMint.ShortGuid(),
                 Title = dto.Title,
                 Category = dto.Category,
                 ScriptBody = dto.ScriptBody,
@@ -219,23 +219,10 @@ public static class ClipboardSerializer
         PortDirection dir,
         Dictionary<string, NodePort> portMap)
     {
-        Enum.TryParse<PortKind>(dto.Kind, ignoreCase: true, out var kind);
-        Enum.TryParse<ParamType>(dto.DataType, ignoreCase: true, out var dtype);
-
-        var port = new NodePort
-        {
-            // init-only Id ⇒ mint a fresh one. The map keyed by the OLD id
-            // lets us remap connection refs after all nodes are built.
-            Id = Guid.NewGuid().ToString("N")[..8],
-            Name = dto.Name,
-            Direction = dir,
-            Kind = kind,
-            DataType = dtype,
-            ParameterName = dto.ParameterName,
-            IsPrimary = dto.IsPrimary,
-            IsPrimaryPipelineTarget = dto.IsPrimaryPipelineTarget,
-            Owner = node,
-        };
+        // Mint a fresh id so paste-into-same-graph doesn't collide with the
+        // originals; the map is keyed by the OLD dto id so connection refs
+        // can be remapped after all nodes are built.
+        var port = ProjectSerializer.PortFromDto(node, dto, dir, IdMint.ShortGuid());
         list.Add(port);
         portMap[dto.Id] = port;
     }

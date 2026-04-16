@@ -189,5 +189,5 @@ internal static class V1Migrator
     private static ContainerType ParseContainer(string s)
         => Enum.TryParse<ContainerType>(s, out var ct) ? ct : ContainerType.None;
 
-    private static string NewId() => Guid.NewGuid().ToString("N")[..8];
+    private static string NewId() => IdMint.ShortGuid();
 }
