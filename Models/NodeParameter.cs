@@ -190,4 +190,44 @@ public partial class NodeParameter : ObservableObject
             _ => $"-{Name} \"{val}\""
         };
     }
+
+    /// <summary>
+    /// Format this parameter as a splat-hashtable entry (<c>Name = value</c>).
+    /// Returns empty string if the value is blank or the parameter should be
+    /// omitted (false-valued switches). The leading indentation is the caller's
+    /// responsibility; this returns the key-value text alone.
+    /// </summary>
+    public string ToSplatEntry()
+    {
+        var val = EffectiveValue;
+        if (string.IsNullOrWhiteSpace(val)) return "";
+
+        return Type switch
+        {
+            ParamType.String or ParamType.Path =>
+                $"{Name} = \"{val.Replace("\"", "`\"")}\"",
+
+            ParamType.Int =>
+                $"{Name} = {val}",
+
+            // Switches in splat form get explicit $true (no omit-when-false
+            // semantic like the inline form — if the value is 'false' we
+            // skipped above via the IsNullOrWhiteSpace guard catching empty,
+            // but an explicit "false" still emits; splat can legitimately
+            // carry false).
+            ParamType.Bool =>
+                $"{Name} = ${val.ToLowerInvariant()}",
+
+            ParamType.StringArray =>
+                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+
+            ParamType.ScriptBlock =>
+                $"{Name} = {{ {val} }}",
+
+            ParamType.Enum =>
+                $"{Name} = \"{val}\"",
+
+            _ => $"{Name} = \"{val}\""
+        };
+    }
 }

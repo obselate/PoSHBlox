@@ -198,14 +198,19 @@ public class ScriptGenerator
         string tailVar = MakeVariableNameForNode(chain[^1]);
         foreach (var n in chain) _varMap[n.Id] = tailVar;
 
-        // Chain expression.
+        // Chain expression. Each node may emit a splat hashtable into the
+        // preamble StringBuilder first; the inline part joins with `|`.
+        var preamble = new StringBuilder();
         var parts = new List<string>();
         for (int i = 0; i < chain.Count; i++)
         {
             bool collapseInput = i > 0; // everyone but the head consumes | upstream
-            parts.Add(BuildNodeExpression(chain[i], collapseInput));
+            parts.Add(BuildNodeExpression(chain[i], collapseInput, pad, preamble));
         }
         string pipeline = string.Join(" | ", parts);
+
+        if (preamble.Length > 0)
+            sb.Append(preamble);
 
         if (NeedsAssignment(chain[^1]))
             sb.AppendLine($"{pad}${tailVar} = {pipeline}");
@@ -215,16 +220,30 @@ public class ScriptGenerator
     }
 
     /// <summary>
+    /// Number of inline args at which a node switches from
+    /// <c>Cmd -A x -B y -C z -D w</c> to a splat hashtable plus <c>Cmd @args</c>.
+    /// Chosen as 4 so that nodes with up to three set parameters stay compact,
+    /// while anything larger becomes dramatically more readable.
+    /// </summary>
+    private const int SplatThreshold = 4;
+
+    /// <summary>
     /// Build <c>Cmdlet -Param value -Other $upstream</c> (or bare ScriptBody for
     /// non-cmdlet nodes). <paramref name="collapseInput"/> suppresses the primary
     /// pipeline-target parameter — it's consumed by the preceding <c>|</c>.
+    /// When the node would emit <see cref="SplatThreshold"/> or more inline
+    /// args, the params are written to <paramref name="preamble"/> as a splat
+    /// hashtable and the returned inline becomes <c>Cmd @argsVar</c>.
     /// </summary>
-    private string BuildNodeExpression(GraphNode node, bool collapseInput)
+    private string BuildNodeExpression(GraphNode node, bool collapseInput, string pad, StringBuilder preamble)
     {
         if (!node.IsCmdletNode)
             return node.ScriptBody.Trim();
 
-        var args = new List<string>();
+        // Collect each arg as both its inline form ("-Name value") and its
+        // splat entry ("Name = value") so we can choose presentation after
+        // counting.
+        var entries = new List<(string Inline, string Splat)>();
 
         foreach (var param in node.Parameters.Where(p => !p.IsArgument && IsParamInActiveSet(node, p)))
         {
@@ -233,7 +252,9 @@ public class ScriptGenerator
             {
                 // Legacy / unpaired parameter — emit literal if present.
                 var lit = param.ToPowerShellArg();
-                if (!string.IsNullOrEmpty(lit)) args.Add(lit);
+                if (string.IsNullOrEmpty(lit)) continue;
+                var splat = param.ToSplatEntry();
+                entries.Add((lit, splat));
                 continue;
             }
 
@@ -244,16 +265,47 @@ public class ScriptGenerator
             if (upstream != null)
             {
                 var refExpr = ResolveUpstreamRef(upstream.Source);
-                args.Add($"-{param.Name} {refExpr}");
+                entries.Add(($"-{param.Name} {refExpr}", $"{param.Name} = {refExpr}"));
             }
             else
             {
                 var lit = param.ToPowerShellArg();
-                if (!string.IsNullOrEmpty(lit)) args.Add(lit);
+                if (string.IsNullOrEmpty(lit)) continue;
+                var splat = param.ToSplatEntry();
+                entries.Add((lit, splat));
             }
         }
 
-        return args.Count > 0 ? $"{node.CmdletName} {string.Join(" ", args)}" : node.CmdletName;
+        if (entries.Count == 0) return node.CmdletName;
+
+        // Below threshold: stay inline for compactness.
+        if (entries.Count < SplatThreshold)
+            return $"{node.CmdletName} {string.Join(" ", entries.Select(e => e.Inline))}";
+
+        // At / above threshold: emit a splat hashtable into the preamble and
+        // reference it inline. Var name derived from cmdlet + node short-id
+        // so multiple invocations of the same cmdlet don't collide.
+        var splatVar = MakeSplatVarName(node);
+        preamble.AppendLine($"{pad}${splatVar} = @{{");
+        foreach (var (_, splat) in entries)
+            preamble.AppendLine($"{pad}    {splat}");
+        preamble.AppendLine($"{pad}}}");
+        return $"{node.CmdletName} @{splatVar}";
+    }
+
+    /// <summary>
+    /// Build a splat variable name from a cmdlet's name and the node's short
+    /// ID, e.g. <c>copyItemArgs_ab12</c>. Camel-cased so it reads naturally
+    /// beside hand-written PowerShell.
+    /// </summary>
+    private static string MakeSplatVarName(GraphNode node)
+    {
+        var raw = string.IsNullOrEmpty(node.CmdletName) ? node.Title : node.CmdletName;
+        // Strip non-alphanumerics, lowercase the first letter.
+        var cleaned = Regex.Replace(raw, @"[^a-zA-Z0-9]", "");
+        if (cleaned.Length == 0) cleaned = "Args";
+        var camelled = char.ToLowerInvariant(cleaned[0]) + cleaned[1..];
+        return $"{camelled}Args_{node.Id[..4]}";
     }
 
     /// <summary>
