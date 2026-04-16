@@ -13,8 +13,12 @@ public static class PortCompatibility
     /// <summary>
     /// Direction-agnostic: does some valid (source, target) ordering exist
     /// between these two pins? True iff they're on different nodes, one is
-    /// Output and the other Input, kinds match (Exec↔Exec, Data↔Data), and
-    /// (for data) the source type flows into the target type.
+    /// Output and the other Input, kinds match (Exec↔Exec, Data↔Data),
+    /// (for data) the source type flows into the target type, and (for exec)
+    /// both nodes live in the same exec scope — the codegen walks each zone
+    /// as an isolated scope, so cross-zone exec wires would be silently dead.
+    /// Data wires can cross zones freely (PowerShell variable scoping lets
+    /// outer references work from within inner blocks).
     /// </summary>
     public static bool CanConnect(NodePort a, NodePort b)
     {
@@ -29,7 +33,24 @@ public static class PortCompatibility
         if (source.Kind == PortKind.Data && !IsDataTypeCompatible(source.DataType, target.DataType))
             return false;
 
+        if (source.Kind == PortKind.Exec && !AreExecSiblings(source.Owner, target.Owner))
+            return false;
+
         return true;
+    }
+
+    /// <summary>
+    /// Two nodes are exec-siblings when they share the same scope: both top-
+    /// level (ParentContainer == null on both), or both nested in the same
+    /// container's same zone. A container's own exec pins belong to the
+    /// container node itself, so wiring a sibling to a container's ExecIn/Out
+    /// goes through this check with the container at its own scope level —
+    /// matching PowerShell's "the if-block starts after the previous statement."
+    /// </summary>
+    private static bool AreExecSiblings(GraphNode a, GraphNode b)
+    {
+        return a.ParentContainer == b.ParentContainer
+            && a.ParentZone == b.ParentZone;
     }
 
     /// <summary>

@@ -31,6 +31,14 @@ public class ScriptGenerator
     /// <summary>node-id → assigned variable name (no $ prefix).</summary>
     private readonly Dictionary<string, string> _varMap = new();
 
+    /// <summary>
+    /// ForEach node-id → name bound inside the body (no $ prefix), or null
+    /// to signal "emit the raw <c>$_</c>". Populated by <see cref="EmitForEach"/>
+    /// before its body walks so <see cref="ResolveUpstreamRef"/> can substitute
+    /// the correct token when a body node wires the Item pin.
+    /// </summary>
+    private readonly Dictionary<string, string?> _foreachVarMap = new();
+
     /// <summary>node-ids already emitted; guards converged-exec paths from double-emission.</summary>
     private readonly HashSet<string> _emitted = new();
 
@@ -48,6 +56,7 @@ public class ScriptGenerator
     {
         _varMap.Clear();
         _emitted.Clear();
+        _foreachVarMap.Clear();
 
         var sb = new StringBuilder();
         sb.AppendLine("# ===========================================");
@@ -310,14 +319,21 @@ public class ScriptGenerator
 
     /// <summary>
     /// Resolve a wire's source pin to a PowerShell expression:
-    ///   - ForEach.Item → $_
+    ///   - ForEach.Item → <c>$_</c> by default; when the ForEach has an explicit
+    ///     IterationVariable or is nested inside another ForEach, the item is
+    ///     rebound to a named variable (see <see cref="_foreachVarMap"/>) to
+    ///     keep the outer pin from shadowing.
     ///   - anything else → $ of the source node's assigned variable.
     /// </summary>
     private string ResolveUpstreamRef(NodePort sourcePort)
     {
         var owner = sourcePort.Owner!;
         if (owner.ContainerType == ContainerType.ForEach && sourcePort.Name == "Item")
+        {
+            if (_foreachVarMap.TryGetValue(owner.Id, out var named) && named != null)
+                return "$" + named;
             return "$_";
+        }
 
         if (_varMap.TryGetValue(owner.Id, out var name))
             return "$" + name;
@@ -365,7 +381,17 @@ public class ScriptGenerator
 
     private void EmitIfElse(StringBuilder sb, GraphNode c, string pad, int indent)
     {
-        var condition = GetParamValue(c, "Condition", "$true");
+        // Wire beats literal: if the user wired a boolean-producing node into the
+        // Condition pin, use that upstream's variable ref. Otherwise use the
+        // literal ScriptBlock from the param. An unset condition emits `$false`
+        // plus a warning comment so the script still parses.
+        var condition = ResolveParamOrWire(c, "Condition", fallback: null);
+        if (string.IsNullOrWhiteSpace(condition))
+        {
+            sb.AppendLine($"{pad}# WARNING: If/Else condition not set — defaulting to $false.");
+            condition = "$false";
+        }
+
         sb.AppendLine($"{pad}if ({condition}) {{");
         EmitZone(sb, FindZone(c, "Then"), indent + 1);
         sb.AppendLine($"{pad}}}");
@@ -392,27 +418,119 @@ public class ScriptGenerator
                 prefix = ResolveUpstreamRef(upstream.Source) + " | ";
         }
 
+        // Iteration variable: let users name it explicitly so nested ForEach
+        // loops don't clobber each other's $_. When empty AND the body contains
+        // another ForEach, we auto-bind to a deterministic per-node name so the
+        // outer's Item pin resolves unambiguously. Otherwise the idiomatic $_
+        // stays as-is for the common single-level case.
+        var body = FindZone(c, "Body");
+        var explicitName = GetParamValue(c, "IterationVariable", "").Trim();
+        string? itemVar;
+        if (!string.IsNullOrEmpty(explicitName))
+            itemVar = SanitizeVariableName(explicitName);
+        else if (body != null && ContainsContainer(body, ContainerType.ForEach))
+            itemVar = "item_" + c.Id[..4];
+        else
+            itemVar = null; // null ⇒ emit $_ verbatim
+
+        _foreachVarMap[c.Id] = itemVar;
+
         sb.AppendLine($"{pad}{prefix}ForEach-Object {{");
-        EmitZone(sb, FindZone(c, "Body"), indent + 1);
+        if (itemVar != null)
+            sb.AppendLine($"{pad}    ${itemVar} = $_");
+        EmitZone(sb, body, indent + 1);
         sb.AppendLine($"{pad}}}");
     }
 
     private void EmitTryCatch(StringBuilder sb, GraphNode c, string pad, int indent)
     {
         sb.AppendLine($"{pad}try {{");
+
+        // ErrorAction only matters inside try: converts non-terminating errors
+        // to terminating so catch actually fires. Empty / Continue is PS
+        // default — skip the assignment in that case. Assignment leaks to the
+        // enclosing scope by design (try/catch don't create scopes); users
+        // who care can wrap the whole node in a Function container.
+        var errorAction = ResolveParamOrWire(c, "ErrorAction", fallback: "");
+        if (!string.IsNullOrWhiteSpace(errorAction)
+            && !errorAction.Equals("Continue", StringComparison.OrdinalIgnoreCase))
+        {
+            // Literal enum value → quote it; wired upstream ref (starts with $) → pass through.
+            var rhs = errorAction.StartsWith("$") ? errorAction : $"'{errorAction}'";
+            sb.AppendLine($"{Indent(indent + 1)}$ErrorActionPreference = {rhs}");
+        }
+
         EmitZone(sb, FindZone(c, "Try"), indent + 1);
         sb.AppendLine($"{pad}}}");
         sb.AppendLine($"{pad}catch {{");
         EmitZone(sb, FindZone(c, "Catch"), indent + 1);
         sb.AppendLine($"{pad}}}");
+
+        // Finally is optional — emit only when the zone exists AND has children.
+        var finallyZone = FindZone(c, "Finally");
+        if (finallyZone != null && finallyZone.Children.Count > 0)
+        {
+            sb.AppendLine($"{pad}finally {{");
+            EmitZone(sb, finallyZone, indent + 1);
+            sb.AppendLine($"{pad}}}");
+        }
     }
 
     private void EmitWhile(StringBuilder sb, GraphNode c, string pad, int indent)
     {
-        var condition = GetParamValue(c, "Condition", "$true");
+        // Wire beats literal; empty falls back to $false so we don't generate
+        // an unintended infinite loop on an unconfigured node.
+        var condition = ResolveParamOrWire(c, "Condition", fallback: null);
+        if (string.IsNullOrWhiteSpace(condition))
+        {
+            sb.AppendLine($"{pad}# WARNING: While condition not set — defaulting to $false (loop will not run).");
+            condition = "$false";
+        }
+
         sb.AppendLine($"{pad}while ({condition}) {{");
         EmitZone(sb, FindZone(c, "Body"), indent + 1);
         sb.AppendLine($"{pad}}}");
+    }
+
+    /// <summary>
+    /// Resolve a container parameter to the PowerShell expression that should
+    /// land in the emitted snippet. If the matching data-input pin is wired,
+    /// the upstream's resolved reference wins (so the user can compute the
+    /// condition / error-action dynamically). Otherwise the literal param
+    /// value is used, or <paramref name="fallback"/> when the literal is empty.
+    /// </summary>
+    private string? ResolveParamOrWire(GraphNode node, string paramName, string? fallback)
+    {
+        var pin = node.Inputs.FirstOrDefault(p =>
+            string.Equals(p.ParameterName, paramName, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(p.Name, paramName, StringComparison.OrdinalIgnoreCase));
+
+        if (pin != null)
+        {
+            var upstream = FirstConnectionTargeting(pin);
+            if (upstream != null)
+                return ResolveUpstreamRef(upstream.Source);
+        }
+
+        var literal = node.Parameters.FirstOrDefault(p => p.Name == paramName)?.EffectiveValue;
+        return string.IsNullOrWhiteSpace(literal) ? fallback : literal;
+    }
+
+    /// <summary>
+    /// Recursively scan a zone's children for any container of the given type.
+    /// Used by ForEach to detect nested ForEach loops so it can disambiguate
+    /// the iteration variable.
+    /// </summary>
+    private static bool ContainsContainer(ContainerZone zone, ContainerType type)
+    {
+        foreach (var child in zone.Children)
+        {
+            if (child.ContainerType == type) return true;
+            if (child.IsContainer)
+                foreach (var inner in child.Zones)
+                    if (ContainsContainer(inner, type)) return true;
+        }
+        return false;
     }
 
     private void EmitLabel(StringBuilder sb, GraphNode c, int indent)

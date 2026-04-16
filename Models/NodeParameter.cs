@@ -20,6 +20,14 @@ public partial class NodeParameter : ObservableObject
     public bool IsPipelineInput { get; set; }
 
     /// <summary>
+    /// True = panel-only config knob; no data-input pin is generated for this
+    /// parameter. Used for container meta-settings whose value must be a
+    /// compile-time string (e.g. ForEach's IterationVariable name) — wiring a
+    /// runtime expression into them doesn't make sense.
+    /// </summary>
+    public bool IsConfigOnly { get; set; }
+
+    /// <summary>
     /// Parameter sets this param belongs to. Empty = visible in every set
     /// (common params, legacy templates). Non-empty = visible only when
     /// the node's <see cref="GraphNode.ActiveParameterSet"/> is in this list.

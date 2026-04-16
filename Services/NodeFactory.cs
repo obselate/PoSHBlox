@@ -111,14 +111,18 @@ public static class NodeFactory
         node.Title = "If / Else";
         node.ContainerWidth = 620;
         node.ContainerHeight = 320;
+        // Condition is a ScriptBlock literal by default, but the generated data-
+        // input pin (added by AddDataInputPinsForParameters) accepts a wired
+        // upstream too — wire beats literal in codegen. No default value: the
+        // validator flags unset mandatory condition so the user can't forget.
         node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "Condition",
             Type = ParamType.ScriptBlock,
             IsMandatory = true,
-            DefaultValue = "$_.Status -eq 'Running'",
-            Description = "PowerShell condition to evaluate",
-            Value = "$_.Status -eq 'Running'",
+            DefaultValue = "",
+            Description = "Boolean expression to evaluate — e.g. $count -gt 0. Wire a node in to compute dynamically.",
+            Value = "",
         }));
         node.Zones.Add(new ContainerZone { Name = "Then" });
         node.Zones.Add(new ContainerZone { Name = "Else" });
@@ -139,7 +143,9 @@ public static class NodeFactory
             IsPrimaryPipelineTarget = true,
             Owner = node,
         });
-        // Data output: the current iteration item. Body nodes wire this to get `$_`.
+        // Data output: the current iteration item. Body nodes wire this to
+        // pick up each element — codegen emits $_ by default, or the named
+        // IterationVariable (below) when nesting or explicit naming requires it.
         node.Outputs.Add(new NodePort
         {
             Name = "Item", Kind = PortKind.Data,
@@ -148,25 +154,45 @@ public static class NodeFactory
             IsPrimary = true,
             Owner = node,
         });
+        // Optional — leaving this empty keeps the idiomatic $_ for top-level
+        // ForEach-Object and auto-mints a deterministic name only when nested
+        // inside another ForEach. Explicitly naming it gives the user control.
+        node.Parameters.Add(NewParam(node, new NodeParameter
+        {
+            Name = "IterationVariable",
+            Type = ParamType.String,
+            IsMandatory = false,
+            IsConfigOnly = true,
+            DefaultValue = "",
+            Description = "Name for the current item (e.g. proc, file). Leave blank to use $_. Required only when nesting ForEach loops.",
+            Value = "",
+        }));
         node.Zones.Add(new ContainerZone { Name = "Body" });
     }
 
     private static void ConfigureTryCatch(GraphNode node)
     {
-        node.Title = "Try / Catch";
+        node.Title = "Try / Catch / Finally";
         node.ContainerWidth = 620;
-        node.ContainerHeight = 320;
+        node.ContainerHeight = 360;
+        // Why ErrorAction lives on try: PowerShell's try/catch only fires on
+        // TERMINATING errors. Most built-ins emit non-terminating errors by
+        // default — so to actually catch them, $ErrorActionPreference inside
+        // the try block must be 'Stop'. That's the common case and the default.
         node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "ErrorAction",
             Type = ParamType.Enum,
             DefaultValue = "Stop",
-            Description = "ErrorActionPreference inside try block",
+            Description = "Sets $ErrorActionPreference inside the try block. 'Stop' converts non-terminating errors so catch fires — the typical choice.",
             ValidValues = ["Stop", "Continue", "SilentlyContinue"],
             Value = "Stop",
         }));
         node.Zones.Add(new ContainerZone { Name = "Try" });
         node.Zones.Add(new ContainerZone { Name = "Catch" });
+        // Finally is optional at codegen time — the zone always exists; when
+        // empty the emitter skips the finally block entirely.
+        node.Zones.Add(new ContainerZone { Name = "Finally" });
     }
 
     private static void ConfigureWhile(GraphNode node)
@@ -174,14 +200,18 @@ public static class NodeFactory
         node.Title = "While Loop";
         node.ContainerWidth = 420;
         node.ContainerHeight = 300;
+        // No default value: $true would silently produce an infinite loop;
+        // empty triggers the validator's missing-mandatory warning instead.
+        // Wire a boolean-producing node into the Condition pin for a dynamic
+        // condition (e.g. keep looping until a retry succeeds).
         node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "Condition",
             Type = ParamType.ScriptBlock,
             IsMandatory = true,
-            DefaultValue = "$true",
-            Description = "Loop condition",
-            Value = "$true",
+            DefaultValue = "",
+            Description = "Boolean expression checked each iteration — e.g. $i -lt 10. Wire a node in to compute dynamically.",
+            Value = "",
         }));
         node.Zones.Add(new ContainerZone { Name = "Body" });
     }
@@ -292,7 +322,7 @@ public static class NodeFactory
     /// </summary>
     private static void AddDataInputPinsForParameters(GraphNode node, string? primaryPipelineParam = null)
     {
-        foreach (var p in node.Parameters.Where(p => !p.IsArgument))
+        foreach (var p in node.Parameters.Where(p => !p.IsArgument && !p.IsConfigOnly))
         {
             bool isPrimary = (primaryPipelineParam != null
                               && string.Equals(p.Name, primaryPipelineParam, StringComparison.OrdinalIgnoreCase))
