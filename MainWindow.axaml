@@ -17,22 +17,26 @@
     </uiw:AppWindow.DataContext>
 
     <uiw:AppWindow.Styles>
-        <!-- Allow tooltips to be wider and taller than FluentAvalonia's defaults
-             so per-parameter help descriptions render in full on hover.
-             FA's ToolTip template has an internal Border with its own MaxWidth/
-             MaxHeight — setting them on ToolTip alone doesn't reach it. The
-             /template/ traversal targets the elements inside the control template. -->
+        <!-- Custom ToolTip template that replaces FluentAvalonia's default.
+             FA's built-in template bakes MaxWidth/MaxHeight constraints deep
+             inside the control template where style selectors can't reliably
+             override them. This template gives us full control: wrap at 480px,
+             no height cap, padding and colors matched to the app's dark tokens. -->
         <Style Selector="ToolTip">
-            <Setter Property="MaxWidth" Value="500" />
-            <Setter Property="MaxHeight" Value="600" />
-        </Style>
-        <Style Selector="ToolTip /template/ Border">
-            <Setter Property="MaxWidth" Value="500" />
-            <Setter Property="MaxHeight" Value="600" />
-        </Style>
-        <Style Selector="ToolTip /template/ ContentPresenter">
-            <Setter Property="MaxWidth" Value="500" />
-            <Setter Property="MaxHeight" Value="600" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{DynamicResource BgSecondaryBrush}"
+                            BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="10,8"
+                            MaxWidth="480"
+                            BoxShadow="0 2 8 0 #66000000">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          TextWrapping="Wrap" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
         </Style>
 
         <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
