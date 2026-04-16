@@ -1,0 +1,463 @@
+{
+  "version": 2,
+  "category": "Registry",
+  "templates": [
+    {
+      "name": "Get-ItemProperty",
+      "category": "",
+      "description": "Gets the properties of a specified item.",
+      "scriptBody": "",
+      "cmdletName": "Get-ItemProperty",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Path",
+      "dataOutputs": [
+        {
+          "name": "Boolean",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Path",
+        "LiteralPath"
+      ],
+      "defaultParameterSet": "Path",
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "HKLM:\\SOFTWARE\\",
+          "description": "Specifies the path to the item or items. Wildcard characters are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Path"
+          ],
+          "mandatoryInSets": [
+            "Path"
+          ]
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a path to one or more locations. The value of **LiteralPath** is used exactly as it is typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences. For more information, see [about_Quoting_Rules](../Microsoft.Powershell.Core/About/about_Quoting_Rules.md).",
+          "validValues": [],
+          "parameterSets": [
+            "LiteralPath"
+          ],
+          "mandatoryInSets": [
+            "LiteralPath"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the name of the property or properties to retrieve. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a filter to qualify the **Path** parameter. The [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider is the only installed PowerShell provider that supports the use of filters. You can find the syntax for the **FileSystem** filter language in [about_Wildcards](../Microsoft.PowerShell.Core/About/about_Wildcards.md). Filters are more efficient than other parameters, because the provider applies them when the cmdlet gets the objects rather than having PowerShell filter the objects after they are retrieved.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet includes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Include** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet excludes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Exclude** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is not supported by any providers installed with PowerShell. To impersonate another \u003E user, or elevate your credentials when running this cmdlet, use \u003E [Invoke-Command](../Microsoft.PowerShell.Core/Invoke-Command.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "New-Item",
+      "category": "",
+      "description": "Creates a new item.",
+      "scriptBody": "",
+      "cmdletName": "New-Item",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Value",
+      "dataOutputs": [
+        {
+          "name": "String",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "pathSet",
+        "nameSet"
+      ],
+      "defaultParameterSet": "pathSet",
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the path of the location of the new item. The default is the current location when **Path** is omitted. You can specify the name of the new item in **Name**, or include it in **Path**. Items names passed using the **Name** parameter are created relative to the value of the **Path** parameter. For this cmdlet, the **Path** parameter works like the **LiteralPath** parameter of other cmdlets. Wildcard characters are not interpreted. All characters are passed to the location\u0027s provider. The provider may not support all characters. For example, you can\u0027t create a filename that contains an asterisk (\u0060*\u0060) character.",
+          "validValues": [],
+          "parameterSets": [
+            "pathSet",
+            "nameSet"
+          ],
+          "mandatoryInSets": [
+            "pathSet"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the name of the new item. You can specify the name of the new item in the **Name** or **Path** parameter value, and you can specify the path of the new item in **Name** or **Path** value. Items names passed using the **Name** parameter are created relative to the value of the **Path** parameter.",
+          "validValues": [],
+          "parameterSets": [
+            "nameSet"
+          ],
+          "mandatoryInSets": [
+            "nameSet"
+          ]
+        },
+        {
+          "name": "ItemType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the provider-specified type of the new item. The available values of this parameter depend on the current provider you are using. If your location is in a \u0060FileSystem\u0060 drive, the following values are allowed: - \u0060File\u0060 - \u0060Directory\u0060 - \u0060SymbolicLink\u0060 - \u0060Junction\u0060 - \u0060HardLink\u0060 \u003E [!NOTE] \u003E Creating a \u0060SymbolicLink\u0060 type on Windows requires elevation as administrator. However, Windows 10 \u003E (build 14972 or newer) with Developer Mode enabled no longer requires elevation creating symbolic \u003E links. In a \u0060Certificate\u0060 drive, these are the values you can specify: - \u0060Certificate Provider\u0060 - \u0060Certificate\u0060 - \u0060Store\u0060 - \u0060StoreLocation\u0060 For more information see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Value",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the value of the new item. You can also pipe a value to \u0060New-Item\u0060.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces this cmdlet to create an item that writes over an existing read-only item. Implementation varies from provider to provider. Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions. Beginning in PowerShell 7.4, this parameter also allows you to overwrite an existing Junction. Previously, this would fail with a \u0022cannot be removed because it is not empty\u0022 error.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter isn\u0027t supported by any providers installed with PowerShell. To impersonate another \u003E user or elevate your credentials when running this cmdlet, use \u0060Invoke-Command\u0060.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Remove-ItemProperty",
+      "category": "",
+      "description": "Deletes the property and its value from an item.",
+      "scriptBody": "",
+      "cmdletName": "Remove-ItemProperty",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Path",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Path",
+        "LiteralPath"
+      ],
+      "defaultParameterSet": "Path",
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the path of the item whose properties are being removed. Wildcard characters are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Path"
+          ],
+          "mandatoryInSets": [
+            "Path"
+          ]
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a path to one or more locations. The value of **LiteralPath** is used exactly as it is typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences. For more information, see [about_Quoting_Rules](../Microsoft.Powershell.Core/About/about_Quoting_Rules.md).",
+          "validValues": [],
+          "parameterSets": [
+            "LiteralPath"
+          ],
+          "mandatoryInSets": [
+            "LiteralPath"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the names of the properties to remove. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to remove a property of an object that cannot otherwise be accessed by the user. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a filter to qualify the **Path** parameter. The [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider is the only installed PowerShell provider that supports the use of filters. You can find the syntax for the **FileSystem** filter language in [about_Wildcards](../Microsoft.PowerShell.Core/About/about_Wildcards.md). Filters are more efficient than other parameters, because the provider applies them when the cmdlet gets the objects rather than having PowerShell filter the objects after they are retrieved.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet includes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060\u0022*.txt\u0022\u0060. Wildcard characters are permitted. The **Include** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet excludes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Exclude** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is not supported by any providers installed with PowerShell. \u003E To impersonate another user, or elevate your credentials when running this cmdlet, \u003E use [Invoke-Command](../Microsoft.PowerShell.Core/Invoke-Command.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Set-ItemProperty",
+      "category": "",
+      "description": "Creates or changes the value of a property of an item.",
+      "scriptBody": "",
+      "cmdletName": "Set-ItemProperty",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "propertyValuePathSet",
+        "propertyPSObjectPathSet",
+        "propertyValueLiteralPathSet",
+        "propertyPSObjectLiteralPathSet"
+      ],
+      "defaultParameterSet": "propertyValuePathSet",
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "HKLM:\\SOFTWARE\\",
+          "description": "Specifies the path of the items with the property to modify. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "propertyPSObjectPathSet",
+            "propertyValuePathSet"
+          ],
+          "mandatoryInSets": [
+            "propertyPSObjectPathSet",
+            "propertyValuePathSet"
+          ]
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a path to one or more locations. The value of **LiteralPath** is used exactly as it is typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences. For more information, see [about_Quoting_Rules](../Microsoft.Powershell.Core/About/about_Quoting_Rules.md).",
+          "validValues": [],
+          "parameterSets": [
+            "propertyValueLiteralPathSet",
+            "propertyPSObjectLiteralPathSet"
+          ],
+          "mandatoryInSets": [
+            "propertyValueLiteralPathSet",
+            "propertyPSObjectLiteralPathSet"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the name of the property.",
+          "validValues": [],
+          "parameterSets": [
+            "propertyValuePathSet",
+            "propertyValueLiteralPathSet"
+          ],
+          "mandatoryInSets": [
+            "propertyValuePathSet",
+            "propertyValueLiteralPathSet"
+          ]
+        },
+        {
+          "name": "Value",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the value of the property.",
+          "validValues": [],
+          "parameterSets": [
+            "propertyValuePathSet",
+            "propertyValueLiteralPathSet"
+          ],
+          "mandatoryInSets": [
+            "propertyValuePathSet",
+            "propertyValueLiteralPathSet"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the object that has the properties that this cmdlet changes. Enter a variable that contains the object or a command that gets the object.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "propertyPSObjectPathSet",
+            "propertyPSObjectLiteralPathSet"
+          ],
+          "mandatoryInSets": [
+            "propertyPSObjectPathSet",
+            "propertyPSObjectLiteralPathSet"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Returns an object that represents the item property. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to set a property on items that cannot otherwise be accessed by the user. Implementation varies by provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a filter to qualify the **Path** parameter. The [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider is the only installed PowerShell provider that supports the use of filters. You can find the syntax for the **FileSystem** filter language in [about_Wildcards](../Microsoft.PowerShell.Core/About/about_Wildcards.md). Filters are more efficient than other parameters, because the provider applies them when the cmdlet gets the objects rather than having PowerShell filter the objects after they are retrieved.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet includes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060\u0022*.txt\u0022\u0060. Wildcard characters are permitted. The **Include** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet excludes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Exclude** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is not supported by any providers installed with PowerShell. \u003E To impersonate another user, or elevate your credentials when running this cmdlet, \u003E use [Invoke-Command](../Microsoft.PowerShell.Core/Invoke-Command.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,623 @@
+{
+  "version": 2,
+  "category": "Process / Service",
+  "templates": [
+    {
+      "name": "Get-Process",
+      "category": "",
+      "description": "Gets the processes that are running on the local computer.",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "ProcessModule",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Name",
+        "NameWithUserName",
+        "Id",
+        "IdWithUserName",
+        "InputObject",
+        "InputObjectWithUserName"
+      ],
+      "defaultParameterSet": "Name",
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies one or more processes by process name. You can specify multiple process names separated by commas and use wildcard characters. Using the \u0060-Name\u0060 parameter is optional.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "NameWithUserName"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Id",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies one or more processes by process ID (PID). You can specify multiple IDs separated by commas. To get the PID of a process, use \u0060Get-Process\u0060. To get the PID of the current PowerShell session, use \u0060$PID\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Id",
+            "IdWithUserName"
+          ],
+          "mandatoryInSets": [
+            "Id",
+            "IdWithUserName"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies one or more **Process** objects. Use a variable that contains the objects, or a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject",
+            "InputObjectWithUserName"
+          ],
+          "mandatoryInSets": [
+            "InputObject",
+            "InputObjectWithUserName"
+          ]
+        },
+        {
+          "name": "IncludeUserName",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this command adds a **UserName** property to each returned **Process** object.",
+          "validValues": [],
+          "parameterSets": [
+            "NameWithUserName",
+            "IdWithUserName",
+            "InputObjectWithUserName"
+          ],
+          "mandatoryInSets": [
+            "NameWithUserName",
+            "IdWithUserName",
+            "InputObjectWithUserName"
+          ]
+        },
+        {
+          "name": "Module",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets the modules that the process has loaded. On Windows Vista and later versions of Windows, you must run PowerShell with elevated user rights (**Run as administrator**) to use this parameter on processes that you don\u0027t own. Using this parameter is the same as accessing the **Modules** property of each **Process** object. When you use this parameter, \u0060Get-Process\u0060 returns a **ProcessModule** object, not a **Process** object. You can\u0027t pipe output produced using this parameter to a cmdlet that expects a **Process** object, such as \u0060Stop-Process\u0060. When you use both the **Module** and **FileVersionInfo** parameters together, this cmdlet returns a **FileVersionInfo** object with information about the file version of all modules.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "Id",
+            "InputObject"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "FileVersionInfo",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets the file version information for the program that runs in the process. On Windows Vista and later versions of Windows, you must run PowerShell with elevated user rights (**Run as administrator**) to use this parameter on processes that you don\u0027t own. Using this parameter is the same as accessing the **MainModule.FileVersionInfo** property of each **Process** object. When you use this parameter, \u0060Get-Process\u0060 returns a **FileVersionInfo** object, not a **Process** object. You can\u0027t pipe output produced using this parameter to a cmdlet that expects a **Process** object, such as \u0060Stop-Process\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "Id",
+            "InputObject"
+          ],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Get-Service",
+      "category": "",
+      "description": "Gets the services on the computer.",
+      "scriptBody": "",
+      "cmdletName": "Get-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Default",
+        "DisplayName",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Default",
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the service names of services to be retrieved. Wildcards are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DependentServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets only the services that depend upon the specified service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "RequiredServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets only the services that this service requires. This parameter gets the value of the **ServicesDependedOn** property of the service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies, as a string array, the display names of services to be retrieved. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, a service or services that this cmdlet includes in the operation. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, a service or services that this cmdlet excludes from the operation. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects representing the services to be retrieved. Enter a variable that contains the objects, or type a command or expression that gets the objects. You can pipe a service object to this cmdlet.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Restart-Service",
+      "category": "",
+      "description": "Stops and then starts one or more services.",
+      "scriptBody": "",
+      "cmdletName": "Restart-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "parameters": [
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the command to run without asking for user confirmation.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names of the services to restart.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects that represent the services to restart. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to restarted. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet restarts. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Start-Service",
+      "category": "",
+      "description": "Starts one or more stopped services.",
+      "scriptBody": "",
+      "cmdletName": "Start-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names for the service to be started. The parameter name is optional. You can use **Name** or its alias, **ServiceName**, or you can omit the parameter name.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects representing the services to be started. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to start. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet starts. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Stop-Process",
+      "category": "",
+      "description": "Stops one or more running processes.",
+      "scriptBody": "",
+      "cmdletName": "Stop-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Process",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Id",
+        "Name",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Id",
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process names of the processes to stop. You can type multiple process names, separated by commas, or use wildcard characters.",
+          "validValues": [],
+          "parameterSets": [
+            "Name"
+          ],
+          "mandatoryInSets": [
+            "Name"
+          ]
+        },
+        {
+          "name": "Id",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process IDs of the processes to stop. To specify multiple IDs, use commas to separate the IDs. To find the PID of a process, type \u0060Get-Process\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Id"
+          ],
+          "mandatoryInSets": [
+            "Id"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process objects to stop. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Returns an object that represents the process. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Stops the specified processes without prompting for confirmation. By default, \u0060Stop-Process\u0060 prompts for confirmation before stopping any process that is not owned by the current user. To find the owner of a process, use the \u0060Get-CimInstance\u0060 cmdlet to get a **Win32_Process** object that represents the process, and then use the **GetOwner** method of the object.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "name": "Stop-Service",
+      "category": "",
+      "description": "Stops one or more running services.",
+      "scriptBody": "",
+      "cmdletName": "Stop-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "parameters": [
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to stop a service even if that service has dependent services.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoWait",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet uses the no wait option.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names of the services to stop. Wildcard characters are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects that represent the services to stop. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to stop. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet stops. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ]
+}
