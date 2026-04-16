@@ -120,6 +120,31 @@ public partial class UndoStack : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Temporarily suppress recording. The returned <see cref="IDisposable"/>
+    /// restores the previous suppression state on dispose. Use for composite
+    /// operations (splice, paste, etc.) that perform several otherwise-
+    /// recorded mutations but want to emit one composite undo entry instead.
+    /// </summary>
+    public IDisposable Suppress()
+    {
+        var was = _suppressed;
+        _suppressed = true;
+        return new SuppressionScope(this, was);
+    }
+
+    private sealed class SuppressionScope : IDisposable
+    {
+        private readonly UndoStack _stack;
+        private readonly bool _previous;
+        public SuppressionScope(UndoStack stack, bool previous)
+        {
+            _stack = stack;
+            _previous = previous;
+        }
+        public void Dispose() => _stack._suppressed = _previous;
+    }
+
     private void Notify()
     {
         OnPropertyChanged(nameof(CanUndo));

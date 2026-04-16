@@ -279,8 +279,27 @@ public class NodeGraphCanvas : Control
     {
         ShowFlyout(new List<(string, Action?, bool)>
         {
-            ("Delete wire",       () => _vm!.RemoveConnection(conn), false),
+            ("Insert node...",    () => OpenQuickAddForSplice(conn),   false),
+            ("Delete wire",       () => _vm!.RemoveConnection(conn),   false),
         });
+    }
+
+    private void OpenQuickAddForSplice(NodeConnection wire)
+    {
+        if (_vm == null) return;
+        var pt = CurrentPointerPosition;
+        // Clamp using the same logic as normal quick-add opens so the popup
+        // never extends off-screen regardless of where the user clicked.
+        const double popupW = 380, popupH = 480, pad = 8;
+        double rootW = 1280, rootH = 720;
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
+        {
+            rootW = topLevel.ClientSize.Width;
+            rootH = topLevel.ClientSize.Height;
+        }
+        double x = Math.Min(Math.Max(pad, pt.X), rootW - popupW - pad);
+        double y = Math.Min(Math.Max(pad, pt.Y), rootH - popupH - pad);
+        _vm.QuickAdd.OpenForSplice(x, y, wire);
     }
 
     private void ShowCanvasContextMenu(Point canvasPos)

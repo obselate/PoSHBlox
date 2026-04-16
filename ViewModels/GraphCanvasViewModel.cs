@@ -472,6 +472,16 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (template == null) return;
         var x = QuickAdd.X;
         var y = QuickAdd.Y;
+
+        // Splice mode: insert the new node into an existing wire. Node add +
+        // wire removals + wire additions all record as a single undo entry.
+        if (QuickAdd.SpliceWire is { } splice)
+        {
+            SpliceCommit(template, splice, x, y);
+            QuickAdd.Close();
+            return;
+        }
+
         var source = QuickAdd.SourcePort;
 
         var node = NodeFactory.CreateFromTemplate(template, x, y);
@@ -485,6 +495,72 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (source != null) AutoWire(source, node);
 
         QuickAdd.Close();
+    }
+
+    /// <summary>
+    /// Insert <paramref name="template"/> into an existing wire between two
+    /// nodes. Removes every wire directly between the wire's endpoints (the
+    /// clicked wire plus any parallel exec/data wire pair) and rewires through
+    /// the new node on its primary exec and data pins. Best-effort: if the
+    /// new node's primary pin types aren't compatible with an end of the
+    /// original chain, that link is skipped (user can manually rewire).
+    /// </summary>
+    private void SpliceCommit(NodeTemplate template, NodeConnection wire, double x, double y)
+    {
+        var upstream = wire.Source.Owner;
+        var downstream = wire.Target.Owner;
+        if (upstream == null || downstream == null) return;
+
+        // Capture every wire going from upstream to downstream — the clicked
+        // wire plus any "parallel" wire (exec partner to a data wire, or vice
+        // versa) between the same two nodes. The splice rewires them all.
+        var displaced = Connections
+            .Where(c => c.Source.Owner == upstream && c.Target.Owner == downstream)
+            .ToList();
+
+        var node = NodeFactory.CreateFromTemplate(template, x, y);
+
+        // Plan the new connections. Only instantiate those where PortCompatibility
+        // agrees — a Write-Host spliced onto a Collection pipe won't force a
+        // type-mismatch wire; it'll just miss that leg.
+        var plan = new List<NodeConnection>();
+        void Plan(NodePort? src, NodePort? tgt)
+        {
+            if (src == null || tgt == null) return;
+            if (!PortCompatibility.CanConnect(src, tgt)) return;
+            plan.Add(new NodeConnection { Source = src, Target = tgt });
+        }
+        Plan(upstream.ExecOutPort, node.ExecInPort);
+        Plan(node.ExecOutPort, downstream.ExecInPort);
+        Plan(upstream.PrimaryDataOutput, node.PrimaryPipelineTarget);
+        Plan(node.PrimaryDataOutput, downstream.PrimaryPipelineTarget);
+
+        // Apply everything with undo suppressed — we emit one composite entry
+        // below so Ctrl+Z reverts the whole splice in one shot.
+        using (Undo.Suppress())
+        {
+            foreach (var c in displaced) Connections.Remove(c);
+            Nodes.Add(node);
+            foreach (var w in plan) Connections.Add(w);
+        }
+
+        Palette.NoteSpawn(template);
+        SelectNode(node);
+
+        Undo.Record(
+            undo: () =>
+            {
+                foreach (var w in plan) Connections.Remove(w);
+                Nodes.Remove(node);
+                foreach (var d in displaced) Connections.Add(d);
+            },
+            redo: () =>
+            {
+                foreach (var d in displaced) Connections.Remove(d);
+                Nodes.Add(node);
+                foreach (var w in plan) Connections.Add(w);
+            },
+            label: $"Splice {template.Name}");
     }
 
     /// <summary>

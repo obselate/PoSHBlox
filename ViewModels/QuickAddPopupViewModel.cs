@@ -45,6 +45,13 @@ public partial class QuickAddPopupViewModel : ObservableObject
     /// <summary>Tracks whether a source pin is active — drives the compatibility chip's visibility.</summary>
     public bool HasSourcePort => SourcePort != null;
 
+    /// <summary>
+    /// When non-null, committing spawns the picked node AND reroutes this wire
+    /// through it: original wire(s) between the endpoints are removed and the
+    /// new node is inserted into the chain. Set via <see cref="OpenForSplice"/>.
+    /// </summary>
+    [ObservableProperty] private NodeConnection? _spliceWire;
+
     /// <summary>Default true whenever <see cref="SourcePort"/> is set; strict primary-compatible filter.</summary>
     [ObservableProperty] private bool _compatibleOnly = true;
 
@@ -92,7 +99,26 @@ public partial class QuickAddPopupViewModel : ObservableObject
         X = x;
         Y = y;
         SourcePort = source;
+        SpliceWire = null;
         CompatibleOnly = source != null;
+        SearchText = "";
+        foreach (var chip in TagChips) chip.IsActive = false;
+        ApplyFilter();
+        IsOpen = true;
+    }
+
+    /// <summary>
+    /// Open the popup for inserting a node into an existing wire. Compatibility
+    /// is keyed to the wire's source pin (upstream data type) so filtering
+    /// surfaces templates whose primary pipeline target can accept it.
+    /// </summary>
+    public void OpenForSplice(double x, double y, NodeConnection wire)
+    {
+        X = x;
+        Y = y;
+        SourcePort = wire.Source;
+        SpliceWire = wire;
+        CompatibleOnly = true;
         SearchText = "";
         foreach (var chip in TagChips) chip.IsActive = false;
         ApplyFilter();
@@ -103,6 +129,7 @@ public partial class QuickAddPopupViewModel : ObservableObject
     {
         IsOpen = false;
         SourcePort = null;
+        SpliceWire = null;
     }
 
     // ── Property change plumbing ───────────────────────────────
