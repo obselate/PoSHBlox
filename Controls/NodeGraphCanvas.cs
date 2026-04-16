@@ -73,6 +73,13 @@ public class NodeGraphCanvas : Control
     /// <summary>Pointer position in window-root coordinate space (for positioning popups).</summary>
     public Point CurrentPointerPosition => _lastPointerInWindow;
 
+    /// <summary>
+    /// Pointer position in graph (canvas) coordinates — control-local
+    /// minus pan, divided by zoom. Used to anchor paste at the cursor so the
+    /// new nodes land where the user is looking.
+    /// </summary>
+    public Point CurrentCanvasPosition => ScreenToCanvas(_lastPointerLocal);
+
     public NodeGraphCanvas()
     {
         ClipToBounds = true;

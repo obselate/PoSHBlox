@@ -53,58 +53,7 @@ public static class ProjectSerializer
         };
 
         foreach (var node in vm.Nodes)
-        {
-            var dto = new PblxNode
-            {
-                Id = node.Id,
-                Title = node.Title,
-                Category = node.Category,
-                ScriptBody = node.ScriptBody,
-                CmdletName = node.CmdletName,
-                OutputVariable = node.OutputVariable,
-                X = node.X,
-                Y = node.Y,
-                Width = node.Width,
-                IsCollapsed = node.IsCollapsed,
-                KnownParameterSets = node.KnownParameterSets,
-                ActiveParameterSet = node.ActiveParameterSet,
-                ContainerType = node.ContainerType.ToString(),
-                ContainerWidth = node.ContainerWidth,
-                ContainerHeight = node.ContainerHeight,
-            };
-
-            if (node.ParentContainer != null && node.ParentZone != null)
-            {
-                dto.ParentNodeId = node.ParentContainer.Id;
-                dto.ParentZoneName = node.ParentZone.Name;
-            }
-
-            foreach (var zone in node.Zones)
-                dto.Zones.Add(new PblxZone { Name = zone.Name });
-
-            foreach (var port in node.Inputs)  dto.Inputs.Add(PortToDto(port));
-            foreach (var port in node.Outputs) dto.Outputs.Add(PortToDto(port));
-
-            foreach (var p in node.Parameters)
-            {
-                dto.Parameters.Add(new PblxParameter
-                {
-                    Name = p.Name,
-                    Type = p.Type.ToString(),
-                    IsMandatory = p.IsMandatory,
-                    DefaultValue = p.DefaultValue,
-                    Description = p.Description,
-                    ValidValues = p.ValidValues,
-                    Value = p.Value,
-                    IsArgument = p.IsArgument,
-                    IsPipelineInput = p.IsPipelineInput,
-                    ParameterSets = p.ParameterSets,
-                    MandatoryInSets = p.MandatoryInSets,
-                });
-            }
-
-            doc.Nodes.Add(dto);
-        }
+            doc.Nodes.Add(NodeToDto(node));
 
         foreach (var conn in vm.Connections)
         {
@@ -124,7 +73,65 @@ public static class ProjectSerializer
         return JsonSerializer.Serialize(doc, Options);
     }
 
-    private static PblxPort PortToDto(NodePort p) => new()
+    /// <summary>
+    /// Build a PblxNode DTO from a live <see cref="GraphNode"/>. Internal so
+    /// the clipboard serializer can reuse the same schema without forking it.
+    /// </summary>
+    internal static PblxNode NodeToDto(GraphNode node)
+    {
+        var dto = new PblxNode
+        {
+            Id = node.Id,
+            Title = node.Title,
+            Category = node.Category,
+            ScriptBody = node.ScriptBody,
+            CmdletName = node.CmdletName,
+            OutputVariable = node.OutputVariable,
+            X = node.X,
+            Y = node.Y,
+            Width = node.Width,
+            IsCollapsed = node.IsCollapsed,
+            KnownParameterSets = node.KnownParameterSets,
+            ActiveParameterSet = node.ActiveParameterSet,
+            ContainerType = node.ContainerType.ToString(),
+            ContainerWidth = node.ContainerWidth,
+            ContainerHeight = node.ContainerHeight,
+        };
+
+        if (node.ParentContainer != null && node.ParentZone != null)
+        {
+            dto.ParentNodeId = node.ParentContainer.Id;
+            dto.ParentZoneName = node.ParentZone.Name;
+        }
+
+        foreach (var zone in node.Zones)
+            dto.Zones.Add(new PblxZone { Name = zone.Name });
+
+        foreach (var port in node.Inputs)  dto.Inputs.Add(PortToDto(port));
+        foreach (var port in node.Outputs) dto.Outputs.Add(PortToDto(port));
+
+        foreach (var p in node.Parameters)
+        {
+            dto.Parameters.Add(new PblxParameter
+            {
+                Name = p.Name,
+                Type = p.Type.ToString(),
+                IsMandatory = p.IsMandatory,
+                DefaultValue = p.DefaultValue,
+                Description = p.Description,
+                ValidValues = p.ValidValues,
+                Value = p.Value,
+                IsArgument = p.IsArgument,
+                IsPipelineInput = p.IsPipelineInput,
+                ParameterSets = p.ParameterSets,
+                MandatoryInSets = p.MandatoryInSets,
+            });
+        }
+
+        return dto;
+    }
+
+    internal static PblxPort PortToDto(NodePort p) => new()
     {
         Id = p.Id,
         Name = p.Name,

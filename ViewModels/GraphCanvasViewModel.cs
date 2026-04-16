@@ -563,6 +563,82 @@ public partial class GraphCanvasViewModel : ObservableObject
             label: $"Splice {template.Name}");
     }
 
+    // ── Clipboard ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Serialize the current selection (nodes + the wires whose endpoints are
+    /// both selected) into a JSON envelope for the system clipboard. Returns
+    /// null when nothing is selected so callers can skip the clipboard write.
+    /// Container nodes copy with their zone shells but children that aren't
+    /// also selected don't come along — same rule as wires (selection is the
+    /// boundary).
+    /// </summary>
+    public string? CopySelectionToText()
+    {
+        if (SelectedNodes.Count == 0) return null;
+        return ClipboardSerializer.SerializeSelection(SelectedNodes, Connections);
+    }
+
+    /// <summary>Cut = Copy then DeleteSelected. Two undo steps (matches editor convention).</summary>
+    public string? CutSelectionToText()
+    {
+        var text = CopySelectionToText();
+        if (text != null) DeleteSelected();
+        return text;
+    }
+
+    /// <summary>
+    /// Paste a clipboard payload into the graph at <paramref name="pasteX"/>,
+    /// <paramref name="pasteY"/> (canvas coords). New nodes get fresh IDs and
+    /// the bounding-box top-left lands at the paste point. Selection is
+    /// replaced with the pasted nodes. Whole paste is one undo entry.
+    /// Returns true when something was pasted (callers can clear selection
+    /// only on success / show a status).
+    /// </summary>
+    public bool PasteFromText(string? text, double pasteX, double pasteY)
+    {
+        var payload = ClipboardSerializer.TryDeserialize(text);
+        if (payload == null || payload.Nodes.Count == 0) return false;
+
+        var (newNodes, wires) = ClipboardSerializer.Build(payload, pasteX, pasteY);
+
+        // Materialized connections — capture so the undo entry can remove
+        // exactly the wires that AddConnection actually accepted (some wires
+        // may be silently rejected by 1:N rules / type mismatches that survived
+        // the source graph but don't apply here).
+        var added = new List<NodeConnection>();
+
+        using (Undo.Suppress())
+        {
+            foreach (var n in newNodes) Nodes.Add(n);
+            foreach (var (s, t) in wires)
+            {
+                int before = Connections.Count;
+                AddConnection(s, t);
+                if (Connections.Count > before)
+                    added.Add(Connections[^1]);
+            }
+        }
+
+        ClearSelection();
+        foreach (var n in newNodes) AddToSelection(n);
+
+        Undo.Record(
+            undo: () =>
+            {
+                foreach (var c in added) Connections.Remove(c);
+                foreach (var n in newNodes) Nodes.Remove(n);
+            },
+            redo: () =>
+            {
+                foreach (var n in newNodes) Nodes.Add(n);
+                foreach (var c in added) Connections.Add(c);
+            },
+            label: newNodes.Count == 1 ? "Paste node" : $"Paste {newNodes.Count} nodes");
+
+        return true;
+    }
+
     /// <summary>
     /// Connect a fresh <paramref name="node"/> to the pending wire source on
     /// its most sensible pin. Exec-from-output ↔ target's ExecIn; data-from-

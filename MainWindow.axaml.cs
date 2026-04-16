@@ -132,6 +132,24 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
+                // Ctrl+C — copy selection to system clipboard
+                case Key.C when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = CopySelectionAsync(vm);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+X — cut selection (copy then delete)
+                case Key.X when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = CutSelectionAsync(vm);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+V — paste at the cursor (canvas coords)
+                case Key.V when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = PasteAtCursorAsync(vm);
+                    e.Handled = true;
+                    break;
+
                 // Ctrl+Z — undo
                 case Key.Z when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
                     vm.PerformUndo();
@@ -449,6 +467,40 @@ public partial class MainWindow : AppWindow
     {
         if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
             await clipboard.SetTextAsync(PreviewTextBox.Text ?? "");
+    }
+
+    // ── Graph clipboard (Ctrl+C/X/V) ───────────────────────────
+    //
+    // Rides on the OS text clipboard so cut-in-window-A → paste-in-window-B
+    // works across PoSHBlox processes. Payload is a tagged JSON envelope
+    // (see ClipboardSerializer.MagicString) so paste over arbitrary text
+    // silently no-ops instead of throwing.
+
+    private async Task CopySelectionAsync(GraphCanvasViewModel vm)
+    {
+        var text = vm.CopySelectionToText();
+        if (text == null) return;
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } cb)
+            await cb.SetTextAsync(text);
+    }
+
+    private async Task CutSelectionAsync(GraphCanvasViewModel vm)
+    {
+        var text = vm.CutSelectionToText();
+        if (text == null) return;
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } cb)
+            await cb.SetTextAsync(text);
+    }
+
+    private async Task PasteAtCursorAsync(GraphCanvasViewModel vm)
+    {
+        if (TopLevel.GetTopLevel(this)?.Clipboard is not { } cb) return;
+        var text = await cb.GetTextAsync();
+        if (string.IsNullOrEmpty(text)) return;
+
+        // Paste at the canvas-space cursor — same UX as quick-add Tab spawn.
+        var pos = GraphCanvas.CurrentCanvasPosition;
+        vm.PasteFromText(text, pos.X, pos.Y);
     }
 
     private async void OnNewClicked(object? sender, RoutedEventArgs e)
