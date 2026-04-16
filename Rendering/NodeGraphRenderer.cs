@@ -315,9 +315,16 @@ public class NodeGraphRenderer
         ctx.DrawRectangle(new SolidColorBrush(bgColor), borderPen,
             new RoundedRect(new Rect(zx, zy, zw, zh), 6));
 
-        // Zone label
-        var label = MakeText(zone.Name.ToUpperInvariant(), 10, FontWeight.SemiBold, GraphTheme.ZoneLabel);
-        ctx.DrawText(label, new Point(zx + 8, zy + 4));
+        // Zone label — omit on Label containers (single zone, no semantic
+        // divider needed; the container's own title already carries the
+        // annotation text) and on any zone whose Name is blank.
+        bool skipZoneHeader = parent.ContainerType == ContainerType.Label
+                              || string.IsNullOrWhiteSpace(zone.Name);
+        if (!skipZoneHeader)
+        {
+            var label = MakeText(zone.Name.ToUpperInvariant(), 10, FontWeight.SemiBold, GraphTheme.ZoneLabel);
+            ctx.DrawText(label, new Point(zx + 8, zy + 4));
+        }
 
         // Empty hint
         if (zone.Children.Count == 0)

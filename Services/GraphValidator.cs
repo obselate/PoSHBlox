@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using PoSHBlox.Models;
 
 namespace PoSHBlox.Services;
@@ -109,6 +110,36 @@ public static class GraphValidator
             }
         }
 
+        // 2c. Function signature sanity. FunctionName must look like Verb-Noun
+        // (PowerShell's convention and what the tokenizer expects); ReturnType
+        // must be a bare type token when set (no embedded spaces / punctuation).
+        // Both emit as warnings — the script still generates and may still run,
+        // but the user should be nudged toward cmdlet-friendly shapes.
+        foreach (var fn in nodes.Where(n => n.ContainerType == ContainerType.Function))
+        {
+            var fnName = fn.Parameters.FirstOrDefault(p => p.Name == "FunctionName")?.EffectiveValue?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(fnName) && !VerbNounPattern.IsMatch(fnName))
+            {
+                Add(result, fn.Id, new GraphIssue
+                {
+                    Severity = IssueSeverity.Warning,
+                    Code = IssueCode.FunctionSignature,
+                    Message = $"Function name '{fnName}' doesn't follow Verb-Noun convention (e.g. Get-User).",
+                });
+            }
+
+            var retType = fn.Parameters.FirstOrDefault(p => p.Name == "ReturnType")?.EffectiveValue?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(retType) && !TypeTokenPattern.IsMatch(retType))
+            {
+                Add(result, fn.Id, new GraphIssue
+                {
+                    Severity = IssueSeverity.Warning,
+                    Code = IssueCode.FunctionSignature,
+                    Message = $"Return type '{retType}' isn't a valid type token — use bare names like 'string', 'int', or 'System.IO.FileInfo'.",
+                });
+            }
+        }
+
         // 3. Exec cycles (strict SCC would be overkill — an exec-wire DFS with
         //    visiting stack catches the cases users actually create).
         var inCycle = FindExecCycles(nodes, connections);
@@ -142,6 +173,24 @@ public static class GraphValidator
 
         return result;
     }
+
+    /// <summary>
+    /// PowerShell approved-verb convention: CapitalLetter+ then '-' then a
+    /// CapitalLetter+ noun. Doesn't enforce the canonical Get-Verb list —
+    /// that's too strict for arbitrary user scripts — just the lexical shape.
+    /// </summary>
+    private static readonly Regex VerbNounPattern = new(
+        @"^[A-Z][a-zA-Z0-9]*-[A-Z][a-zA-Z0-9]*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Accept bare identifiers and dotted .NET type names (e.g. System.IO.FileInfo).
+    /// Generics (List[string]) and array suffixes (int[]) are allowed so users
+    /// can type any common return-type token.
+    /// </summary>
+    private static readonly Regex TypeTokenPattern = new(
+        @"^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*(\[[^\]]*\])*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static bool IsMandatoryInContext(NodeParameter p, GraphNode node)
     {

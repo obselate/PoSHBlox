@@ -26,6 +26,9 @@ public enum IssueCode
 
     /// <summary>A container's required zone has no children (e.g. If with an empty Then body).</summary>
     EmptyContainerZone,
+
+    /// <summary>A Function container has an invalid signature (non-Verb-Noun name, malformed return type).</summary>
+    FunctionSignature,
 }
 
 /// <summary>

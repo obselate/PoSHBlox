@@ -535,8 +535,11 @@ public class ScriptGenerator
 
     private void EmitLabel(StringBuilder sb, GraphNode c, int indent)
     {
-        // Pass-through: label zones just wrap their content.
-        EmitZone(sb, FindZone(c, "Content"), indent);
+        // Pass-through: label zones just wrap their content. Use the first
+        // zone rather than looking up by name — Label is single-zone so
+        // first-zone is unambiguous, and this lets the renderer drop the
+        // zone header without the codegen losing its reference.
+        EmitZone(sb, c.Zones.FirstOrDefault(), indent);
     }
 
     private void EmitZone(StringBuilder sb, ContainerZone? zone, int indent)
