@@ -57,12 +57,12 @@ public static class GraphValidator
         }
 
         // 2. Orphan nodes — no exec predecessor AND no data consumer.
-        //    Containers and function bodies are skipped (containers coordinate
-        //    execution; functions are callables, not inline executors).
+        //    Functions are callables (no exec pins, ExecInPort == null so they're
+        //    naturally considered "source" and skipped). Other containers with
+        //    exec pins (If/ForEach/While/TryCatch/Label) follow the same rule
+        //    as regular nodes: unwired means they won't run.
         foreach (var node in nodes)
         {
-            if (node.IsContainer) continue;
-
             bool hasExecIncoming =
                 node.ExecInPort != null
                 && connections.Any(c => c.Target == node.ExecInPort && nodeIds.Contains(c.Source.Owner!.Id));
@@ -81,8 +81,31 @@ public static class GraphValidator
                 {
                     Severity = IssueSeverity.Warning,
                     Code = IssueCode.Orphan,
-                    Message = "Node has no exec or data connections — will not execute.",
+                    Message = node.IsContainer
+                        ? "Container is not connected to an exec chain — its body will not run."
+                        : "Node has no exec or data connections — will not execute.",
                 });
+            }
+        }
+
+        // 2b. Empty required zones on containers. Fresh drops produce these —
+        // the amber warning tells the user what's still missing, same pattern
+        // as MissingMandatory on params. Optional zones (If.Else, TryCatch's
+        // Catch/Finally, Label.Content) don't trigger this.
+        foreach (var node in nodes.Where(n => n.IsContainer))
+        {
+            foreach (var zoneName in RequiredZonesFor(node.ContainerType))
+            {
+                var zone = node.Zones.FirstOrDefault(z => z.Name == zoneName);
+                if (zone != null && zone.Children.Count == 0)
+                {
+                    Add(result, node.Id, new GraphIssue
+                    {
+                        Severity = IssueSeverity.Warning,
+                        Code = IssueCode.EmptyContainerZone,
+                        Message = $"'{zoneName}' zone is empty — drop at least one node into it.",
+                    });
+                }
             }
         }
 
@@ -125,6 +148,22 @@ public static class GraphValidator
         if (p.MandatoryInSets.Length == 0) return p.IsMandatory;
         return p.MandatoryInSets.Contains(node.ActiveParameterSet, StringComparer.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Zones that must be non-empty for the container to produce meaningful
+    /// PowerShell. Optional zones (If.Else, TryCatch.Catch/Finally, Label.Content)
+    /// are deliberately omitted — an empty Else is just "no else branch", which
+    /// is a common and valid shape.
+    /// </summary>
+    private static IEnumerable<string> RequiredZonesFor(ContainerType type) => type switch
+    {
+        ContainerType.IfElse   => ["Then"],
+        ContainerType.ForEach  => ["Body"],
+        ContainerType.While    => ["Body"],
+        ContainerType.TryCatch => ["Try"],
+        ContainerType.Function => ["Body"],
+        _                      => [],
+    };
 
     /// <summary>
     /// Find every node participating in an exec-wire cycle. DFS with a visiting

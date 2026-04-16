@@ -23,6 +23,9 @@ public enum IssueCode
 
     /// <summary>A wired input pin points at a source that no longer exists.</summary>
     UnresolvedUpstream,
+
+    /// <summary>A container's required zone has no children (e.g. If with an empty Then body).</summary>
+    EmptyContainerZone,
 }
 
 /// <summary>

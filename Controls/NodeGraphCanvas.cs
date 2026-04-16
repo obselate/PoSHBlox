@@ -768,12 +768,20 @@ public class NodeGraphCanvas : Control
             node.ParentZone = null;
         }
 
-        double nodeCenterX = node.X + node.EffectiveWidth / 2;
-        double nodeCenterY = node.Y + node.Height / 2;
+        // Majority-overlap test: a zone wins when the node's bounding rect has
+        // > 50% of its area inside the zone. This is more forgiving than the
+        // previous center-point rule — a node whose center sits just past a
+        // zone border but is otherwise mostly inside still snaps in.
+        double nodeW = node.EffectiveWidth;
+        double nodeH = node.Height;
+        double nodeArea = nodeW * nodeH;
 
-        // Collect all matching (container, zone) pairs, then pick the deepest
+        // Tiebreak by nesting depth (prefer innermost) then by overlap area,
+        // so a drop over stacked/nested zones lands in the one the user most
+        // likely intended.
         (GraphNode container, ContainerZone zone)? bestMatch = null;
         int bestDepth = -1;
+        double bestArea = 0;
 
         foreach (var container in _vm.Nodes.Where(n => n.IsContainer))
         {
@@ -786,15 +794,20 @@ public class NodeGraphCanvas : Control
             foreach (var zone in container.Zones)
             {
                 var (zx, zy, zw, zh) = zone.GetAbsoluteRect(container);
-                if (nodeCenterX >= zx && nodeCenterX <= zx + zw &&
-                    nodeCenterY >= zy && nodeCenterY <= zy + zh)
+                double ix = Math.Max(node.X, zx);
+                double iy = Math.Max(node.Y, zy);
+                double ix2 = Math.Min(node.X + nodeW, zx + zw);
+                double iy2 = Math.Min(node.Y + nodeH, zy + zh);
+                double overlap = Math.Max(0, ix2 - ix) * Math.Max(0, iy2 - iy);
+
+                if (nodeArea <= 0 || overlap <= 0.5 * nodeArea) continue;
+
+                int depth = GetNestingDepth(container);
+                if (depth > bestDepth || (depth == bestDepth && overlap > bestArea))
                 {
-                    int depth = GetNestingDepth(container);
-                    if (depth > bestDepth)
-                    {
-                        bestDepth = depth;
-                        bestMatch = (container, zone);
-                    }
+                    bestDepth = depth;
+                    bestArea = overlap;
+                    bestMatch = (container, zone);
                 }
             }
         }
