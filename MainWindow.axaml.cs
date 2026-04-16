@@ -18,6 +18,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Windowing;
+using PoSHBlox.Models;
 using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
 using PoSHBlox.Views;
