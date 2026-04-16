@@ -10,9 +10,9 @@ $ErrorActionPreference = 'Stop'
 # modules whose Import-Module fails on type conflicts.
 $PSModuleAutoloadingPreference = 'All'
 
-# Common parameters to skip
+# Common parameters to skip. Includes PS 7.2+ additions (ProgressAction).
 $CommonParams = @(
-    'Verbose','Debug','ErrorAction','WarningAction','InformationAction',
+    'Verbose','Debug','ErrorAction','WarningAction','InformationAction','ProgressAction',
     'ErrorVariable','WarningVariable','InformationVariable','OutVariable',
     'OutBuffer','PipelineVariable','Confirm','WhatIf'
 )

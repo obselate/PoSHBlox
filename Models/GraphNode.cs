@@ -140,19 +140,17 @@ public partial class GraphNode : ObservableObject
     public NodePort? PrimaryPipelineTarget   => DataInputs.FirstOrDefault(p => p.IsPrimaryPipelineTarget);
 
     /// <summary>
-    /// Data input pins that should actually render. Equal to <see cref="DataInputs"/>
-    /// when expanded; when collapsed, filters out pins whose paired parameter is
-    /// non-mandatory, unwired, and has no user-set value. Unpaired data inputs
-    /// (e.g. ForEach's Source) always stay visible.
+    /// Data input pins that should actually render. Combines both filters —
+    /// collapse state AND active-parameter-set membership — so row-indexing
+    /// stays consistent with what the renderer ultimately draws. Using only
+    /// the collapse filter here produces "empty rows" on nodes where the
+    /// active-set filter hides pins in the middle of the list.
     /// </summary>
-    public IEnumerable<NodePort> VisibleDataInputs => IsCollapsed
-        ? DataInputs.Where(IsDataInputVisibleWhenCollapsed)
-        : DataInputs;
+    public IEnumerable<NodePort> VisibleDataInputs =>
+        DataInputs.Where(IsPortVisible);
 
-    /// <summary>How many data input pins are hidden by collapse — used by the renderer hint.</summary>
-    public int HiddenDataInputCount => IsCollapsed
-        ? DataInputs.Count() - VisibleDataInputs.Count()
-        : 0;
+    /// <summary>How many data input pins are hidden — used by the renderer hint.</summary>
+    public int HiddenDataInputCount => DataInputs.Count() - VisibleDataInputs.Count();
 
     private bool IsDataInputVisibleWhenCollapsed(NodePort port)
     {
