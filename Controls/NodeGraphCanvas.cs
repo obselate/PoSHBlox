@@ -40,6 +40,22 @@ public class NodeGraphCanvas : Control
     /// </summary>
     private readonly Dictionary<GraphNode, Point> _multiDragStart = new();
 
+    /// <summary>
+    /// Per-node zone membership snapshot at drag-press, mirroring
+    /// <see cref="_multiDragStart"/>. Undo recorded on release restores each
+    /// node's ParentContainer + ParentZone + child-index so dragging a node
+    /// into a zone (or out of one) is reversible in a single Ctrl+Z along
+    /// with the position change.
+    /// </summary>
+    private readonly Dictionary<GraphNode, (GraphNode? Container, ContainerZone? Zone, int Index)> _multiDragStartParent = new();
+
+    /// <summary>
+    /// Size captured at resize-grip press, used to record a single undo entry
+    /// on release. Continuous drag moves during resize aren't individually
+    /// recorded — we want one entry covering the whole interaction.
+    /// </summary>
+    private Size _resizeStartSize;
+
     /// <summary>Left-click on empty canvas records this so a drag can morph into a lasso.</summary>
     private bool _isLassoArmed;
     private bool _isLassoing;
@@ -135,6 +151,7 @@ public class NodeGraphCanvas : Control
             {
                 _isResizingContainer = true;
                 _resizeNode = resizeTarget;
+                _resizeStartSize = new Size(resizeTarget.ContainerWidth, resizeTarget.ContainerHeight);
                 e.Handled = true;
                 return;
             }
@@ -145,7 +162,7 @@ public class NodeGraphCanvas : Control
             var chevronNode = HitChevron(canvasPos);
             if (chevronNode != null)
             {
-                chevronNode.IsCollapsed = !chevronNode.IsCollapsed;
+                _vm.ToggleCollapse(chevronNode);
                 e.Handled = true;
                 return;
             }
@@ -205,10 +222,18 @@ public class NodeGraphCanvas : Control
                 _dragStartPos = new Point(node.X, node.Y);
 
                 // Snapshot every selected node's start position so the move
-                // handler can apply a consistent delta to all of them.
+                // handler can apply a consistent delta to all of them. Also
+                // snapshot zone membership so OnPointerReleased can fold any
+                // reparenting that TrySnapToZone performs into the same undo
+                // entry as the position change — one Ctrl+Z reverts everything.
                 _multiDragStart.Clear();
+                _multiDragStartParent.Clear();
                 foreach (var sel in _vm.SelectedNodes)
+                {
                     _multiDragStart[sel] = new Point(sel.X, sel.Y);
+                    var idx = sel.ParentZone?.Children.IndexOf(sel) ?? -1;
+                    _multiDragStartParent[sel] = (sel.ParentContainer, sel.ParentZone, idx);
+                }
 
                 e.Handled = true;
                 return;
@@ -570,24 +595,76 @@ public class NodeGraphCanvas : Control
 
                 // Record one undo entry for the whole drag (across all selected
                 // nodes if this was a multi-drag). Captures each node's start
-                // and end positions so undo restores them atomically.
+                // and end positions AND zone membership so one Ctrl+Z reverts
+                // both the move and any reparenting TrySnapToZone performed.
                 var moved = _multiDragStart
-                    .Select(kv => (node: kv.Key, start: kv.Value, end: new Point(kv.Key.X, kv.Key.Y)))
-                    .Where(m => m.start != m.end)
+                    .Select(kv =>
+                    {
+                        var node = kv.Key;
+                        var startPos = kv.Value;
+                        var endPos = new Point(node.X, node.Y);
+                        var startParent = _multiDragStartParent.TryGetValue(node, out var sp)
+                            ? sp
+                            : (Container: (GraphNode?)null, Zone: (ContainerZone?)null, Index: -1);
+                        var endIdx = node.ParentZone?.Children.IndexOf(node) ?? -1;
+                        var endParent = (Container: node.ParentContainer, Zone: node.ParentZone, Index: endIdx);
+                        return (node, startPos, endPos, startParent, endParent);
+                    })
+                    .Where(m =>
+                        m.startPos != m.endPos
+                        || m.startParent.Container != m.endParent.Container
+                        || m.startParent.Zone != m.endParent.Zone)
                     .ToList();
                 if (moved.Count > 0)
                 {
                     _vm.Undo.Record(
                         undo: () =>
                         {
-                            foreach (var m in moved) { m.node.X = m.start.X; m.node.Y = m.start.Y; }
+                            foreach (var m in moved)
+                            {
+                                RestoreParent(m.node, m.startParent);
+                                m.node.X = m.startPos.X;
+                                m.node.Y = m.startPos.Y;
+                            }
                         },
                         redo: () =>
                         {
-                            foreach (var m in moved) { m.node.X = m.end.X; m.node.Y = m.end.Y; }
+                            foreach (var m in moved)
+                            {
+                                RestoreParent(m.node, m.endParent);
+                                m.node.X = m.endPos.X;
+                                m.node.Y = m.endPos.Y;
+                            }
                         },
                         label: moved.Count == 1 ? "Move node" : $"Move {moved.Count} nodes");
                 }
+            }
+        }
+
+        // Container resize — emit one undo entry for the whole drag (start
+        // size → end size). Skipped if the user pressed but didn't actually
+        // resize (size unchanged).
+        if (_isResizingContainer && _resizeNode != null)
+        {
+            var resized = _resizeNode;
+            var startSize = _resizeStartSize;
+            var endSize = new Size(resized.ContainerWidth, resized.ContainerHeight);
+            if (startSize != endSize)
+            {
+                _vm.Undo.Record(
+                    undo: () =>
+                    {
+                        resized.ContainerWidth = startSize.Width;
+                        resized.ContainerHeight = startSize.Height;
+                        resized.RecalcZoneLayout();
+                    },
+                    redo: () =>
+                    {
+                        resized.ContainerWidth = endSize.Width;
+                        resized.ContainerHeight = endSize.Height;
+                        resized.RecalcZoneLayout();
+                    },
+                    label: "Resize container");
             }
         }
 
@@ -613,6 +690,7 @@ public class NodeGraphCanvas : Control
         _isDraggingNode = false;
         _dragNode = null;
         _multiDragStart.Clear();
+        _multiDragStartParent.Clear();
         _isLassoArmed = false;
         _isLassoing = false;
         _isDraggingWire = false;
@@ -620,6 +698,35 @@ public class NodeGraphCanvas : Control
         _reroutingOriginal = null;
         _isResizingContainer = false;
         _resizeNode = null;
+    }
+
+    /// <summary>
+    /// Reattach <paramref name="node"/> to the recorded parent state. Handles
+    /// the three transitions: top-level→zone, zone→zone, zone→top-level, plus
+    /// the no-op case. Index is used to restore the original ordering inside
+    /// the zone's Children collection so re-emit order stays stable.
+    /// </summary>
+    private static void RestoreParent(
+        GraphNode node,
+        (GraphNode? Container, ContainerZone? Zone, int Index) target)
+    {
+        // Detach from current zone if any.
+        if (node.ParentZone != null)
+            node.ParentZone.Children.Remove(node);
+
+        node.ParentContainer = target.Container;
+        node.ParentZone = target.Zone;
+
+        if (target.Zone != null)
+        {
+            if (!target.Zone.Children.Contains(node))
+            {
+                if (target.Index >= 0 && target.Index <= target.Zone.Children.Count)
+                    target.Zone.Children.Insert(target.Index, node);
+                else
+                    target.Zone.Children.Add(node);
+            }
+        }
     }
 
     // ── Input: Scroll (zoom) ───────────────────────────────────

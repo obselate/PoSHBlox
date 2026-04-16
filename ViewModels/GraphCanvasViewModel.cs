@@ -401,7 +401,8 @@ public partial class GraphCanvasViewModel : ObservableObject
     /// <summary>
     /// Toggle collapsed state on every selected non-container node. When a mix
     /// is currently selected, the first node's current state drives the target:
-    /// "make them all match the opposite of the primary".
+    /// "make them all match the opposite of the primary". Records one composite
+    /// undo entry covering the whole toggle.
     /// </summary>
     [RelayCommand]
     public void ToggleCollapseSelected()
@@ -410,8 +411,33 @@ public partial class GraphCanvasViewModel : ObservableObject
         if (targets.Count == 0) return;
 
         bool newState = !targets[0].IsCollapsed;
+        // Snapshot per-node prior state so mixed selections (some collapsed,
+        // some not) restore accurately on undo.
+        var prior = targets.Select(n => (node: n, was: n.IsCollapsed)).ToList();
         foreach (var n in targets)
             n.IsCollapsed = newState;
+
+        Undo.Record(
+            undo: () => { foreach (var p in prior) p.node.IsCollapsed = p.was; },
+            redo: () => { foreach (var p in prior) p.node.IsCollapsed = newState; },
+            label: targets.Count == 1 ? "Toggle collapse" : $"Toggle collapse ({targets.Count})");
+    }
+
+    /// <summary>
+    /// Toggle a single node's collapse state and record undo. Used by the
+    /// chevron-click handler on the canvas so the keyboard and mouse paths
+    /// both produce undoable entries.
+    /// </summary>
+    public void ToggleCollapse(GraphNode node)
+    {
+        if (node.IsContainer) return;
+        bool was = node.IsCollapsed;
+        bool now = !was;
+        node.IsCollapsed = now;
+        Undo.Record(
+            undo: () => { node.IsCollapsed = was; SelectNode(node); },
+            redo: () => { node.IsCollapsed = now; SelectNode(node); },
+            label: now ? "Collapse node" : "Expand node");
     }
 
     private GraphNode CloneNode(GraphNode src)
@@ -899,9 +925,10 @@ public partial class GraphCanvasViewModel : ObservableObject
         {
             // Clear was called — can't enumerate old items, they're gone.
             // Nodes list is now empty so nothing to unsubscribe. Drop the
-            // _lastValues snapshot too; any lingering keys point at orphaned
-            // parameters from the previous document.
+            // per-node snapshots too; any lingering keys point at orphaned
+            // parameters / nodes from the previous document.
             _lastValues.Clear();
+            _lastActiveSet.Clear();
         }
 
         // Fresh nodes need their params' IsInActiveSet / IsEffectivelyMandatory
@@ -922,6 +949,13 @@ public partial class GraphCanvasViewModel : ObservableObject
     /// </summary>
     private readonly Dictionary<NodeParameter, string> _lastValues = new();
 
+    /// <summary>
+    /// Mirror of <see cref="_lastValues"/> for each node's ActiveParameterSet.
+    /// Populated on subscribe; consulted when OnNodePropertyChanged sees the
+    /// set change so we can emit an old→new undo entry.
+    /// </summary>
+    private readonly Dictionary<GraphNode, string> _lastActiveSet = new();
+
     private void SubscribeNode(GraphNode node)
     {
         node.PropertyChanged += OnNodePropertyChanged;
@@ -930,6 +964,7 @@ public partial class GraphCanvasViewModel : ObservableObject
             p.PropertyChanged += OnParamPropertyChanged;
             _lastValues[p] = p.Value;
         }
+        _lastActiveSet[node] = node.ActiveParameterSet;
         node.Parameters.CollectionChanged += OnNodeParamsChanged;
     }
 
@@ -941,6 +976,7 @@ public partial class GraphCanvasViewModel : ObservableObject
             p.PropertyChanged -= OnParamPropertyChanged;
             _lastValues.Remove(p);
         }
+        _lastActiveSet.Remove(node);
         node.Parameters.CollectionChanged -= OnNodeParamsChanged;
     }
 
@@ -955,10 +991,24 @@ public partial class GraphCanvasViewModel : ObservableObject
             RefreshWiredState();
 
         // Active-set switch changes which params render + which are mandatory.
-        if (e.PropertyName == nameof(GraphNode.ActiveParameterSet))
+        if (e.PropertyName == nameof(GraphNode.ActiveParameterSet) && sender is GraphNode node)
         {
             RefreshParameterSetVisibility();
             RefreshValidation();
+
+            // Record undo: snapshot the previous set name from the last-seen
+            // map, swap in the current. No coalesce — set-switching is a
+            // discrete user choice, each one should be a distinct undo step.
+            var prev = _lastActiveSet.TryGetValue(node, out var old) ? old : "";
+            var now = node.ActiveParameterSet;
+            _lastActiveSet[node] = now;
+            if (prev != now)
+            {
+                Undo.Record(
+                    undo: () => { node.ActiveParameterSet = prev; SelectNode(node); },
+                    redo: () => { node.ActiveParameterSet = now;  SelectNode(node); },
+                    label: $"Switch parameter set to {now}");
+            }
         }
     }
 
