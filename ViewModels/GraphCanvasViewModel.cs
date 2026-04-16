@@ -28,6 +28,14 @@ public partial class GraphCanvasViewModel : ObservableObject
     public ObservableCollection<GraphNode> Nodes { get; } = new();
     public ObservableCollection<NodeConnection> Connections { get; } = new();
 
+    // Port → incident connections indexes. Maintained via CollectionChanged
+    // so ConnectionsFrom/To/Touching/HasConnection are O(degree) instead of
+    // O(|Connections|) per call. Matters during batch ops (splice, paste,
+    // auto-wire) that fire many AddConnection calls in sequence.
+    private readonly Dictionary<NodePort, List<NodeConnection>> _bySource = new();
+    private readonly Dictionary<NodePort, List<NodeConnection>> _byTarget = new();
+    private static readonly IReadOnlyList<NodeConnection> EmptyConnections = Array.Empty<NodeConnection>();
+
     // ── Sub-ViewModels ─────────────────────────────────────────
     public NodePaletteViewModel Palette { get; } = new();
     public QuickAddPopupViewModel QuickAdd { get; }
@@ -83,12 +91,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         QuickAdd = new QuickAddPopupViewModel(Palette);
         Palette.SetGraphNodes(Nodes);
         Nodes.CollectionChanged += OnNodesChanged;
-        Connections.CollectionChanged += (_, _) =>
-        {
-            MarkDirty();
-            RefreshWiredState();
-            RefreshValidation();
-        };
+        Connections.CollectionChanged += OnConnectionsChanged;
 
         SeedExampleGraph();
         RefreshWiredState();
@@ -818,24 +821,34 @@ public partial class GraphCanvasViewModel : ObservableObject
         var displaced = new List<NodeConnection>();
         if (source.Kind == PortKind.Data)
         {
-            // Data input accepts exactly one upstream.
-            foreach (var c in Connections.Where(c => c.Target == target).ToList())
+            // Data input accepts exactly one upstream. Snapshot the per-target
+            // list before mutating since Remove fires CollectionChanged, which
+            // rewrites the live index list under our feet.
+            var existing = ConnectionsTo(target);
+            if (existing.Count > 0)
             {
-                displaced.Add(c);
-                Connections.Remove(c);
+                foreach (var c in existing.ToArray())
+                {
+                    displaced.Add(c);
+                    Connections.Remove(c);
+                }
             }
         }
         else // PortKind.Exec
         {
             // ExecOut fires exactly one successor. ExecIn accepts many (N→1 merge).
-            foreach (var c in Connections.Where(c => c.Source == source).ToList())
+            var existing = ConnectionsFrom(source);
+            if (existing.Count > 0)
             {
-                displaced.Add(c);
-                Connections.Remove(c);
+                foreach (var c in existing.ToArray())
+                {
+                    displaced.Add(c);
+                    Connections.Remove(c);
+                }
             }
         }
 
-        if (Connections.Any(c => c.Source == source && c.Target == target)) return;
+        if (HasConnection(source, target)) return;
 
         var conn = new NodeConnection { Source = source, Target = target };
         Connections.Add(conn);
@@ -866,7 +879,14 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public void RemoveConnectionsForPort(NodePort port)
     {
-        var toRemove = Connections.Where(c => c.Source == port || c.Target == port).ToList();
+        // Snapshot both sides of the index because Remove mutates them.
+        var fromPort = ConnectionsFrom(port);
+        var toPort = ConnectionsTo(port);
+        if (fromPort.Count == 0 && toPort.Count == 0) return;
+
+        var toRemove = new List<NodeConnection>(fromPort.Count + toPort.Count);
+        toRemove.AddRange(fromPort);
+        toRemove.AddRange(toPort);
         foreach (var c in toRemove)
             Connections.Remove(c);
     }
@@ -899,6 +919,65 @@ public partial class GraphCanvasViewModel : ObservableObject
     private void MarkDirty()
     {
         if (!_suppressDirty) IsDirty = true;
+    }
+
+    private void OnConnectionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+            foreach (NodeConnection c in e.NewItems) IndexAdd(c);
+
+        if (e.OldItems != null)
+            foreach (NodeConnection c in e.OldItems) IndexRemove(c);
+
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            _bySource.Clear();
+            _byTarget.Clear();
+            foreach (var c in Connections) IndexAdd(c);
+        }
+
+        MarkDirty();
+        RefreshWiredState();
+        RefreshValidation();
+    }
+
+    private void IndexAdd(NodeConnection c)
+    {
+        if (!_bySource.TryGetValue(c.Source, out var s)) _bySource[c.Source] = s = new List<NodeConnection>(1);
+        s.Add(c);
+        if (!_byTarget.TryGetValue(c.Target, out var t)) _byTarget[c.Target] = t = new List<NodeConnection>(1);
+        t.Add(c);
+    }
+
+    private void IndexRemove(NodeConnection c)
+    {
+        if (_bySource.TryGetValue(c.Source, out var s))
+        {
+            s.Remove(c);
+            if (s.Count == 0) _bySource.Remove(c.Source);
+        }
+        if (_byTarget.TryGetValue(c.Target, out var t))
+        {
+            t.Remove(c);
+            if (t.Count == 0) _byTarget.Remove(c.Target);
+        }
+    }
+
+    /// <summary>Connections whose Source is <paramref name="port"/>. O(1) lookup, O(degree) enumeration.</summary>
+    public IReadOnlyList<NodeConnection> ConnectionsFrom(NodePort port)
+        => _bySource.TryGetValue(port, out var list) ? list : EmptyConnections;
+
+    /// <summary>Connections whose Target is <paramref name="port"/>. O(1) lookup, O(degree) enumeration.</summary>
+    public IReadOnlyList<NodeConnection> ConnectionsTo(NodePort port)
+        => _byTarget.TryGetValue(port, out var list) ? list : EmptyConnections;
+
+    /// <summary>True if a wire already exists from <paramref name="source"/> to <paramref name="target"/>.</summary>
+    public bool HasConnection(NodePort source, NodePort target)
+    {
+        if (!_bySource.TryGetValue(source, out var list)) return false;
+        foreach (var c in list)
+            if (ReferenceEquals(c.Target, target)) return true;
+        return false;
     }
 
     private void OnNodesChanged(object? sender, NotifyCollectionChangedEventArgs e)

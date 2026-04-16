@@ -22,6 +22,8 @@ public class NodeGraphRenderer
     private readonly Dictionary<uint, SolidColorBrush> _brushCache = new();
     private readonly Dictionary<(uint Argb, long ThkBits, int DashKind), Pen> _penCache = new();
     private LinearGradientBrush? _headerGradient;
+    private StreamGeometry? _resizeGripGeo;
+    private StreamGeometry? _execTriangleGeo;
 
     // Margin added to the viewport for culling (world-space units).
     // Covers port labels (~80px), shadows, selection borders, and breathing room.
@@ -355,17 +357,24 @@ public class NodeGraphRenderer
     {
         double hx = node.X + node.ContainerWidth;
         double hy = node.Y + node.ContainerHeight;
-        double gs = GraphTheme.ResizeGripSize;
 
+        using (ctx.PushTransform(Matrix.CreateTranslation(hx, hy)))
+            ctx.DrawGeometry(BrushFor(GraphTheme.ResizeGrip), null, ResizeGripGeometry());
+    }
+
+    private StreamGeometry ResizeGripGeometry()
+    {
+        if (_resizeGripGeo != null) return _resizeGripGeo;
+        double gs = GraphTheme.ResizeGripSize;
         var geo = new StreamGeometry();
         using (var g = geo.Open())
         {
-            g.BeginFigure(new Point(hx, hy), true);
-            g.LineTo(new Point(hx - gs, hy));
-            g.LineTo(new Point(hx, hy - gs));
+            g.BeginFigure(new Point(0, 0), true);
+            g.LineTo(new Point(-gs, 0));
+            g.LineTo(new Point(0, -gs));
             g.EndFigure(true);
         }
-        ctx.DrawGeometry(BrushFor(GraphTheme.ResizeGrip), null, geo);
+        return _resizeGripGeo = geo;
     }
 
     // ── Ports ──────────────────────────────────────────────────
@@ -429,19 +438,24 @@ public class NodeGraphRenderer
     /// </summary>
     private void DrawExecTriangle(DrawingContext ctx, Point pos, byte alpha = 255)
     {
+        var color = Color.FromArgb(alpha, GraphTheme.ExecPin.R, GraphTheme.ExecPin.G, GraphTheme.ExecPin.B);
+        using (ctx.PushTransform(Matrix.CreateTranslation(pos.X, pos.Y)))
+            ctx.DrawGeometry(BrushFor(color), PenFor(color, 1.5), ExecTriangleGeometry());
+    }
+
+    private StreamGeometry ExecTriangleGeometry()
+    {
+        if (_execTriangleGeo != null) return _execTriangleGeo;
         double size = GraphTheme.PortRadius + 1;
-        double tipX = pos.X + size;
-        double baseX = pos.X - size;
         var geo = new StreamGeometry();
         using (var g = geo.Open())
         {
-            g.BeginFigure(new Point(baseX, pos.Y - size), true);
-            g.LineTo(new Point(tipX, pos.Y));
-            g.LineTo(new Point(baseX, pos.Y + size));
+            g.BeginFigure(new Point(-size, -size), true);
+            g.LineTo(new Point(size, 0));
+            g.LineTo(new Point(-size, size));
             g.EndFigure(true);
         }
-        var color = Color.FromArgb(alpha, GraphTheme.ExecPin.R, GraphTheme.ExecPin.G, GraphTheme.ExecPin.B);
-        ctx.DrawGeometry(BrushFor(color), PenFor(color, 1.5), geo);
+        return _execTriangleGeo = geo;
     }
 
     // ── Wires ──────────────────────────────────────────────────
