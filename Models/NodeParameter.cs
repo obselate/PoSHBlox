@@ -76,6 +76,12 @@ public partial class NodeParameter : ObservableObject
     /// <summary>Convenience negation of <see cref="IsWired"/> for IsVisible bindings.</summary>
     public bool IsUnwired => !IsWired;
 
+    /// <summary>
+    /// True when the properties panel should show the full Description text.
+    /// Toggled by clicking the description line. Default false = 2-line preview.
+    /// </summary>
+    [ObservableProperty] private bool _isDescriptionExpanded;
+
     partial void OnIsWiredChanged(bool value) => OnPropertyChanged(nameof(IsUnwired));
 
     /// <summary>Maps ParamType to PowerShell type accelerator for function signatures.</summary>

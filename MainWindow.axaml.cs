@@ -538,6 +538,20 @@ public partial class MainWindow : AppWindow
         }
     }
 
+    private void OnDescriptionPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click on a parameter's description line toggles its expanded state.
+        // Only left-button clicks; right-click falls through so users can still
+        // select text or invoke system context menus in the future.
+        if (sender is TextBlock tb
+            && tb.DataContext is NodeParameter p
+            && e.GetCurrentPoint(tb).Properties.IsLeftButtonPressed)
+        {
+            p.IsDescriptionExpanded = !p.IsDescriptionExpanded;
+            e.Handled = true;
+        }
+    }
+
     private void OnQuickAddPanelPressed(object? sender, PointerPressedEventArgs e)
     {
         // Clicks inside the popup must not bubble to the backdrop's close handler.

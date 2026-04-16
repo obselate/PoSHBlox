@@ -17,12 +17,15 @@
     </uiw:AppWindow.DataContext>
 
     <uiw:AppWindow.Styles>
-        <!-- Expandable parameter description: 2 lines by default, full text on hover. -->
+        <!-- Expandable parameter description: 2 lines by default, full when
+             the user clicks (toggles the .expanded class via a bound bool on
+             the parameter model). Click-to-toggle avoids layout jitter from
+             hover expansion while the user is trying to click other fields. -->
         <Style Selector="TextBlock.paramDesc">
             <Setter Property="MaxLines" Value="2" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
-        <Style Selector="TextBlock.paramDesc:pointerover">
+        <Style Selector="TextBlock.paramDesc.expanded">
             <Setter Property="MaxLines" Value="1000" />
             <Setter Property="TextTrimming" Value="None" />
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
@@ -494,16 +497,18 @@
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
-                                                            <!-- Per-parameter help. 2 lines by default; expands to full on
-                                                                 hover via the paramDesc class style defined at window level
-                                                                 (local TextBlock.Styles inside a DataTemplate didn't take). -->
+                                                            <!-- Per-parameter help. 2 lines by default; click to expand / collapse.
+                                                                 Click-based instead of hover so passing the mouse over a
+                                                                 description doesn't reflow fields below and destabilize clicks. -->
                                                             <TextBlock Text="{Binding Description}"
                                                                        Classes="paramDesc"
+                                                                       Classes.expanded="{Binding IsDescriptionExpanded}"
                                                                        FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                                        Background="Transparent"
                                                                        TextWrapping="Wrap"
                                                                        Cursor="Hand"
+                                                                       PointerPressed="OnDescriptionPressed"
                                                                        IsVisible="{Binding !IsBool}" />
 
                                                             <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
