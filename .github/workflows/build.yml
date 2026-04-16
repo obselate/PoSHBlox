@@ -31,7 +31,12 @@ jobs:
 
       # Compose the version the build is stamped with:
       #   - tag v1.2.3     →  1.2.3                        (assembly + informational)
-      #   - branch / PR    →  <baseFromCsproj>.<run>        (assembly)
+      #   - main + fresh bump (no v<csproj-version> tag yet)
+      #                    →  <baseFromCsproj>               (assembly + informational)
+      #                       also flags is_main_release=True so the release
+      #                       step below creates the tag + release.
+      #   - other branches / PRs
+      #                    →  <baseFromCsproj>.<run>        (assembly)
       #                       <baseFromCsproj>+<run>.<sha>.<branch>  (informational)
       # Assembly version must be 4-part numeric; informational is a free string
       # that surfaces in Properties → Details on the .exe.
@@ -49,21 +54,38 @@ jobs:
           $refName    = "${{ github.ref_name }}"
           $branchSafe = ($refName -replace '[^a-zA-Z0-9._-]', '-')
 
+          # Detect "main with a fresh version bump" — a push to main whose
+          # csproj <Version> doesn't yet have a matching v<version> tag on the
+          # remote. When true, stamp the build with clean semver and the
+          # downstream step will cut a proper tagged release.
+          $isMainRelease = $false
+          if ($refType -eq 'branch' -and $refName -eq 'main' -and '${{ github.event_name }}' -eq 'push') {
+            git fetch origin --tags --quiet 2>$null
+            $existingTag = git tag --list "v$baseVersion"
+            if (-not $existingTag) { $isMainRelease = $true }
+          }
+
           if ($refType -eq 'tag' -and $refName -match '^v') {
               $assemblyVersion      = $refName.Substring(1)
               $informationalVersion = $assemblyVersion
+          } elseif ($isMainRelease) {
+              $assemblyVersion      = $baseVersion
+              $informationalVersion = $baseVersion
           } else {
               $assemblyVersion      = "$baseVersion.$runNumber"
               $informationalVersion = "$baseVersion+$runNumber.$shortSha.$branchSafe"
           }
 
-          Write-Host "Assembly:      $assemblyVersion"
-          Write-Host "Informational: $informationalVersion"
-          Write-Host "Branch slug:   $branchSafe"
+          Write-Host "Assembly:       $assemblyVersion"
+          Write-Host "Informational:  $informationalVersion"
+          Write-Host "Branch slug:    $branchSafe"
+          Write-Host "Main release:   $isMainRelease"
 
           Add-Content -Path $env:GITHUB_OUTPUT -Value "assembly=$assemblyVersion"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "informational=$informationalVersion"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "branch_safe=$branchSafe"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "is_main_release=$isMainRelease"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "release_tag=v$baseVersion"
 
       - name: Restore
         run: dotnet restore PoSHBlox.csproj
@@ -110,12 +132,14 @@ jobs:
           path: ${{ steps.pkg.outputs.zip }}
           retention-days: 30
 
-      # Branch pushes (not PRs, not tags): upsert a rolling pre-release named
-      # after the branch. Going to the Releases page, a user can find each
+      # Branch pushes (not PRs, not tags, NOT main): upsert a rolling pre-release
+      # named after the branch. Going to the Releases page, a user can find each
       # branch's latest build and grab the attached .exe. This is what delivers
-      # "go on GitHub for any branch and grab the .exe."
+      # "go on GitHub for any branch and grab the .exe." Main is excluded since
+      # main-branch pushes cut proper tagged releases (see below) — we don't
+      # want both a rolling `branch-main` pre-release AND a semver release.
       - name: Upsert branch pre-release
-        if: github.event_name == 'push' && github.ref_type == 'branch'
+        if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref != 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: branch-${{ steps.ver.outputs.branch_safe }}
@@ -133,8 +157,28 @@ jobs:
           make_latest: 'false'
           files: ${{ steps.pkg.outputs.zip }}
 
-      # Tag pushes matching v* create a proper release. The tag version drives
-      # the stamped AssemblyVersion above, so the .exe's metadata matches.
+      # Main-branch pushes whose csproj <Version> doesn't have a matching tag yet
+      # create a real tagged release. softprops/action-gh-release creates the
+      # tag against the current commit when tag_name doesn't exist remotely, so
+      # we get v<version> pointing at the merge commit plus an attached .exe
+      # stamped with clean semver (no run-number suffix — see compute-version
+      # step above). Bumping csproj <Version> is the trigger for cutting a
+      # release; if the version matches an existing tag the step is a no-op
+      # and the run just uploads a plain artifact.
+      - name: Create main-branch release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ver.outputs.is_main_release == 'True'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.release_tag }}
+          name: ${{ steps.ver.outputs.release_tag }}
+          generate_release_notes: true
+          make_latest: 'true'
+          files: ${{ steps.pkg.outputs.zip }}
+
+      # Tag pushes matching v* (e.g. hand-cut v1.2.3) create a proper release.
+      # The tag version drives the stamped AssemblyVersion above, so the .exe's
+      # metadata matches. Kept alongside the main-branch path for emergencies
+      # (cut a release from a non-main commit, or hotfix a missed one).
       - name: Create tagged release
         if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         uses: softprops/action-gh-release@v2
