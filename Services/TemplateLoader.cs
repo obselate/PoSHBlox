@@ -87,11 +87,19 @@ public static class TemplateLoader
                         t.Tags = [..PaletteTaxonomy.DeriveTags(t.CmdletName)];
                     templates.Add(t);
 
-                    if (!string.IsNullOrEmpty(t.CmdletName) && catalogEditions.Count > 0)
+                    // Prefer per-cmdlet SupportedEditions (finer-grained, set by
+                    // IntrospectionMerger) over catalog-level IntrospectedHosts.
+                    // Falling back to catalog editions keeps pre-Phase-3 catalogs
+                    // working without any warning flood.
+                    var cmdletEditions = t.SupportedEditions.Count > 0
+                        ? t.SupportedEditions
+                        : catalogEditions;
+
+                    if (!string.IsNullOrEmpty(t.CmdletName) && cmdletEditions.Count > 0)
                     {
                         if (!editionsAccumulator.TryGetValue(t.CmdletName, out var set))
                             editionsAccumulator[t.CmdletName] = set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                        foreach (var e in catalogEditions)
+                        foreach (var e in cmdletEditions)
                             set.Add(e);
                     }
                 }

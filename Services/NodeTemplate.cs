@@ -50,6 +50,13 @@ public class NodeTemplate
     /// <summary>V2: which set a node spawns with. Null = first of KnownParameterSets (if any).</summary>
     public string? DefaultParameterSet { get; set; }
 
+    /// <summary>
+    /// Editions (<c>"pwsh"</c> / <c>"powershell"</c>) the cmdlet was discovered in
+    /// during introspection. Populated by <c>IntrospectionMerger</c> when a catalog
+    /// is built from a multi-host scan. Empty = legacy / unknown → treat as universal.
+    /// </summary>
+    public List<string> SupportedEditions { get; set; } = [];
+
     public List<ParameterDef> Parameters { get; set; } = [];
 }
 
@@ -76,6 +83,14 @@ public class ParameterDef
 
     /// <summary>V2: sets in which this param is mandatory. Falls back to IsMandatory when empty.</summary>
     public List<string> MandatoryInSets { get; set; } = [];
+
+    /// <summary>
+    /// Editions (<c>"pwsh"</c> / <c>"powershell"</c>) the parameter appeared in during
+    /// introspection. Populated by <c>IntrospectionMerger</c> when the catalog was
+    /// built from multi-host scans. Empty = legacy / unknown → treat as universal so
+    /// pre-merge catalogs don't flag every param as unsupported.
+    /// </summary>
+    public List<string> SupportedEditions { get; set; } = [];
 }
 
 /// <summary>V2: describes a single data-output pin on a node.</summary>

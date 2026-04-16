@@ -356,6 +356,7 @@ public static class NodeFactory
                 IsPipelineInput = pdef.IsPipelineInput,
                 ParameterSets = pdef.ParameterSets.ToArray(),
                 MandatoryInSets = pdef.MandatoryInSets.ToArray(),
+                SupportedEditions = pdef.SupportedEditions.ToArray(),
             }));
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PoSHBlox.Services;
 
 namespace PoSHBlox.Models;
 
@@ -36,6 +37,53 @@ public partial class NodeParameter : ObservableObject
 
     /// <summary>Sets in which this param is mandatory. Falls back to <see cref="IsMandatory"/> when empty.</summary>
     public string[] MandatoryInSets { get; set; } = [];
+
+    /// <summary>
+    /// Editions the parameter was introspected for. Empty = universal / legacy
+    /// catalog without host metadata — no warning fires. Populated from the
+    /// merged catalog via <see cref="ParameterDef.SupportedEditions"/>.
+    /// </summary>
+    public string[] SupportedEditions { get; set; } = [];
+
+    /// <summary>
+    /// False only when <see cref="SupportedEditions"/> is non-empty and the active
+    /// host's edition isn't in it. UI binds to this to surface a "not introspected
+    /// for &lt;edition&gt;" hint.
+    /// </summary>
+    public bool IsSupportedByActiveHost
+    {
+        get
+        {
+            if (SupportedEditions.Length == 0) return true;
+            var active = PowerShellHostRegistry.Active?.Edition;
+            return active != null && SupportedEditions.Contains(active, StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    /// <summary>Inverse of <see cref="IsSupportedByActiveHost"/> for IsVisible bindings.</summary>
+    public bool IsMissingForActiveHost => !IsSupportedByActiveHost;
+
+    /// <summary>
+    /// Human label for the warning line — "Not introspected for pwsh". Empty when
+    /// the param is supported by the active host.
+    /// </summary>
+    public string MissingHostLabel =>
+        IsMissingForActiveHost
+            ? $"Not introspected for {PowerShellHostRegistry.Active?.Edition ?? "active host"}"
+            : "";
+
+    /// <summary>
+    /// Fired by the owning view model when <see cref="PowerShellHostRegistry.ActiveHostChanged"/>
+    /// fires so bindings to <see cref="IsSupportedByActiveHost"/> / <see cref="IsMissingForActiveHost"/>
+    /// / <see cref="MissingHostLabel"/> refresh. Avoids a static event subscription
+    /// on the model (which would leak handlers for every spawned param).
+    /// </summary>
+    public void NotifyHostCompatChanged()
+    {
+        OnPropertyChanged(nameof(IsSupportedByActiveHost));
+        OnPropertyChanged(nameof(IsMissingForActiveHost));
+        OnPropertyChanged(nameof(MissingHostLabel));
+    }
 
     /// <summary>
     /// Maintained by the view model: true when the param belongs to the node's

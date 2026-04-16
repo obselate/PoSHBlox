@@ -93,11 +93,25 @@ public partial class GraphCanvasViewModel : ObservableObject
         Nodes.CollectionChanged += OnNodesChanged;
         Connections.CollectionChanged += OnConnectionsChanged;
 
+        // Refresh per-param host-compat flags when the user flips the active
+        // PowerShell host via the chip — the properties panel can't re-query
+        // the registry on its own.
+        PowerShellHostRegistry.ActiveHostChanged += RefreshHostCompatOnAllParams;
+
         SeedExampleGraph();
         RefreshWiredState();
         RefreshParameterSetVisibility();
         RefreshValidation();
         IsDirty = false;
+    }
+
+    private void RefreshHostCompatOnAllParams()
+    {
+        foreach (var node in Nodes)
+            foreach (var p in node.Parameters)
+            {
+                p.NotifyHostCompatChanged();
+            }
     }
 
     /// <summary>

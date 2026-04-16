@@ -536,6 +536,13 @@
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
+                                                            <!-- Host-compat warning: catalog carried no metadata for the active
+                                                                 PowerShell edition. Param name / availability may differ; re-import
+                                                                 the module from the active host to refresh. -->
+                                                            <TextBlock Text="{Binding MissingHostLabel}" FontSize="10"
+                                                                       Foreground="{DynamicResource TextDeleteLightBrush}"
+                                                                       IsVisible="{Binding IsMissingForActiveHost}"
+                                                                       ToolTip.Tip="Parameter names and availability may differ on this edition. Re-import the module from the active host to refresh." />
                                                             <!-- Per-parameter help. 2 lines by default; click to expand / collapse.
                                                                  Click-based instead of hover so passing the mouse over a
                                                                  description doesn't reflow fields below and destabilize clicks. -->

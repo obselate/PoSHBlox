@@ -66,8 +66,7 @@ public static class TemplateRegenerator
         var cmdletsResult = await IntrospectAndFilterAsync(opts.ModuleName, opts.OnlyCmdlets);
         if (cmdletsResult.ExitCode != 0) return cmdletsResult.ExitCode;
 
-        var hosts = cmdletsResult.HostId is { Length: > 0 } ? new List<string> { cmdletsResult.HostId } : [];
-        return await WriteCatalogAsync(opts.OutputPath, category, cmdletsResult.Cmdlets, hosts, existing, dryRun);
+        return await WriteCatalogAsync(opts.OutputPath, category, cmdletsResult.Cmdlets, cmdletsResult.HostIds, existing, dryRun);
     }
 
     // ── Manifest entry (used by --regen-manifest) ──────────────
@@ -164,8 +163,10 @@ public static class TemplateRegenerator
             var result = await IntrospectAndFilterAsync(source.Module, only);
             if (result.ExitCode != 0) return result.ExitCode;
 
-            if (result.HostId is { Length: > 0 } && !hosts.Contains(result.HostId))
-                hosts.Add(result.HostId);
+            foreach (var h in result.HostIds)
+            {
+                if (!hosts.Contains(h)) hosts.Add(h);
+            }
 
             foreach (var c in result.Cmdlets)
             {
@@ -200,25 +201,39 @@ public static class TemplateRegenerator
         }
     }
 
-    private record struct IntrospectResult(int ExitCode, List<DiscoveredCmdlet> Cmdlets, string HostId);
+    private record struct IntrospectResult(int ExitCode, List<DiscoveredCmdlet> Cmdlets, List<string> HostIds);
 
     private static async Task<IntrospectResult> IntrospectAndFilterAsync(string module, HashSet<string>? only)
     {
-        Console.Out.WriteLine($"[regen]   scanning '{module}'{(only != null ? $" (only {only.Count} cmdlet(s))" : "")}...");
-        IntrospectionResult result;
+        Console.Out.WriteLine($"[regen]   scanning '{module}' against all detected hosts{(only != null ? $" (only {only.Count} cmdlet(s))" : "")}...");
+
+        IReadOnlyList<IntrospectionResult> perHost;
         try
         {
-            result = await PowerShellIntrospector.IntrospectModuleAsync(module);
+            perHost = await PowerShellIntrospector.IntrospectModuleAllHostsAsync(module);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[regen]   introspection failed for '{module}': {ex.Message}");
-            return new IntrospectResult(3, [], "");
+            return new IntrospectResult(3, [], []);
         }
 
+        if (perHost.Count == 0)
+        {
+            Console.Error.WriteLine($"[regen]   no host successfully scanned '{module}'.");
+            return new IntrospectResult(3, [], []);
+        }
+
+        var hostLookup = PowerShellHostRegistry.All.ToDictionary(h => h.Id, h => h, StringComparer.OrdinalIgnoreCase);
+        var perHostKeyed = perHost
+            .Select(r => (Edition: hostLookup.TryGetValue(r.HostId, out var h) ? h.Edition : "", Result: r))
+            .Where(t => !string.IsNullOrEmpty(t.Edition))
+            .ToList();
+        var merged = IntrospectionMerger.Merge(perHostKeyed);
+
         var cmdlets = only is { Count: > 0 }
-            ? result.Cmdlets.Where(c => only.Contains(c.Name)).ToList()
-            : result.Cmdlets;
+            ? merged.Where(c => only.Contains(c.Name)).ToList()
+            : merged;
 
         if (only != null && cmdlets.Count < only.Count)
         {
@@ -227,7 +242,8 @@ public static class TemplateRegenerator
                 Console.Error.WriteLine($"[regen]   warning: {missing.Count} requested cmdlet(s) not found in '{module}': {string.Join(", ", missing)}");
         }
 
-        return new IntrospectResult(0, cmdlets, result.HostId);
+        var hostIds = perHost.Select(r => r.HostId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+        return new IntrospectResult(0, cmdlets, hostIds);
     }
 
     private static async Task<int> WriteCatalogAsync(
@@ -263,6 +279,7 @@ public static class TemplateRegenerator
                     : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
                 KnownParameterSets = cmdlet.KnownParameterSets,
                 DefaultParameterSet = cmdlet.DefaultParameterSet,
+                SupportedEditions = new List<string>(cmdlet.SupportedEditions),
             };
 
             foreach (var p in cmdlet.Parameters)
@@ -279,6 +296,7 @@ public static class TemplateRegenerator
                     IsPipelineInput = p.IsPipelineInput,
                     ParameterSets = p.ParameterSets,
                     MandatoryInSets = p.MandatoryInSets,
+                    SupportedEditions = new List<string>(p.SupportedEditions),
                 };
 
                 if (string.IsNullOrEmpty(def.DefaultValue)

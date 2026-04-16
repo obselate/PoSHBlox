@@ -16,8 +16,8 @@ public partial class ImportModuleViewModel : ObservableObject
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private string _statusMessage = "";
 
-    /// <summary>Host id from the last successful scan — stamped into the saved catalog.</summary>
-    private string _lastScanHostId = "";
+    /// <summary>Host ids from the last successful scan — stamped into the saved catalog.</summary>
+    private System.Collections.Generic.List<string> _lastScanHostIds = [];
 
     public ObservableCollection<SelectableCmdlet> DiscoveredCmdlets { get; } = new();
 
@@ -32,14 +32,37 @@ public partial class ImportModuleViewModel : ObservableObject
 
         DiscoveredCmdlets.Clear();
         IsScanning = true;
-        StatusMessage = $"Scanning {ModuleName}...";
+
+        var hosts = PowerShellHostRegistry.All;
+        if (hosts.Count == 0)
+        {
+            StatusMessage = "No PowerShell host detected on PATH.";
+            IsScanning = false;
+            return;
+        }
+
+        var hostLabels = string.Join(" + ", hosts.Select(h => h.DisplayName));
+        StatusMessage = $"Scanning {ModuleName} against {hostLabels}...";
 
         try
         {
-            var result = await PowerShellIntrospector.IntrospectModuleAsync(ModuleName.Trim());
-            _lastScanHostId = result.HostId;
+            var perHostResults = await PowerShellIntrospector.IntrospectModuleAllHostsAsync(ModuleName.Trim());
+            if (perHostResults.Count == 0)
+            {
+                StatusMessage = "All hosts failed to scan the module — check stderr for details.";
+                return;
+            }
 
-            foreach (var c in result.Cmdlets)
+            _lastScanHostIds = perHostResults.Select(r => r.HostId).ToList();
+
+            var editionByHostId = hosts.ToDictionary(h => h.Id, h => h.Edition, StringComparer.OrdinalIgnoreCase);
+            var perHostKeyed = perHostResults
+                .Select(r => (Edition: editionByHostId.TryGetValue(r.HostId, out var e) ? e : "", Result: r))
+                .Where(t => !string.IsNullOrEmpty(t.Edition))
+                .ToList();
+            var merged = IntrospectionMerger.Merge(perHostKeyed);
+
+            foreach (var c in merged)
             {
                 DiscoveredCmdlets.Add(new SelectableCmdlet
                 {
@@ -53,15 +76,21 @@ public partial class ImportModuleViewModel : ObservableObject
                     DataOutputs = c.DataOutputs,
                     KnownParameterSets = c.KnownParameterSets,
                     DefaultParameterSet = c.DefaultParameterSet,
+                    SupportedEditions = c.SupportedEditions,
                 });
             }
 
-            CategoryName = result.ResolvedModuleName;
+            // Pick resolved name from whichever result has one; they're the same module.
+            var resolvedName = perHostResults
+                .Select(r => r.ResolvedModuleName)
+                .FirstOrDefault(n => !string.IsNullOrEmpty(n)) ?? ModuleName.Trim();
+            CategoryName = resolvedName;
 
-            var matchNote = result.ResolvedModuleName != ModuleName.Trim()
-                ? $" (resolved to {result.ResolvedModuleName})"
+            var matchNote = resolvedName != ModuleName.Trim()
+                ? $" (resolved to {resolvedName})"
                 : "";
-            StatusMessage = $"Found {result.Cmdlets.Count} cmdlet(s){matchNote}.";
+            var hostCount = perHostResults.Count;
+            StatusMessage = $"Found {merged.Count} cmdlet(s) across {hostCount} host(s){matchNote}.";
         }
         catch (Exception ex)
         {
@@ -94,7 +123,7 @@ public partial class ImportModuleViewModel : ObservableObject
         {
             Version = 2,
             Category = CategoryName.Trim(),
-            IntrospectedHosts = string.IsNullOrEmpty(_lastScanHostId) ? [] : [_lastScanHostId],
+            IntrospectedHosts = new System.Collections.Generic.List<string>(_lastScanHostIds),
         };
 
         foreach (var cmdlet in selected)
@@ -112,6 +141,7 @@ public partial class ImportModuleViewModel : ObservableObject
                     : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
                 KnownParameterSets = cmdlet.KnownParameterSets,
                 DefaultParameterSet = cmdlet.DefaultParameterSet,
+                SupportedEditions = new System.Collections.Generic.List<string>(cmdlet.SupportedEditions),
             };
 
             foreach (var p in cmdlet.Parameters)
@@ -128,6 +158,7 @@ public partial class ImportModuleViewModel : ObservableObject
                     IsPipelineInput = p.IsPipelineInput,
                     ParameterSets = p.ParameterSets,
                     MandatoryInSets = p.MandatoryInSets,
+                    SupportedEditions = new System.Collections.Generic.List<string>(p.SupportedEditions),
                 });
             }
 
@@ -161,4 +192,7 @@ public partial class SelectableCmdlet : ObservableObject
 
     public System.Collections.Generic.List<string> KnownParameterSets { get; set; } = [];
     public string? DefaultParameterSet { get; set; }
+
+    /// <summary>Editions this cmdlet was discovered in (merged across hosts).</summary>
+    public System.Collections.Generic.List<string> SupportedEditions { get; set; } = [];
 }

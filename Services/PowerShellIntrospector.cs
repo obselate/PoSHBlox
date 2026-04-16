@@ -72,6 +72,36 @@ public static class PowerShellIntrospector
         var cmdlets = JsonSerializer.Deserialize<List<DiscoveredCmdlet>>(stdout, Options) ?? [];
         return new IntrospectionResult { ResolvedModuleName = resolvedName, HostId = host.Id, Cmdlets = cmdlets };
     }
+
+    /// <summary>
+    /// Scan <paramref name="moduleName"/> against every detected host in parallel.
+    /// Hosts whose scans fail are skipped with a warning on stderr — the caller
+    /// still gets results from any host that succeeded. Empty list when no host
+    /// is available at all (caller should treat as fatal).
+    /// </summary>
+    public static async Task<IReadOnlyList<IntrospectionResult>> IntrospectModuleAllHostsAsync(string moduleName)
+    {
+        var hosts = PowerShellHostRegistry.All;
+        if (hosts.Count == 0) return [];
+
+        var tasks = hosts
+            .Select(async h =>
+            {
+                try { return (host: h, result: await IntrospectModuleAsync(moduleName, h), error: (string?)null); }
+                catch (Exception ex) { return (host: h, result: (IntrospectionResult?)null, error: ex.Message); }
+            })
+            .ToList();
+
+        var outcomes = await Task.WhenAll(tasks);
+
+        var results = new List<IntrospectionResult>();
+        foreach (var (host, result, error) in outcomes)
+        {
+            if (result != null) results.Add(result);
+            else Console.Error.WriteLine($"[introspect]   {host.DisplayName} failed: {error}");
+        }
+        return results;
+    }
 }
 
 public class IntrospectionResult
@@ -101,6 +131,13 @@ public class DiscoveredCmdlet
 
     /// <summary>Cmdlet's declared default parameter set (may be null).</summary>
     public string? DefaultParameterSet { get; set; }
+
+    /// <summary>
+    /// Editions this cmdlet was found in — populated by <see cref="IntrospectionMerger"/>
+    /// when two single-host results get merged. Empty when the cmdlet came straight
+    /// from a single scan (not yet merged); consumers treat empty as universal.
+    /// </summary>
+    public List<string> SupportedEditions { get; set; } = [];
 }
 
 public class DiscoveredParameter
@@ -120,4 +157,11 @@ public class DiscoveredParameter
 
     /// <summary>Sets in which this param is mandatory (overrides IsMandatory when non-empty).</summary>
     public List<string> MandatoryInSets { get; set; } = [];
+
+    /// <summary>
+    /// Editions this parameter exists in — populated by <see cref="IntrospectionMerger"/>.
+    /// Empty = single-scan / legacy; consumers treat empty as universal so existing
+    /// catalogs don't suddenly flag every param as edition-missing.
+    /// </summary>
+    public List<string> SupportedEditions { get; set; } = [];
 }
