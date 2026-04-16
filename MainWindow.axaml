@@ -485,10 +485,12 @@
                                                             </StackPanel>
                                                             <!-- Per-parameter help. 2 lines by default; on hover the
                                                                  TextBlock expands to show the full description inline.
-                                                                 No ToolTip — FA's tooltip template resists every override
-                                                                 and we control the inline layout fully. -->
+                                                                 Background="Transparent" is required for the TextBlock
+                                                                 to receive pointer events — a null Background makes it
+                                                                 invisible to hit-testing and :pointerover never fires. -->
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
+                                                                       Background="Transparent"
                                                                        TextWrapping="Wrap"
                                                                        MaxLines="2"
                                                                        TextTrimming="CharacterEllipsis"
