@@ -17,28 +17,6 @@
     </uiw:AppWindow.DataContext>
 
     <uiw:AppWindow.Styles>
-        <!-- Custom ToolTip template that replaces FluentAvalonia's default.
-             FA's built-in template bakes MaxWidth/MaxHeight constraints deep
-             inside the control template where style selectors can't reliably
-             override them. This template gives us full control: wrap at 480px,
-             no height cap, padding and colors matched to the app's dark tokens. -->
-        <Style Selector="ToolTip">
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <Border Background="{DynamicResource BgSecondaryBrush}"
-                            BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            Padding="10,8"
-                            MaxWidth="480"
-                            BoxShadow="0 2 8 0 #66000000">
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          TextWrapping="Wrap" />
-                    </Border>
-                </ControlTemplate>
-            </Setter>
-        </Style>
-
         <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
         <Style Selector="TextBlock.cheatKey">
             <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
@@ -505,22 +483,24 @@
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
-                                                            <!-- Per-parameter help. Truncated to ~2 lines in-panel; full
-                                                                 text surfaces on hover via a wrapping TextBlock tooltip
-                                                                 so long Get-Help descriptions don't blow out the panel
-                                                                 while staying discoverable. -->
+                                                            <!-- Per-parameter help. 2 lines by default; on hover the
+                                                                 TextBlock expands to show the full description inline.
+                                                                 No ToolTip — FA's tooltip template resists every override
+                                                                 and we control the inline layout fully. -->
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                                        TextWrapping="Wrap"
                                                                        MaxLines="2"
                                                                        TextTrimming="CharacterEllipsis"
-                                                                       ToolTip.ShowDelay="300"
+                                                                       Cursor="Hand"
                                                                        IsVisible="{Binding !IsBool}">
-                                                                <ToolTip.Tip>
-                                                                    <TextBlock Text="{Binding Description}"
-                                                                               TextWrapping="Wrap"
-                                                                               FontSize="12" />
-                                                                </ToolTip.Tip>
+                                                                <TextBlock.Styles>
+                                                                    <Style Selector="TextBlock:pointerover">
+                                                                        <Setter Property="MaxLines" Value="1000" />
+                                                                        <Setter Property="TextTrimming" Value="None" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                                                    </Style>
+                                                                </TextBlock.Styles>
                                                             </TextBlock>
 
                                                             <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
