@@ -600,7 +600,7 @@ public class NodeGraphRenderer
         return brush;
     }
 
-    private Pen PenFor(Color c, double thickness, DashStyle? dash = null)
+    private Pen PenFor(Color c, double thickness, IDashStyle? dash = null)
     {
         uint colorKey = ((uint)c.A << 24) | ((uint)c.R << 16) | ((uint)c.G << 8) | c.B;
         long thkBits = BitConverter.DoubleToInt64Bits(thickness);
