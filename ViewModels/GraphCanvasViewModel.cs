@@ -75,14 +75,6 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     partial void OnCurrentFilePathChanged(string? value) => OnPropertyChanged(nameof(WindowTitle));
 
-    // ── Pending connection state (exposed for canvas) ──────────
-    [ObservableProperty] private bool _isDraggingConnection;
-    [ObservableProperty] private double _pendingWireStartX;
-    [ObservableProperty] private double _pendingWireStartY;
-    [ObservableProperty] private double _pendingWireEndX;
-    [ObservableProperty] private double _pendingWireEndY;
-    public NodePort? PendingSourcePort { get; set; }
-
     // ── Spawn offset counter ───────────────────────────────────
     private int _spawnCount;
 

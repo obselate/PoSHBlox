@@ -1,9 +1,8 @@
 using System;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PoSHBlox.Models;
 
-public partial class NodePort : ObservableObject
+public class NodePort
 {
     public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
     public string Name { get; set; } = "";
@@ -34,7 +33,4 @@ public partial class NodePort : ObservableObject
     public bool IsPrimaryPipelineTarget { get; set; }
 
     public GraphNode? Owner { get; set; }
-
-    [ObservableProperty] private double _anchorX;
-    [ObservableProperty] private double _anchorY;
 }

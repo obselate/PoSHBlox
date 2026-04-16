@@ -153,8 +153,6 @@ internal static class V1Migrator
         var newConns = new List<PblxConnection>();
         foreach (var c in doc.Connections)
         {
-            bool wroteAny = false;
-
             if (execOutByNode.TryGetValue(c.SourceNodeId, out var execSrc)
              && execInByNode.TryGetValue(c.TargetNodeId, out var execTgt))
             {
@@ -165,7 +163,6 @@ internal static class V1Migrator
                     TargetNodeId = c.TargetNodeId,
                     TargetPortId = execTgt,
                 });
-                wroteAny = true;
             }
 
             if (primaryDataOutputByNode.TryGetValue(c.SourceNodeId, out var dataSrc)
@@ -178,13 +175,11 @@ internal static class V1Migrator
                     TargetNodeId = c.TargetNodeId,
                     TargetPortId = dataTgt,
                 });
-                wroteAny = true;
             }
 
             // If neither side had matching V2 pins (e.g. Function containers whose
-            // V1 shape had no exec), drop the connection — user had to rewire
-            // manually after the refactor landed.
-            _ = wroteAny;
+            // V1 shape had no exec), the connection is dropped — user rewires
+            // manually after the refactor.
         }
 
         doc.Connections = newConns;

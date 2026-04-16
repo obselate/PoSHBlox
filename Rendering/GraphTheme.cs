@@ -49,8 +49,6 @@ public static class GraphTheme
     public const double WireThickness = 2.5;
 
     // ── Ports ──────────────────────────────────────────────────
-    public static readonly Color PortInput         = Color.FromRgb(127, 191, 239);    // #7FBFEF blue-sky
-    public static readonly Color PortOutput        = Color.FromRgb(91, 168, 154);     // #5BA89A teal
     public static readonly Color PortCenter        = Color.FromRgb(6, 13, 22);        // canvas bg
     public static readonly Color PortLabel         = Color.FromRgb(168, 186, 201);    // #A8BAC9
     public static readonly Color ExecPin           = Color.FromRgb(224, 234, 242);    // #E0EAF2 cream — exec triangles
@@ -84,7 +82,6 @@ public static class GraphTheme
     public static readonly Color HudText           = Color.FromRgb(112, 141, 163);    // #708DA3 slate-mid
     public static readonly Color HudBg             = Color.FromArgb(180, 15, 34, 54); // secondary bg
     public const string FontFamily = "avares://PoSHBlox/Assets/Fonts#JetBrains Mono";
-    public const string FontFamilyMono = "avares://PoSHBlox/Assets/Fonts#JetBrains Mono";
 
     // ── Header gradient overlay ────────────────────────────────
     public static readonly Color HeaderGradientTop    = Color.FromArgb(40, 255, 255, 255);
