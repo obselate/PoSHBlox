@@ -16,6 +16,68 @@
         <vm:GraphCanvasViewModel />
     </uiw:AppWindow.DataContext>
 
+    <uiw:AppWindow.Styles>
+        <!-- Expandable parameter description: 2 lines by default, full when
+             the user clicks (toggles the .expanded class via a bound bool on
+             the parameter model). Click-to-toggle avoids layout jitter from
+             hover expansion while the user is trying to click other fields. -->
+        <Style Selector="TextBlock.paramDesc">
+            <Setter Property="MaxLines" Value="2" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="TextBlock.paramDesc.expanded">
+            <Setter Property="MaxLines" Value="1000" />
+            <Setter Property="TextTrimming" Value="None" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+
+        <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
+        <Style Selector="TextBlock.cheatKey">
+            <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFileBrush}" />
+        </Style>
+        <Style Selector="TextBlock.cheatLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+
+        <!-- Quick-add: arrow-key selected item gets an accent background. -->
+        <Style Selector="Button.quickAddSelected">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
+
+        <!-- Tag filter chips — inactive = muted slate, active = saved-tint accent. -->
+        <Style Selector="ToggleButton.tagChip">
+            <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimaryBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="ToggleButton.tagChip:checked">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFileBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.tagChip:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextFileBrush}" />
+        </Style>
+
+        <!-- Node-graph context menu items — inherit the app's slate palette.
+             Monospace header keeps the trailing shortcut hint right-aligned. -->
+        <Style Selector="MenuItem.graphCtx">
+            <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Padding" Value="12,6" />
+        </Style>
+        <Style Selector="MenuItem.graphCtx:pointerover">
+            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+        </Style>
+    </uiw:AppWindow.Styles>
+
+    <Grid>
     <DockPanel>
         <!-- ══════ Title bar separator ══════ -->
         <Border DockPanel.Dock="Top" Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
@@ -225,6 +287,25 @@
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
                                          Padding="8,6" CornerRadius="3" FontSize="12" />
+
+                                <!-- Tag filter chips: toggle any combination to narrow the palette. -->
+                                <ItemsControl ItemsSource="{Binding Palette.TagChips}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                                          Content="{Binding Label}"
+                                                          Classes="tagChip"
+                                                          Padding="8,3" CornerRadius="10"
+                                                          FontSize="10"
+                                                          FontFamily="{DynamicResource FontMono}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
 
@@ -340,15 +421,71 @@
 
                                             <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
 
+                                            <!-- Validation issues for the selected node. Hidden when empty. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasIssues}" Margin="0,0,0,6">
+                                                <TextBlock Text="ISSUES" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextDeleteLightBrush}"
+                                                           Margin="0,2,0,4" />
+                                                <ItemsControl ItemsSource="{Binding SelectedNode.Issues}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource BgDeleteTintBrush}"
+                                                                    CornerRadius="3" Padding="8,4" Margin="0,0,0,3">
+                                                                <TextBlock Text="{Binding Message}"
+                                                                           TextWrapping="Wrap" FontSize="11"
+                                                                           Foreground="{DynamicResource TextDeleteLightBrush}" />
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
+                                            </StackPanel>
+
                                             <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Margin="0,2,0,4" />
+
+                                            <!-- Parameter set picker — only visible when the cmdlet declares multiple sets. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasMultipleSets}"
+                                                        Spacing="3" Margin="0,0,0,6">
+                                                <TextBlock Text="Parameter Set" FontSize="11"
+                                                           Foreground="{DynamicResource TextMutedBrush}" />
+                                                <ComboBox ItemsSource="{Binding SelectedNode.KnownParameterSets}"
+                                                          SelectedItem="{Binding SelectedNode.ActiveParameterSet, Mode=TwoWay}"
+                                                          Background="{DynamicResource BgPrimaryBrush}"
+                                                          Foreground="{DynamicResource TextTertiaryBrush}"
+                                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                          Padding="8,5" CornerRadius="3"
+                                                          FontFamily="{DynamicResource FontMono}" FontSize="12"
+                                                          HorizontalAlignment="Stretch"
+                                                          HorizontalContentAlignment="Left"
+                                                          VerticalContentAlignment="Center">
+                                                    <!-- Highlight the currently-selected item inside the dropdown so
+                                                         users can see which set is active at a glance. FluentAvalonia's
+                                                         defaults for ComboBoxItem don't pop against our dark tokens. -->
+                                                    <ComboBox.Styles>
+                                                        <Style Selector="ComboBoxItem">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+                                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextFileBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+                                                        </Style>
+                                                        <Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter">
+                                                            <Setter Property="Background" Value="{DynamicResource BgSaveTintBrush}" />
+                                                        </Style>
+                                                    </ComboBox.Styles>
+                                                </ComboBox>
+                                            </StackPanel>
 
                                             <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <StackPanel Spacing="3" Margin="0,0,0,8"
-                                                                    IsVisible="{Binding !IsArgument}">
+                                                                    IsVisible="{Binding ShouldRenderInPanel}">
                                                             <!-- Header (hidden for Bool — the CheckBox label replaces it) -->
                                                             <StackPanel Orientation="Horizontal" Spacing="4"
                                                                         IsVisible="{Binding !IsBool}">
@@ -356,45 +493,70 @@
                                                                            Foreground="{DynamicResource TextPrimaryBrush}" />
                                                                 <TextBlock Text="*" FontSize="12" FontWeight="Bold"
                                                                            Foreground="{DynamicResource TextDeleteBrush}"
-                                                                           IsVisible="{Binding IsMandatory}" />
+                                                                           IsVisible="{Binding IsEffectivelyMandatory}" />
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
-                                                            <TextBlock Text="{Binding Description}" FontSize="10"
-                                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
+                                                            <!-- Per-parameter help. 2 lines by default; click to expand / collapse.
+                                                                 Click-based instead of hover so passing the mouse over a
+                                                                 description doesn't reflow fields below and destabilize clicks. -->
+                                                            <TextBlock Text="{Binding Description}"
+                                                                       Classes="paramDesc"
+                                                                       Classes.expanded="{Binding IsDescriptionExpanded}"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                                       Background="Transparent"
+                                                                       TextWrapping="Wrap"
+                                                                       Cursor="Hand"
+                                                                       PointerPressed="OnDescriptionPressed"
                                                                        IsVisible="{Binding !IsBool}" />
-                                                            <!-- Bool → CheckBox -->
-                                                            <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
-                                                                      IsVisible="{Binding IsBool}"
-                                                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                      FontSize="13"
-                                                                      HorizontalAlignment="Left"
-                                                                      VerticalContentAlignment="Center"
-                                                                      Padding="8,4" Margin="0,2">
-                                                                <TextBlock Text="{Binding Name}" FontSize="13"
-                                                                           Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                            </CheckBox>
-                                                            <!-- Enum → ComboBox -->
-                                                            <ComboBox ItemsSource="{Binding EnumOptions}"
-                                                                      SelectedItem="{Binding SelectedEnumValue, Mode=TwoWay}"
-                                                                      IsVisible="{Binding IsEnum}"
-                                                                      Background="{DynamicResource BgPrimaryBrush}"
-                                                                      Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                      BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                      Padding="8,5" CornerRadius="3"
-                                                                      FontFamily="{DynamicResource FontMono}" FontSize="12"
-                                                                      HorizontalAlignment="Stretch"
-                                                                      HorizontalContentAlignment="Left"
-                                                                      VerticalContentAlignment="Center" />
-                                                            <!-- Everything else → TextBox -->
-                                                            <TextBox Text="{Binding Value, Mode=TwoWay}"
-                                                                     Watermark="{Binding DefaultValue}"
-                                                                     IsVisible="{Binding IsTextInput}"
-                                                                     Background="{DynamicResource BgPrimaryBrush}"
-                                                                     Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                     BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                     Padding="8,5" CornerRadius="3"
-                                                                     FontFamily="{DynamicResource FontMono}" FontSize="12" />
+
+                                                            <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
+                                                            <Border IsVisible="{Binding IsWired}"
+                                                                    Background="{DynamicResource BgSecondaryBrush}"
+                                                                    BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                    BorderThickness="1" CornerRadius="10"
+                                                                    Padding="8,3" HorizontalAlignment="Left">
+                                                                <TextBlock Text="{Binding WiredFromLabel}" FontSize="11"
+                                                                           Foreground="{DynamicResource TextFileBrush}"
+                                                                           FontFamily="{DynamicResource FontMono}" />
+                                                            </Border>
+
+                                                            <!-- Literal editors: hidden while wired. One outer gate, type-specific inner toggles. -->
+                                                            <StackPanel IsVisible="{Binding IsUnwired}" Spacing="3">
+                                                                <!-- Bool → CheckBox -->
+                                                                <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                          IsVisible="{Binding IsBool}"
+                                                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                          FontSize="13"
+                                                                          HorizontalAlignment="Left"
+                                                                          VerticalContentAlignment="Center"
+                                                                          Padding="8,4" Margin="0,2">
+                                                                    <TextBlock Text="{Binding Name}" FontSize="13"
+                                                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                                </CheckBox>
+                                                                <!-- Enum → ComboBox -->
+                                                                <ComboBox ItemsSource="{Binding EnumOptions}"
+                                                                          SelectedItem="{Binding SelectedEnumValue, Mode=TwoWay}"
+                                                                          IsVisible="{Binding IsEnum}"
+                                                                          Background="{DynamicResource BgPrimaryBrush}"
+                                                                          Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                          BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                          Padding="8,5" CornerRadius="3"
+                                                                          FontFamily="{DynamicResource FontMono}" FontSize="12"
+                                                                          HorizontalAlignment="Stretch"
+                                                                          HorizontalContentAlignment="Left"
+                                                                          VerticalContentAlignment="Center" />
+                                                                <!-- Everything else → TextBox -->
+                                                                <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                                         Watermark="{Binding DefaultValue}"
+                                                                         IsVisible="{Binding IsTextInput}"
+                                                                         Background="{DynamicResource BgPrimaryBrush}"
+                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                         Padding="8,5" CornerRadius="3"
+                                                                         FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                            </StackPanel>
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
@@ -495,7 +657,7 @@
                             </DockPanel>
                         </Border>
 
-                        <ctrl:NodeGraphCanvas DataContext="{Binding}" />
+                        <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
                     </DockPanel>
                 </SplitView.Content>
             </SplitView>
@@ -547,4 +709,198 @@
         </Grid>
 
     </DockPanel>
+
+    <!-- ══════ Quick-add popup (Tab / wire drop on empty / right-click → Quick add). ══════
+         Placed anchored at the cursor via Margin bound to QuickAdd.X / .Y. -->
+    <Border IsVisible="{Binding QuickAdd.IsOpen}"
+            Background="Transparent"
+            PointerPressed="OnQuickAddBackgroundPressed">
+        <Border x:Name="QuickAddPanel"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Margin="{Binding QuickAdd.CursorMargin}"
+                Width="380" MaxHeight="480"
+                Background="{DynamicResource BgPrimaryBrush}"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                BorderThickness="1" CornerRadius="6"
+                Padding="8"
+                BoxShadow="0 4 12 0 #99000000"
+                PointerPressed="OnQuickAddPanelPressed">
+            <DockPanel LastChildFill="True">
+                <!-- Chip row: compatibility chip (when drag-initiated) + tag chips -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,6">
+                    <ToggleButton IsChecked="{Binding QuickAdd.CompatibleOnly, Mode=TwoWay}"
+                                  IsVisible="{Binding QuickAdd.HasSourcePort}"
+                                  Content="{Binding QuickAdd.CompatibilityChipLabel}"
+                                  Classes="tagChip"
+                                  Padding="8,3" CornerRadius="10"
+                                  FontSize="10"
+                                  FontFamily="{DynamicResource FontMono}" />
+                    <ItemsControl ItemsSource="{Binding QuickAdd.TagChips}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                              Content="{Binding Label}"
+                                              Classes="tagChip"
+                                              Padding="8,3" CornerRadius="10"
+                                              FontSize="10"
+                                              FontFamily="{DynamicResource FontMono}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Search box: focused on open, first key goes here -->
+                <TextBox DockPanel.Dock="Top" x:Name="QuickAddSearchBox"
+                         Text="{Binding QuickAdd.SearchText, Mode=TwoWay}"
+                         Watermark="Type to filter..."
+                         Background="{DynamicResource BgSecondaryBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                         Padding="8,6" CornerRadius="3" FontSize="12"
+                         Margin="0,0,0,6"
+                         KeyDown="OnQuickAddSearchKeyDown" />
+
+                <!-- Results: categorized collapsible rows, auto-expanded when search is active -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding QuickAdd.FilteredCategories}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,1">
+                                    <Button Click="OnQuickAddCategoryClicked" Tag="{Binding}"
+                                            Background="Transparent" BorderThickness="0"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left"
+                                            Padding="6,4" Margin="0,1" CornerRadius="3" Cursor="Hand">
+                                        <Button.Resources>
+                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                        </Button.Resources>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Width="3" CornerRadius="1.5"
+                                                    Background="{Binding CategoryBrush}"
+                                                    VerticalAlignment="Stretch" />
+                                            <TextBlock Text="&#x25BC;" FontSize="9"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding IsExpanded}" />
+                                            <TextBlock Text="&#x25B6;" FontSize="9"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding !IsExpanded}" />
+                                            <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding Items.Count, StringFormat='({0})'}"
+                                                       FontSize="10" Foreground="{DynamicResource TextMutedBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <ItemsControl ItemsSource="{Binding Items}"
+                                                  IsVisible="{Binding IsExpanded}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="OnQuickAddTemplateClicked"
+                                                        Tag="{Binding Template}"
+                                                        Classes.quickAddSelected="{Binding IsSelected}"
+                                                        Background="Transparent"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Left"
+                                                        Padding="14,4,6,4" Margin="0,1" CornerRadius="3"
+                                                        Cursor="Hand">
+                                                    <Button.Resources>
+                                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreBlueSteel800}" />
+                                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreBlueSteel900}" />
+                                                    </Button.Resources>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Template.Name}" FontSize="12"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                        <TextBlock Text="{Binding Template.Description}" FontSize="10"
+                                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="340" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Border>
+
+    <!-- ══════ Cheat sheet overlay (toggled by ?) — last child so it renders on top. ══════ -->
+    <Border IsVisible="{Binding IsCheatSheetOpen}"
+            Background="#CC060D16">
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                MinWidth="460" MaxWidth="640" Padding="24,20"
+                Background="{DynamicResource BgPrimaryBrush}"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                BorderThickness="1" CornerRadius="8">
+            <StackPanel Spacing="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="Keyboard Shortcuts"
+                               FontSize="15" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="Esc / ? to close"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right" />
+                </DockPanel>
+                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" />
+
+                <!-- Two columns: shortcut ∷ description -->
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      RowSpacing="4">
+                    <TextBlock Grid.Row="0"  Grid.Column="0" Text="Ctrl+N"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="0"  Grid.Column="1" Text="New graph"    Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="1"  Grid.Column="0" Text="Ctrl+O"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="1"  Grid.Column="1" Text="Open .pblx project" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="2"  Grid.Column="0" Text="Ctrl+S"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="2"  Grid.Column="1" Text="Save .pblx"   Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="3"  Grid.Column="0" Text="Ctrl+E"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="3"  Grid.Column="1" Text="Export .ps1"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="4"  Grid.Column="0" Text="F5"           Classes="cheatKey"/>
+                    <TextBlock Grid.Row="4"  Grid.Column="1" Text="Run generated script"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="5"  Grid.Column="0" Text="Alt+S"        Classes="cheatKey"/>
+                    <TextBlock Grid.Row="5"  Grid.Column="1" Text="Toggle script preview" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="6"  Grid.Column="0" Text="P"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="6"  Grid.Column="1" Text="Toggle palette"        Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="7"  Grid.Column="0" Text="/"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="7"  Grid.Column="1" Text="Focus palette search"  Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="8"  Grid.Column="0" Text="Ctrl+D"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="8"  Grid.Column="1" Text="Duplicate selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="14" Grid.Column="0" Text="C"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="14" Grid.Column="1" Text="Collapse / expand selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="15" Grid.Column="0" Text="Tab"          Classes="cheatKey"/>
+                    <TextBlock Grid.Row="15" Grid.Column="1" Text="Quick add popup at cursor (or drag wire onto empty space)" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="16" Grid.Column="0" Text="Ctrl+Z"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="16" Grid.Column="1" Text="Undo"         Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="17" Grid.Column="0" Text="Ctrl+Y"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="17" Grid.Column="1" Text="Redo (also Ctrl+Shift+Z)" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="9"  Grid.Column="0" Text="Del / Backspace" Classes="cheatKey"/>
+                    <TextBlock Grid.Row="9"  Grid.Column="1" Text="Delete selected node" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="F"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="10" Grid.Column="1" Text="Zoom to fit (selection or all)" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+0"       Classes="cheatKey"/>
+                    <TextBlock Grid.Row="11" Grid.Column="1" Text="Reset view"   Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Esc"          Classes="cheatKey"/>
+                    <TextBlock Grid.Row="12" Grid.Column="1" Text="Cancel drag · deselect · close overlay" Classes="cheatLabel"/>
+                    <TextBlock Grid.Row="13" Grid.Column="0" Text="?"            Classes="cheatKey"/>
+                    <TextBlock Grid.Row="13" Grid.Column="1" Text="Toggle this cheat sheet" Classes="cheatLabel"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Border>
+    </Grid>
 </uiw:AppWindow>

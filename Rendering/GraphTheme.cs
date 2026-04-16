@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Avalonia.Media;
+using PoSHBlox.Models;
 
 namespace PoSHBlox.Rendering;
 
@@ -24,6 +25,8 @@ public static class GraphTheme
     public static readonly Color NodeBorder        = Color.FromRgb(28, 52, 80);       // #1C3450
     public static readonly Color NodeSelectedBorder = Color.FromRgb(91, 168, 154);    // #5BA89A teal
     public static readonly Color NodeShadow        = Color.FromArgb(102, 0, 0, 0);    // ~40% black
+    public static readonly Color NodeErrorBorder   = Color.FromRgb(209, 84, 84);      // #D15454 soft red
+    public static readonly Color NodeWarningBorder = Color.FromRgb(212, 148, 58);     // #D4943A amber (same as WirePending)
     public const double NodeCornerRadius = 8;
     public const double NodeShadowOffset = 4;
 
@@ -50,9 +53,30 @@ public static class GraphTheme
     public static readonly Color PortOutput        = Color.FromRgb(91, 168, 154);     // #5BA89A teal
     public static readonly Color PortCenter        = Color.FromRgb(6, 13, 22);        // canvas bg
     public static readonly Color PortLabel         = Color.FromRgb(168, 186, 201);    // #A8BAC9
+    public static readonly Color ExecPin           = Color.FromRgb(224, 234, 242);    // #E0EAF2 cream — exec triangles
     public const double PortRadius = 7;
     public const double PortDotRadius = 3.5;
     public const double PortHitPadding = 4;
+
+    // ── Typed data-pin colors (V2) ─────────────────────────────
+    private static readonly Dictionary<ParamType, Color> DataTypeColors = new()
+    {
+        [ParamType.Any]         = Color.FromRgb(168, 186, 201), // #A8BAC9 slate — untyped
+        [ParamType.String]      = Color.FromRgb(127, 191, 239), // #7FBFEF blue-sky
+        [ParamType.Int]         = Color.FromRgb(111, 191, 222), // #6FBFDE cyan
+        [ParamType.Bool]        = Color.FromRgb(212, 148, 58),  // #D4943A amber
+        [ParamType.Path]        = Color.FromRgb(118, 201, 162), // #76C9A2 mint
+        [ParamType.StringArray] = Color.FromRgb(168, 212, 136), // #A8D488 lime
+        [ParamType.Object]      = Color.FromRgb(192, 155, 220), // #C09BDC lavender
+        [ParamType.Collection]  = Color.FromRgb(220, 188, 138), // #DCBC8A sand
+        [ParamType.ScriptBlock] = Color.FromRgb(209, 124, 138), // #D17C8A rose
+        [ParamType.Credential]  = Color.FromRgb(212, 127, 91),  // #D47F5B salmon
+        [ParamType.HashTable]   = Color.FromRgb(127, 159, 220), // #7F9FDC slate-blue
+        [ParamType.Enum]        = Color.FromRgb(184, 151, 215), // #B897D7 violet
+    };
+
+    public static Color GetDataTypeColor(ParamType type)
+        => DataTypeColors.TryGetValue(type, out var c) ? c : DataTypeColors[ParamType.Any];
 
     // ── Text ───────────────────────────────────────────────────
     public static readonly Color TextPrimary       = Color.FromRgb(224, 234, 242);    // #E0EAF2 cream

@@ -2,17 +2,28 @@ namespace PoSHBlox.Models;
 
 public enum PortDirection { Input, Output }
 
-public enum PortType { String, Object, Array, Pipeline }
+/// <summary>
+/// Kind of pin: triangle exec pins drive execution order; data pins carry values.
+/// </summary>
+public enum PortKind { Exec, Data }
 
+/// <summary>
+/// Unified type system for both data pins and parameters.
+/// <c>Any</c> matches anything (used for script-body outputs and untyped pipeline data).
+/// </summary>
 public enum ParamType
 {
+    Any,
     String,
     Int,
     Bool,
-    StringArray,
-    ScriptBlock,
     Path,
+    StringArray,
+    Object,
+    Collection,
+    ScriptBlock,
     Credential,
+    HashTable,
     Enum,
 }
 

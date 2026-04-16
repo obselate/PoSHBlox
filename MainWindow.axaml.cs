@@ -18,6 +18,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Windowing;
+using PoSHBlox.Models;
 using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
 using PoSHBlox.Views;
@@ -52,11 +53,17 @@ public partial class MainWindow : AppWindow
 
         // Subscribe to VM changes — DataContext may already be set from XAML
         if (DataContext is GraphCanvasViewModel vm)
+        {
             vm.PropertyChanged += OnViewModelPropertyChanged;
+            vm.QuickAdd.PropertyChanged += OnQuickAddPropertyChanged;
+        }
         DataContextChanged += (_, _) =>
         {
             if (DataContext is GraphCanvasViewModel v)
+            {
                 v.PropertyChanged += OnViewModelPropertyChanged;
+                v.QuickAdd.PropertyChanged += OnQuickAddPropertyChanged;
+            }
         };
     }
 
@@ -112,14 +119,96 @@ public partial class MainWindow : AppWindow
                     e.Handled = true;
                     break;
 
-                // Del — delete selected node (only when not typing)
+                // Del / Backspace — delete selected node (only when not typing)
                 case Key.Delete when !inTextBox:
+                case Key.Back when !inTextBox:
                     vm.DeleteSelected();
                     e.Handled = true;
                     break;
 
-                // / — focus palette search (only when not typing)
-                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.None:  // '/' key
+                // Ctrl+D — duplicate selected node
+                case Key.D when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    vm.DuplicateSelected();
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+C — copy selection to system clipboard
+                case Key.C when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = CopySelectionAsync(vm);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+X — cut selection (copy then delete)
+                case Key.X when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = CutSelectionAsync(vm);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+V — paste at the cursor (canvas coords)
+                case Key.V when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    _ = PasteAtCursorAsync(vm);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+Z — undo
+                case Key.Z when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                    vm.PerformUndo();
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+Y or Ctrl+Shift+Z — redo
+                case Key.Y when !inTextBox && e.KeyModifiers == KeyModifiers.Control:
+                case Key.Z when !inTextBox && e.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift):
+                    vm.PerformRedo();
+                    e.Handled = true;
+                    break;
+
+                // C — collapse / expand selected node
+                case Key.C when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    vm.ToggleCollapseSelected();
+                    e.Handled = true;
+                    break;
+
+                // F — zoom-to-fit (selection if one is selected, whole graph otherwise)
+                case Key.F when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    GraphCanvas.ZoomToFit(selectionOnly: vm.SelectedNodes.Count > 0);
+                    e.Handled = true;
+                    break;
+
+                // Ctrl+0 — reset pan/zoom
+                case Key.D0 when e.KeyModifiers == KeyModifiers.Control:
+                case Key.NumPad0 when e.KeyModifiers == KeyModifiers.Control:
+                    vm.ResetView();
+                    e.Handled = true;
+                    break;
+
+                // Esc — cancel in-flight drag, then deselect, then close cheat sheet / preview
+                case Key.Escape:
+                    GraphCanvas.CancelDrag();
+                    if (vm.IsCheatSheetOpen) vm.IsCheatSheetOpen = false;
+                    else if (vm.SelectedNodes.Count > 0) vm.ClearSelection();
+                    e.Handled = true;
+                    break;
+
+                // ? — toggle cheat sheet. Must require Shift — OemQuestion and Oem2
+                // are the same physical key on Windows (VK_OEM_2), so an unshifted
+                // "/" was also matching the first case and stealing the palette
+                // search shortcut. Guarding both cases on Shift keeps "/" free.
+                case Key.OemQuestion when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.Shift:
+                    vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
+                    e.Handled = true;
+                    break;
+
+                // Tab — open the quick-add popup at the cursor (empty-canvas invocation).
+                // Only fires when focus isn't in a TextBox so it doesn't steal Tab navigation.
+                case Key.Tab when !inTextBox && e.KeyModifiers == KeyModifiers.None:
+                    OpenQuickAddAtPointer(vm);
+                    e.Handled = true;
+                    break;
+
+                // / — focus palette search (only when not typing, unshifted)
+                case Key.Oem2 when !inTextBox && e.KeyModifiers == KeyModifiers.None:
                     vm.IsPaletteOpen = true;
                     PaletteSearchBox.Focus();
                     PaletteSearchBox.SelectAll();
@@ -255,7 +344,7 @@ public partial class MainWindow : AppWindow
 
             // Strip PowerShell 7+ module paths from PSModulePath so PS 5.1
             // doesn't load PS 7 modules whose type data conflicts with PS 5.1.
-            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath))
+            if (psi.Environment.TryGetValue("PSModulePath", out var modulePath) && modulePath is not null)
             {
                 var filtered = string.Join(";", modulePath.Split(';')
                     .Where(p => !Regex.IsMatch(p, @"\\powershell\\\d", RegexOptions.IgnoreCase)));
@@ -380,6 +469,40 @@ public partial class MainWindow : AppWindow
             await clipboard.SetTextAsync(PreviewTextBox.Text ?? "");
     }
 
+    // ── Graph clipboard (Ctrl+C/X/V) ───────────────────────────
+    //
+    // Rides on the OS text clipboard so cut-in-window-A → paste-in-window-B
+    // works across PoSHBlox processes. Payload is a tagged JSON envelope
+    // (see ClipboardSerializer.MagicString) so paste over arbitrary text
+    // silently no-ops instead of throwing.
+
+    private async Task CopySelectionAsync(GraphCanvasViewModel vm)
+    {
+        var text = vm.CopySelectionToText();
+        if (text == null) return;
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } cb)
+            await cb.SetTextAsync(text);
+    }
+
+    private async Task CutSelectionAsync(GraphCanvasViewModel vm)
+    {
+        var text = vm.CutSelectionToText();
+        if (text == null) return;
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } cb)
+            await cb.SetTextAsync(text);
+    }
+
+    private async Task PasteAtCursorAsync(GraphCanvasViewModel vm)
+    {
+        if (TopLevel.GetTopLevel(this)?.Clipboard is not { } cb) return;
+        var text = await cb.GetTextAsync();
+        if (string.IsNullOrEmpty(text)) return;
+
+        // Paste at the canvas-space cursor — same UX as quick-add Tab spawn.
+        var pos = GraphCanvas.CurrentCanvasPosition;
+        vm.PasteFromText(text, pos.X, pos.Y);
+    }
+
     private async void OnNewClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
@@ -438,8 +561,113 @@ public partial class MainWindow : AppWindow
     }
 
     private static string GenerateScript(GraphCanvasViewModel vm)
+        => new ScriptGenerator(vm.Nodes, vm.Connections).Generate();
+
+    // ── Quick-add popup handlers ───────────────────────────────
+
+    /// <summary>
+    /// Open the quick-add popup at the current pointer position (relative to
+    /// the canvas). Routes through the canvas so window-edge clamping applies
+    /// equally whether the trigger came from Tab, the context menu, or a wire
+    /// drop on empty space.
+    /// </summary>
+    private void OpenQuickAddAtPointer(GraphCanvasViewModel vm)
     {
-        var generator = new ScriptGenerator(vm.Nodes, vm.Connections);
-        return generator.Generate();
+        GraphCanvas.OpenQuickAddAtCursor();
+    }
+
+    private void OnQuickAddPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Focus the search box once the popup becomes visible — caret inside,
+        // first key goes straight to filtering.
+        if (e.PropertyName == nameof(QuickAddPopupViewModel.IsOpen)
+            && sender is QuickAddPopupViewModel vm && vm.IsOpen)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                QuickAddSearchBox.Focus();
+                QuickAddSearchBox.SelectAll();
+            }, DispatcherPriority.Input);
+        }
+    }
+
+    private void OnDescriptionPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click on a parameter's description line toggles its expanded state.
+        // Only left-button clicks; right-click falls through so users can still
+        // select text or invoke system context menus in the future.
+        if (sender is TextBlock tb
+            && tb.DataContext is NodeParameter p
+            && e.GetCurrentPoint(tb).Properties.IsLeftButtonPressed)
+        {
+            p.IsDescriptionExpanded = !p.IsDescriptionExpanded;
+            e.Handled = true;
+        }
+    }
+
+    private void OnQuickAddPanelPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Clicks inside the popup must not bubble to the backdrop's close handler.
+        e.Handled = true;
+    }
+
+    private void OnQuickAddBackgroundPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click-through on the transparent backdrop cancels the popup.
+        // Clicks inside the panel itself don't bubble here (the panel Border
+        // has a non-transparent Background, which blocks PointerPressed).
+        if (DataContext is GraphCanvasViewModel vm)
+        {
+            GraphCanvas.CancelDrag(); // drop any pending wire drag too
+            vm.QuickAdd.Close();
+        }
+    }
+
+    private void OnQuickAddCategoryClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: QuickAddCategory cat })
+            cat.IsExpanded = !cat.IsExpanded;
+    }
+
+    private void OnQuickAddTemplateClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+        if (sender is not Button { Tag: NodeTemplate template }) return;
+        vm.CommitQuickAdd(template);
+    }
+
+    private void OnQuickAddSearchKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                GraphCanvas.CancelDrag();
+                vm.QuickAdd.Close();
+                e.Handled = true;
+                break;
+
+            case Key.Down:
+                vm.QuickAdd.SelectNext();
+                e.Handled = true;
+                break;
+
+            case Key.Up:
+                vm.QuickAdd.SelectPrevious();
+                e.Handled = true;
+                break;
+
+            case Key.Enter:
+                // Commit the highlighted item (Down/Up moves this). SelectFirstVisible
+                // seeds it on popup open, so Enter always has a target when results exist.
+                var selected = vm.QuickAdd.SelectedItem?.Template;
+                if (selected != null)
+                {
+                    vm.CommitQuickAdd(selected);
+                    e.Handled = true;
+                }
+                break;
+        }
     }
 }

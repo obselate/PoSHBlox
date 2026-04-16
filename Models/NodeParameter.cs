@@ -19,6 +19,79 @@ public partial class NodeParameter : ObservableObject
     /// <summary>true = [Parameter(ValueFromPipeline)]</summary>
     public bool IsPipelineInput { get; set; }
 
+    /// <summary>
+    /// True = panel-only config knob; no data-input pin is generated for this
+    /// parameter. Used for container meta-settings whose value must be a
+    /// compile-time string (e.g. ForEach's IterationVariable name) — wiring a
+    /// runtime expression into them doesn't make sense.
+    /// </summary>
+    public bool IsConfigOnly { get; set; }
+
+    /// <summary>
+    /// Parameter sets this param belongs to. Empty = visible in every set
+    /// (common params, legacy templates). Non-empty = visible only when
+    /// the node's <see cref="GraphNode.ActiveParameterSet"/> is in this list.
+    /// </summary>
+    public string[] ParameterSets { get; set; } = [];
+
+    /// <summary>Sets in which this param is mandatory. Falls back to <see cref="IsMandatory"/> when empty.</summary>
+    public string[] MandatoryInSets { get; set; } = [];
+
+    /// <summary>
+    /// Maintained by the view model: true when the param belongs to the node's
+    /// currently-active parameter set (or when the param doesn't declare any
+    /// sets — common params are always in scope).
+    /// </summary>
+    [ObservableProperty] private bool _isInActiveSet = true;
+
+    /// <summary>
+    /// Maintained by the view model: true when the param is mandatory given
+    /// the node's current parameter set. Falls back to <see cref="IsMandatory"/>
+    /// when the param declares no per-set mandatory flags (legacy / non-set
+    /// cmdlets). The properties panel's red asterisk and the validator's
+    /// missing-mandatory check both read this.
+    /// </summary>
+    [ObservableProperty] private bool _isEffectivelyMandatory;
+
+    /// <summary>Composite visibility gate used by the properties-panel ItemTemplate.</summary>
+    public bool ShouldRenderInPanel => !IsArgument && IsInActiveSet;
+
+    partial void OnIsInActiveSetChanged(bool value) => OnPropertyChanged(nameof(ShouldRenderInPanel));
+
+    /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
+    public GraphNode? Owner { get; set; }
+
+    /// <summary>
+    /// The data-input pin paired with this parameter (Owner.Inputs with matching ParameterName).
+    /// Null if the parameter has no paired pin (function arguments, legacy nodes).
+    /// </summary>
+    public NodePort? InputPort =>
+        Owner?.Inputs.FirstOrDefault(p => p.ParameterName == Name);
+
+    /// <summary>
+    /// True when <see cref="InputPort"/> has at least one incoming wire. Set by
+    /// the view model on every connection change — the parameter doesn't observe
+    /// the graph itself.
+    /// </summary>
+    [ObservableProperty] private bool _isWired;
+
+    /// <summary>
+    /// Label used by the properties panel when <see cref="IsWired"/> is true —
+    /// typically <c>"← SourceNode.PinName"</c>. Empty otherwise.
+    /// </summary>
+    [ObservableProperty] private string _wiredFromLabel = "";
+
+    /// <summary>Convenience negation of <see cref="IsWired"/> for IsVisible bindings.</summary>
+    public bool IsUnwired => !IsWired;
+
+    /// <summary>
+    /// True when the properties panel should show the full Description text.
+    /// Toggled by clicking the description line. Default false = 2-line preview.
+    /// </summary>
+    [ObservableProperty] private bool _isDescriptionExpanded;
+
+    partial void OnIsWiredChanged(bool value) => OnPropertyChanged(nameof(IsUnwired));
+
     /// <summary>Maps ParamType to PowerShell type accelerator for function signatures.</summary>
     public string PowerShellTypeName => Type switch
     {
@@ -27,6 +100,9 @@ public partial class NodeParameter : ObservableObject
         ParamType.Bool => "switch",
         ParamType.StringArray => "string[]",
         ParamType.ScriptBlock => "scriptblock",
+        ParamType.Credential => "PSCredential",
+        ParamType.HashTable => "hashtable",
+        ParamType.Collection => "object[]",
         _ => "object",
     };
 
@@ -126,6 +202,46 @@ public partial class NodeParameter : ObservableObject
                 $"-{Name} \"{val}\"",
 
             _ => $"-{Name} \"{val}\""
+        };
+    }
+
+    /// <summary>
+    /// Format this parameter as a splat-hashtable entry (<c>Name = value</c>).
+    /// Returns empty string if the value is blank or the parameter should be
+    /// omitted (false-valued switches). The leading indentation is the caller's
+    /// responsibility; this returns the key-value text alone.
+    /// </summary>
+    public string ToSplatEntry()
+    {
+        var val = EffectiveValue;
+        if (string.IsNullOrWhiteSpace(val)) return "";
+
+        return Type switch
+        {
+            ParamType.String or ParamType.Path =>
+                $"{Name} = \"{val.Replace("\"", "`\"")}\"",
+
+            ParamType.Int =>
+                $"{Name} = {val}",
+
+            // Switches in splat form get explicit $true (no omit-when-false
+            // semantic like the inline form — if the value is 'false' we
+            // skipped above via the IsNullOrWhiteSpace guard catching empty,
+            // but an explicit "false" still emits; splat can legitimately
+            // carry false).
+            ParamType.Bool =>
+                $"{Name} = ${val.ToLowerInvariant()}",
+
+            ParamType.StringArray =>
+                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+
+            ParamType.ScriptBlock =>
+                $"{Name} = {{ {val} }}",
+
+            ParamType.Enum =>
+                $"{Name} = \"{val}\"",
+
+            _ => $"{Name} = \"{val}\""
         };
     }
 }

@@ -1,16 +1,20 @@
 using System;
+using System.Linq;
 using PoSHBlox.Models;
 
 namespace PoSHBlox.Services;
 
 /// <summary>
 /// Central factory for creating GraphNode instances.
-/// All node creation goes through here so new types only need changes in one place.
+/// Produces V2-shaped nodes: ExecIn/ExecOut triangle pins, N typed data-input
+/// pins (one per parameter paired via <see cref="NodePort.ParameterName"/>),
+/// and M data-output pins (first marked <see cref="NodePort.IsPrimary"/>).
 /// </summary>
 public static class NodeFactory
 {
     /// <summary>
-    /// Create a blank node at a given position.
+    /// Create a blank node at a given position. Ships with the default V2 pin
+    /// shape from <see cref="GraphNode"/>'s constructor (ExecIn, ExecOut, Out).
     /// </summary>
     public static GraphNode CreateBlank(double x, double y)
     {
@@ -39,18 +43,22 @@ public static class NodeFactory
             ScriptBody = template.ScriptBody,
             X = x,
             Y = y,
+            KnownParameterSets = template.KnownParameterSets.ToArray(),
+            ActiveParameterSet = template.DefaultParameterSet
+                ?? template.KnownParameterSets.FirstOrDefault()
+                ?? "",
         };
 
-        ConfigurePorts(node, template);
         CopyParameters(node, template);
+        ConfigurePorts(node, template);
 
         return node;
     }
 
     /// <summary>
     /// Create a container node for control flow constructs.
-    /// To add a new container type: add the enum value, add a case here,
-    /// add an emitter in ScriptGenerator, and add rendering in NodeGraphRenderer.
+    /// Containers get ExecIn/ExecOut only — no data outputs in v1 per the refactor
+    /// spec (ForEach is the carve-out: it exposes an Item data pin for its body).
     /// </summary>
     public static GraphNode CreateContainer(ContainerType type, double x, double y)
     {
@@ -62,29 +70,35 @@ public static class NodeFactory
             Category = "Control Flow",
         };
 
+        // Containers start with ExecIn + ExecOut only. Individual configurators
+        // may adjust (e.g. Label drops both, ForEach adds an Item data output).
+        node.Inputs.Clear();
+        node.Outputs.Clear();
+        node.Inputs.Add(new NodePort
+        {
+            Name = "", Kind = PortKind.Exec,
+            Direction = PortDirection.Input, Owner = node,
+        });
+        node.Outputs.Add(new NodePort
+        {
+            Name = "", Kind = PortKind.Exec,
+            Direction = PortDirection.Output, Owner = node,
+        });
+
         switch (type)
         {
-            case ContainerType.IfElse:
-                ConfigureIfElse(node);
-                break;
-            case ContainerType.ForEach:
-                ConfigureForEach(node);
-                break;
-            case ContainerType.TryCatch:
-                ConfigureTryCatch(node);
-                break;
-            case ContainerType.While:
-                ConfigureWhile(node);
-                break;
-            case ContainerType.Function:
-                ConfigureFunction(node);
-                break;
-            case ContainerType.Label:
-                ConfigureLabel(node);
-                break;
+            case ContainerType.IfElse:   ConfigureIfElse(node);   break;
+            case ContainerType.ForEach:  ConfigureForEach(node);  break;
+            case ContainerType.TryCatch: ConfigureTryCatch(node); break;
+            case ContainerType.While:    ConfigureWhile(node);    break;
+            case ContainerType.Function: ConfigureFunction(node); break;
+            case ContainerType.Label:    ConfigureLabel(node);    break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), $"Unknown container type: {type}");
         }
+
+        // After container-specific param setup, add data-input pins for each parameter.
+        AddDataInputPinsForParameters(node);
 
         node.RecalcZoneLayout();
         return node;
@@ -97,15 +111,19 @@ public static class NodeFactory
         node.Title = "If / Else";
         node.ContainerWidth = 620;
         node.ContainerHeight = 320;
-        node.Parameters.Add(new NodeParameter
+        // Condition is a ScriptBlock literal by default, but the generated data-
+        // input pin (added by AddDataInputPinsForParameters) accepts a wired
+        // upstream too — wire beats literal in codegen. No default value: the
+        // validator flags unset mandatory condition so the user can't forget.
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "Condition",
             Type = ParamType.ScriptBlock,
             IsMandatory = true,
-            DefaultValue = "$_.Status -eq 'Running'",
-            Description = "PowerShell condition to evaluate",
-            Value = "$_.Status -eq 'Running'",
-        });
+            DefaultValue = "",
+            Description = "Boolean expression to evaluate — e.g. $count -gt 0. Wire a node in to compute dynamically.",
+            Value = "",
+        }));
         node.Zones.Add(new ContainerZone { Name = "Then" });
         node.Zones.Add(new ContainerZone { Name = "Else" });
     }
@@ -115,33 +133,66 @@ public static class NodeFactory
         node.Title = "ForEach-Object";
         node.ContainerWidth = 420;
         node.ContainerHeight = 300;
-        node.Parameters.Add(new NodeParameter
+        // Unpaired data input: the collection to iterate. Primary pipeline target
+        // so upstream can collapse into `$collection | ForEach-Object { ... }`.
+        node.Inputs.Add(new NodePort
         {
-            Name = "Variable",
-            Type = ParamType.String,
-            DefaultValue = "$_",
-            Description = "Loop variable (default $_ for pipeline)",
-            Value = "$_",
+            Name = "Source", Kind = PortKind.Data,
+            Direction = PortDirection.Input,
+            DataType = ParamType.Collection,
+            IsPrimaryPipelineTarget = true,
+            Owner = node,
         });
+        // Data output: the current iteration item. Body nodes wire this to
+        // pick up each element — codegen emits $_ by default, or the named
+        // IterationVariable (below) when nesting or explicit naming requires it.
+        node.Outputs.Add(new NodePort
+        {
+            Name = "Item", Kind = PortKind.Data,
+            Direction = PortDirection.Output,
+            DataType = ParamType.Any,
+            IsPrimary = true,
+            Owner = node,
+        });
+        // Optional — leaving this empty keeps the idiomatic $_ for top-level
+        // ForEach-Object and auto-mints a deterministic name only when nested
+        // inside another ForEach. Explicitly naming it gives the user control.
+        node.Parameters.Add(NewParam(node, new NodeParameter
+        {
+            Name = "IterationVariable",
+            Type = ParamType.String,
+            IsMandatory = false,
+            IsConfigOnly = true,
+            DefaultValue = "",
+            Description = "Name for the current item (e.g. proc, file). Leave blank to use $_. Required only when nesting ForEach loops.",
+            Value = "",
+        }));
         node.Zones.Add(new ContainerZone { Name = "Body" });
     }
 
     private static void ConfigureTryCatch(GraphNode node)
     {
-        node.Title = "Try / Catch";
+        node.Title = "Try / Catch / Finally";
         node.ContainerWidth = 620;
-        node.ContainerHeight = 320;
-        node.Parameters.Add(new NodeParameter
+        node.ContainerHeight = 360;
+        // Why ErrorAction lives on try: PowerShell's try/catch only fires on
+        // TERMINATING errors. Most built-ins emit non-terminating errors by
+        // default — so to actually catch them, $ErrorActionPreference inside
+        // the try block must be 'Stop'. That's the common case and the default.
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "ErrorAction",
             Type = ParamType.Enum,
             DefaultValue = "Stop",
-            Description = "ErrorActionPreference inside try block",
+            Description = "Sets $ErrorActionPreference inside the try block. 'Stop' converts non-terminating errors so catch fires — the typical choice.",
             ValidValues = ["Stop", "Continue", "SilentlyContinue"],
             Value = "Stop",
-        });
+        }));
         node.Zones.Add(new ContainerZone { Name = "Try" });
         node.Zones.Add(new ContainerZone { Name = "Catch" });
+        // Finally is optional at codegen time — the zone always exists; when
+        // empty the emitter skips the finally block entirely.
+        node.Zones.Add(new ContainerZone { Name = "Finally" });
     }
 
     private static void ConfigureWhile(GraphNode node)
@@ -149,15 +200,19 @@ public static class NodeFactory
         node.Title = "While Loop";
         node.ContainerWidth = 420;
         node.ContainerHeight = 300;
-        node.Parameters.Add(new NodeParameter
+        // No default value: $true would silently produce an infinite loop;
+        // empty triggers the validator's missing-mandatory warning instead.
+        // Wire a boolean-producing node into the Condition pin for a dynamic
+        // condition (e.g. keep looping until a retry succeeds).
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "Condition",
             Type = ParamType.ScriptBlock,
             IsMandatory = true,
-            DefaultValue = "$true",
-            Description = "Loop condition",
-            Value = "$true",
-        });
+            DefaultValue = "",
+            Description = "Boolean expression checked each iteration — e.g. $i -lt 10. Wire a node in to compute dynamically.",
+            Value = "",
+        }));
         node.Zones.Add(new ContainerZone { Name = "Body" });
     }
 
@@ -167,9 +222,10 @@ public static class NodeFactory
         node.Category = "Function";
         node.ContainerWidth = 500;
         node.ContainerHeight = 320;
+        // Function nodes define a callable — they don't execute inline, so no exec pins.
         node.Inputs.Clear();
         node.Outputs.Clear();
-        node.Parameters.Add(new NodeParameter
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "FunctionName",
             Type = ParamType.String,
@@ -177,23 +233,23 @@ public static class NodeFactory
             DefaultValue = "Invoke-MyFunction",
             Description = "PowerShell function name (use Verb-Noun convention)",
             Value = "Invoke-MyFunction",
-        });
-        node.Parameters.Add(new NodeParameter
+        }));
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "ReturnType",
             Type = ParamType.String,
             DefaultValue = "",
             Description = "Output type hint (e.g. string, int, PSObject). Leave blank for none.",
             Value = "",
-        });
-        node.Parameters.Add(new NodeParameter
+        }));
+        node.Parameters.Add(NewParam(node, new NodeParameter
         {
             Name = "ReturnVariable",
             Type = ParamType.String,
             DefaultValue = "",
             Description = "Variable to return (e.g. result). Leave blank for no explicit return.",
             Value = "",
-        });
+        }));
         node.Zones.Add(new ContainerZone { Name = "Body" });
     }
 
@@ -210,29 +266,75 @@ public static class NodeFactory
 
     // ── Helpers ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// Build V2-shaped ports for a non-container template:
+    ///   ExecIn? ∷ [data pins, one per parameter] ∷ ExecOut? ∷ [data outputs].
+    /// Parameters must already be copied onto the node so pairing works.
+    /// </summary>
     private static void ConfigurePorts(GraphNode node, NodeTemplate template)
     {
         node.Inputs.Clear();
         node.Outputs.Clear();
 
-        for (int i = 0; i < template.InputCount; i++)
-        {
-            var name = i < template.InputNames.Length ? template.InputNames[i] : $"In{i + 1}";
+        if (template.HasExecIn)
             node.Inputs.Add(new NodePort
             {
-                Name = name,
-                Direction = PortDirection.Input,
-                Owner = node,
+                Name = "", Kind = PortKind.Exec,
+                Direction = PortDirection.Input, Owner = node,
             });
-        }
 
-        for (int i = 0; i < template.OutputCount; i++)
-        {
-            var name = i < template.OutputNames.Length ? template.OutputNames[i] : $"Out{i + 1}";
+        AddDataInputPinsForParameters(node, template.PrimaryPipelineParameter);
+
+        if (template.HasExecOut)
             node.Outputs.Add(new NodePort
             {
-                Name = name,
+                Name = "", Kind = PortKind.Exec,
+                Direction = PortDirection.Output, Owner = node,
+            });
+
+        // Data outputs: use template's explicit list, or fall back to a single primary Any.
+        var outs = template.DataOutputs.Count > 0
+            ? template.DataOutputs
+            : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }];
+
+        foreach (var od in outs)
+            node.Outputs.Add(new NodePort
+            {
+                Name = od.Name, Kind = PortKind.Data,
                 Direction = PortDirection.Output,
+                DataType = od.Type,
+                IsPrimary = od.IsPrimary,
+                Owner = node,
+            });
+
+        // Guarantee exactly one primary data output if any exist.
+        if (!node.DataOutputs.Any(p => p.IsPrimary))
+        {
+            var first = node.DataOutputs.FirstOrDefault();
+            if (first != null) first.IsPrimary = true;
+        }
+    }
+
+    /// <summary>
+    /// Add one typed data-input pin for each non-argument parameter on the node,
+    /// pairing via <see cref="NodePort.ParameterName"/>. Primary-pipeline-target
+    /// is chosen by name match or any parameter with IsPipelineInput=true.
+    /// </summary>
+    private static void AddDataInputPinsForParameters(GraphNode node, string? primaryPipelineParam = null)
+    {
+        foreach (var p in node.Parameters.Where(p => !p.IsArgument && !p.IsConfigOnly))
+        {
+            bool isPrimary = (primaryPipelineParam != null
+                              && string.Equals(p.Name, primaryPipelineParam, StringComparison.OrdinalIgnoreCase))
+                             || p.IsPipelineInput;
+            node.Inputs.Add(new NodePort
+            {
+                Name = p.Name,
+                Kind = PortKind.Data,
+                Direction = PortDirection.Input,
+                DataType = p.Type,
+                ParameterName = p.Name,
+                IsPrimaryPipelineTarget = isPrimary,
                 Owner = node,
             });
         }
@@ -242,7 +344,7 @@ public static class NodeFactory
     {
         foreach (var pdef in template.Parameters)
         {
-            node.Parameters.Add(new NodeParameter
+            node.Parameters.Add(NewParam(node, new NodeParameter
             {
                 Name = pdef.Name,
                 Type = pdef.Type,
@@ -251,7 +353,17 @@ public static class NodeFactory
                 Description = pdef.Description,
                 ValidValues = pdef.ValidValues,
                 Value = pdef.DefaultValue,
-            });
+                IsPipelineInput = pdef.IsPipelineInput,
+                ParameterSets = pdef.ParameterSets.ToArray(),
+                MandatoryInSets = pdef.MandatoryInSets.ToArray(),
+            }));
         }
+    }
+
+    /// <summary>Stamp a parameter's <see cref="NodeParameter.Owner"/> before adding it to a node.</summary>
+    private static NodeParameter NewParam(GraphNode owner, NodeParameter p)
+    {
+        p.Owner = owner;
+        return p;
     }
 }

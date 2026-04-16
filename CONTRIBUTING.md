@@ -136,7 +136,7 @@ Open an issue first to discuss it. This saves everyone time — especially you �
 
 If you're comfortable with C# and want to work on the core:
 
-- **Code generation** lives in `Services/ScriptGenerator.cs` — it walks the node graph, resolves pipeline chains vs. variable assignments, detects cycles, and outputs PowerShell. Read through it and trace a simple graph before making changes.
+- **Code generation** lives in `Services/ScriptGenerator.cs` — it walks exec wires from each exec-root, assigns variables per node, and collapses pipeline-eligible chains (`A.ExecOut→B.ExecIn` + `A.PrimaryDataOutput→B.PrimaryPipelineTarget`, single consumer, no user-set OutputVariable) into `A | B`. ForEach's `Item` data pin compiles to `$_`. Read through it and trace a simple graph before making changes.
 - **Template loading** is in `Services/TemplateLoader.cs` — reads JSON from `Templates/Builtin/` and `Templates/Custom/`. Malformed files are skipped with a debug trace.
 - **Module introspection** is `Services/PowerShellIntrospector.cs` + `Scripts/IntrospectModule.ps1` — launches PowerShell 5.1 to discover cmdlets in installed modules.
 - **Rendering** is in `Rendering/NodeGraphRenderer.cs` — custom DrawingContext rendering for nodes, wires, and the canvas.

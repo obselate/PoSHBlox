@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Media;
 using PoSHBlox.Models;
+using PoSHBlox.Services;
 using PoSHBlox.ViewModels;
 
 namespace PoSHBlox.Rendering;
@@ -19,7 +20,6 @@ public class NodeGraphRenderer
     private readonly SolidColorBrush _gridDotBrush = new(GraphTheme.GridMinor);
     private readonly SolidColorBrush _gridDotMajorBrush = new(GraphTheme.GridMajor);
     private readonly Pen _wirePen = new(new SolidColorBrush(GraphTheme.Wire), GraphTheme.WireThickness);
-    private readonly Pen _wirePendingPen = new(new SolidColorBrush(GraphTheme.WirePending), GraphTheme.WireThickness) { DashStyle = DashStyle.Dash };
 
     // Margin added to the viewport for culling (world-space units).
     // Covers port labels (~80px), shadows, selection borders, and breathing room.
@@ -30,7 +30,8 @@ public class NodeGraphRenderer
     /// </summary>
     public void Render(DrawingContext ctx, Rect bounds, GraphCanvasViewModel vm,
         bool isDraggingWire, NodePort? wireStartPort, Point wireEndPoint,
-        bool isDraggingNode = false, GraphNode? dragNode = null)
+        bool isDraggingNode = false, GraphNode? dragNode = null,
+        bool isLassoing = false, Point lassoStart = default, Point lassoEnd = default)
     {
         ctx.DrawRectangle(_bgBrush, null, bounds);
         DrawGrid(ctx, bounds, vm);
@@ -47,7 +48,7 @@ public class NodeGraphRenderer
                 .OrderBy(n => GetNestingDepth(n)))
             {
                 if (IsNodeVisible(node, viewport))
-                    DrawContainer(ctx, node, isDraggingNode, dragNode);
+                    DrawContainer(ctx, node, isDraggingNode, dragNode, wireStartPort);
             }
 
             // Wires above containers
@@ -64,11 +65,32 @@ public class NodeGraphRenderer
             foreach (var node in vm.Nodes.Where(n => !n.IsContainer))
             {
                 if (IsNodeVisible(node, viewport))
-                    DrawNode(ctx, node);
+                    DrawNode(ctx, node, wireStartPort);
             }
+
+            // Lasso rectangle on top of everything else in the world layer.
+            if (isLassoing)
+                DrawLassoRect(ctx, lassoStart, lassoEnd);
         }
 
         DrawHud(ctx, bounds, vm);
+    }
+
+    /// <summary>
+    /// Dashed selection rectangle. Thin outline + faint fill so users can see
+    /// through it to the nodes they're about to select.
+    /// </summary>
+    private static void DrawLassoRect(DrawingContext ctx, Point a, Point b)
+    {
+        double x = Math.Min(a.X, b.X);
+        double y = Math.Min(a.Y, b.Y);
+        double w = Math.Abs(b.X - a.X);
+        double h = Math.Abs(b.Y - a.Y);
+        if (w < 1 && h < 1) return;
+
+        var fill   = new SolidColorBrush(Color.FromArgb(28, 91, 168, 154));   // faint teal
+        var stroke = new Pen(new SolidColorBrush(GraphTheme.NodeSelectedBorder), 1.0) { DashStyle = DashStyle.Dash };
+        ctx.DrawRectangle(fill, stroke, new Rect(x, y, w, h));
     }
 
     // ── Viewport culling helpers ─────────────────────────────
@@ -84,7 +106,7 @@ public class NodeGraphRenderer
 
     private static bool IsNodeVisible(GraphNode node, Rect viewport)
     {
-        double w = node.IsContainer ? node.ContainerWidth : node.Width;
+        double w = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
         double h = node.IsContainer ? node.ContainerHeight : node.Height;
         var nodeRect = new Rect(node.X, node.Y, w, h);
         return viewport.Intersects(nodeRect);
@@ -141,10 +163,11 @@ public class NodeGraphRenderer
 
     // ── Regular nodes ──────────────────────────────────────────
 
-    private void DrawNode(DrawingContext ctx, GraphNode node)
+    private void DrawNode(DrawingContext ctx, GraphNode node, NodePort? wireStartPort = null)
     {
         double hh = GraphNode.HeaderHeight;
-        var rect = new Rect(node.X, node.Y, node.Width, node.Height);
+        double width = NodeLayout.GetEffectiveWidth(node);
+        var rect = new Rect(node.X, node.Y, width, node.Height);
         var catColor = GraphTheme.GetCategoryColor(node.Category);
         bool inContainer = node.ParentContainer != null;
 
@@ -154,17 +177,24 @@ public class NodeGraphRenderer
                 GraphTheme.NodeCornerRadius));
 
         // Body
-        var borderColor = node.IsSelected ? GraphTheme.NodeSelectedBorder
+        // Border priority: selection > error > warning > default. Validation
+        // borders win over the "inside container" tint but lose to explicit
+        // selection so the user can always see what they've clicked on.
+        var borderColor =
+            node.IsSelected ? GraphTheme.NodeSelectedBorder
+            : node.HasErrors ? GraphTheme.NodeErrorBorder
+            : node.HasIssues ? GraphTheme.NodeWarningBorder
             : inContainer ? catColor
             : GraphTheme.NodeBorder;
+        double borderThickness = node.IsSelected ? 2.5 : (node.HasIssues ? 2.0 : 1.0);
         ctx.DrawRectangle(new SolidColorBrush(GraphTheme.NodeBackground),
-            new Pen(new SolidColorBrush(borderColor), node.IsSelected ? 2.5 : 1),
+            new Pen(new SolidColorBrush(borderColor), borderThickness),
             new RoundedRect(rect, GraphTheme.NodeCornerRadius));
 
         // Header band with gradient overlay
         using (ctx.PushClip(new RoundedRect(rect, GraphTheme.NodeCornerRadius)))
         {
-            var headerRect = new Rect(node.X, node.Y, node.Width, hh);
+            var headerRect = new Rect(node.X, node.Y, width, hh);
             ctx.DrawRectangle(new SolidColorBrush(catColor), null, headerRect);
             ctx.DrawRectangle(MakeHeaderGradient(), null, headerRect);
         }
@@ -173,15 +203,58 @@ public class NodeGraphRenderer
         var title = MakeText(node.Title, 13, FontWeight.Bold, GraphTheme.TextPrimary);
         ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
 
+        // Collapse-state chevron on the header (right side, dim). Indicates the
+        // node can be collapsed/expanded — wired to the C keyboard shortcut /
+        // upcoming context menu.
+        var chevronGlyph = node.IsCollapsed ? "\u25B8" : "\u25BE"; // ▸ / ▾
+        var chevron = MakeText(chevronGlyph, 11, FontWeight.Normal, GraphTheme.TextSecondary);
+        ctx.DrawText(chevron, new Point(node.X + width - 18, node.Y + (hh - chevron.Height) / 2));
+
+        // Validation badge — sits left of the chevron when the node has issues.
+        // Color mirrors the border (red for errors, amber for warning-only).
+        // Drawn on a square dark chip with a matching-color ring so it stays
+        // legible on category headers that share the amber/red hue family
+        // (Output's header would otherwise swallow an amber warning badge).
+        if (node.HasIssues)
+        {
+            var badgeColor = node.HasErrors ? GraphTheme.NodeErrorBorder : GraphTheme.NodeWarningBorder;
+            var badge = MakeText("\u26A0", 12, FontWeight.Bold, badgeColor);   // ⚠
+
+            // Square chip sized to the larger glyph dimension + padding so the
+            // glyph sits centered in a square rather than an elongated pill.
+            double chipSize = Math.Max(badge.Width, badge.Height) + 6;
+            double chipX = node.X + width - 42;
+            double chipY = node.Y + (hh - chipSize) / 2;
+
+            ctx.DrawRectangle(
+                new SolidColorBrush(GraphTheme.NodeBackground),
+                new Pen(new SolidColorBrush(badgeColor), 1),
+                new RoundedRect(new Rect(chipX, chipY, chipSize, chipSize), 3));
+
+            // Center the glyph inside the chip.
+            double glyphX = chipX + (chipSize - badge.Width) / 2;
+            double glyphY = chipY + (chipSize - badge.Height) / 2;
+            ctx.DrawText(badge, new Point(glyphX, glyphY));
+        }
+
+        // Collapsed-hint row: "+N hidden" centered under the visible data rows.
+        if (node.HiddenDataInputCount > 0)
+        {
+            var hint = MakeText($"+{node.HiddenDataInputCount} hidden", 10, FontWeight.Normal, GraphTheme.HudText);
+            double hintY = node.Y + node.Height - hint.Height - 8;
+            ctx.DrawText(hint, new Point(node.X + (width - hint.Width) / 2, hintY));
+        }
+
         // Ports
-        foreach (var port in node.Inputs) DrawPort(ctx, node, port);
-        foreach (var port in node.Outputs) DrawPort(ctx, node, port);
+        foreach (var port in node.Inputs) DrawPort(ctx, node, port, wireStartPort);
+        foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
     }
 
     // ── Containers ─────────────────────────────────────────────
 
     private void DrawContainer(DrawingContext ctx, GraphNode node,
-        bool isDraggingNode = false, GraphNode? dragNode = null)
+        bool isDraggingNode = false, GraphNode? dragNode = null,
+        NodePort? wireStartPort = null)
     {
         var catColor = GraphTheme.GetCategoryColor(node.Category);
         double hh = GraphNode.ContainerHeaderHeight;
@@ -226,8 +299,8 @@ public class NodeGraphRenderer
         DrawResizeGrip(ctx, node);
 
         // Ports
-        foreach (var port in node.Inputs) DrawPort(ctx, node, port);
-        foreach (var port in node.Outputs) DrawPort(ctx, node, port);
+        foreach (var port in node.Inputs) DrawPort(ctx, node, port, wireStartPort);
+        foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
     }
 
     private void DrawZone(DrawingContext ctx, GraphNode parent, ContainerZone zone, bool highlight = false)
@@ -242,9 +315,16 @@ public class NodeGraphRenderer
         ctx.DrawRectangle(new SolidColorBrush(bgColor), borderPen,
             new RoundedRect(new Rect(zx, zy, zw, zh), 6));
 
-        // Zone label
-        var label = MakeText(zone.Name.ToUpperInvariant(), 10, FontWeight.SemiBold, GraphTheme.ZoneLabel);
-        ctx.DrawText(label, new Point(zx + 8, zy + 4));
+        // Zone label — omit on Label containers (single zone, no semantic
+        // divider needed; the container's own title already carries the
+        // annotation text) and on any zone whose Name is blank.
+        bool skipZoneHeader = parent.ContainerType == ContainerType.Label
+                              || string.IsNullOrWhiteSpace(zone.Name);
+        if (!skipZoneHeader)
+        {
+            var label = MakeText(zone.Name.ToUpperInvariant(), 10, FontWeight.SemiBold, GraphTheme.ZoneLabel);
+            ctx.DrawText(label, new Point(zx + 8, zy + 4));
+        }
 
         // Empty hint
         if (zone.Children.Count == 0)
@@ -284,27 +364,79 @@ public class NodeGraphRenderer
 
     // ── Ports ──────────────────────────────────────────────────
 
-    private void DrawPort(DrawingContext ctx, GraphNode node, NodePort port)
+    /// <summary>
+    /// Dim alpha applied to ports/labels that are incompatible with the current
+    /// wire-drag source. Chosen to read as clearly backgrounded without fully
+    /// disappearing.
+    /// </summary>
+    private const byte DimAlpha = 70;
+
+    private void DrawPort(DrawingContext ctx, GraphNode node, NodePort port, NodePort? wireStartPort)
     {
+        // Collapsed nodes hide non-essential data input pins — don't draw them.
+        if (!node.IsPortVisible(port)) return;
+
         var pos = GetPortPosition(node, port);
         bool isInput = port.Direction == PortDirection.Input;
-        var color = isInput ? GraphTheme.PortInput : GraphTheme.PortOutput;
 
-        // Outer ring
-        ctx.DrawEllipse(new SolidColorBrush(GraphTheme.PortCenter),
+        // Compatibility dim: when a wire drag is active, port stays bright if
+        // it's the drag source itself or could accept the drag; otherwise dim.
+        bool dragActive = wireStartPort != null;
+        bool isSelf = dragActive && ReferenceEquals(wireStartPort, port);
+        bool compatible = !dragActive
+            || isSelf
+            || PortCompatibility.CanConnect(wireStartPort!, port);
+        byte alpha = compatible ? (byte)255 : DimAlpha;
+
+        if (port.Kind == PortKind.Exec)
+        {
+            DrawExecTriangle(ctx, pos, alpha);
+            return;
+        }
+
+        var baseColor = GraphTheme.GetDataTypeColor(port.DataType);
+        var color = Color.FromArgb(alpha, baseColor.R, baseColor.G, baseColor.B);
+        var centerColor = Color.FromArgb(alpha, GraphTheme.PortCenter.R, GraphTheme.PortCenter.G, GraphTheme.PortCenter.B);
+
+        // Outer ring + inner dot, colored by data type.
+        ctx.DrawEllipse(new SolidColorBrush(centerColor),
             new Pen(new SolidColorBrush(color), 2),
             pos, GraphTheme.PortRadius, GraphTheme.PortRadius);
-
-        // Inner dot
         ctx.DrawEllipse(new SolidColorBrush(color), null,
             pos, GraphTheme.PortDotRadius, GraphTheme.PortDotRadius);
 
-        // Label
-        var label = MakeText(port.Name, 10, FontWeight.Normal, GraphTheme.PortLabel);
+        // Label — skip for unnamed pins (e.g. ForEach's synthesized Source).
+        if (string.IsNullOrEmpty(port.Name)) return;
+
+        var labelColor = Color.FromArgb(alpha, GraphTheme.PortLabel.R, GraphTheme.PortLabel.G, GraphTheme.PortLabel.B);
+        var label = MakeText(port.Name, 10, FontWeight.Normal, labelColor);
         double labelX = isInput
             ? pos.X + GraphTheme.PortRadius + 6
             : pos.X - GraphTheme.PortRadius - label.Width - 6;
         ctx.DrawText(label, new Point(labelX, pos.Y - label.Height / 2));
+    }
+
+    /// <summary>
+    /// Right-pointing filled triangle at <paramref name="pos"/>. Blueprint-style
+    /// exec-pin glyph. Both input (left edge) and output (right edge) point right
+    /// to cue data-flow direction. Alpha controls dim-state during wire drags.
+    /// </summary>
+    private static void DrawExecTriangle(DrawingContext ctx, Point pos, byte alpha = 255)
+    {
+        double size = GraphTheme.PortRadius + 1;
+        double tipX = pos.X + size;
+        double baseX = pos.X - size;
+        var geo = new StreamGeometry();
+        using (var g = geo.Open())
+        {
+            g.BeginFigure(new Point(baseX, pos.Y - size), true);
+            g.LineTo(new Point(tipX, pos.Y));
+            g.LineTo(new Point(baseX, pos.Y + size));
+            g.EndFigure(true);
+        }
+        var color = Color.FromArgb(alpha, GraphTheme.ExecPin.R, GraphTheme.ExecPin.G, GraphTheme.ExecPin.B);
+        var brush = new SolidColorBrush(color);
+        ctx.DrawGeometry(brush, new Pen(brush, 1.5), geo);
     }
 
     // ── Wires ──────────────────────────────────────────────────
@@ -321,7 +453,19 @@ public class NodeGraphRenderer
         var start = GetPortPosition(startPort.Owner!, startPort);
         var end = endPoint;
         if (startPort.Direction == PortDirection.Input) (start, end) = (end, start);
-        ctx.DrawGeometry(null, _wirePendingPen, MakeBezier(start, end));
+
+        // Color the in-flight wire by the source pin's type so users see what
+        // they'd be producing. Exec drags use the cream exec color; data drags
+        // use the typed palette entry.
+        var wireColor = startPort.Kind == PortKind.Exec
+            ? GraphTheme.ExecPin
+            : GraphTheme.GetDataTypeColor(startPort.DataType);
+
+        var pen = new Pen(new SolidColorBrush(wireColor), GraphTheme.WireThickness)
+        {
+            DashStyle = DashStyle.Dash,
+        };
+        ctx.DrawGeometry(null, pen, MakeBezier(start, end));
     }
 
     // ── HUD ────────────────────────────────────────────────────
@@ -340,21 +484,54 @@ public class NodeGraphRenderer
     // ── Geometry helpers (public for hit testing) ──────────────
 
     /// <summary>
-    /// Calculate absolute position of a port on the canvas.
+    /// Calculate absolute position of a port on the canvas. V2 layout:
+    ///   - Exec pins ride in the header (input left edge, output right edge).
+    ///   - Data pins occupy body rows, indexed within DataInputs/DataOutputs only.
     /// Used by both rendering and hit testing.
     /// </summary>
     public static Point GetPortPosition(GraphNode node, NodePort port)
     {
         double headerH = node.IsContainer ? GraphNode.ContainerHeaderHeight : GraphNode.HeaderHeight;
-        double width = node.IsContainer ? node.ContainerWidth : node.Width;
-        int idx = port.Direction == PortDirection.Input
-            ? node.Inputs.IndexOf(port)
-            : node.Outputs.IndexOf(port);
+        double width = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
 
-        double x = port.Direction == PortDirection.Input ? node.X : node.X + width;
-        double y = node.Y + headerH + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
+        // Containers still put exec pins in the header (they're wider and the
+        // chevron pattern doesn't apply). Regular nodes get a dedicated exec row.
+        if (port.Kind == PortKind.Exec)
+        {
+            // Keep the triangle tips clear of the node's rounded corners
+            // (NodeCornerRadius=8) and give a little visual breathing room.
+            const double inset = 16;
+            double x = port.Direction == PortDirection.Input ? node.X + inset : node.X + width - inset;
+            double y;
+            if (node.IsContainer)
+            {
+                y = node.Y + headerH / 2;
+            }
+            else
+            {
+                // Centered vertically in the exec row sitting directly below the header.
+                y = node.Y + headerH + GraphNode.ExecRowHeight / 2;
+            }
+            return new Point(x, y);
+        }
 
-        return new Point(x, y);
+        // Data pin: index within VisibleDataInputs (so collapsed hidden rows don't
+        // reserve space) or DataOutputs. Returns an off-screen point for pins not
+        // in the visible list — keeps them out of the way of hit testing too.
+        int idx = -1, i = 0;
+        var list = port.Direction == PortDirection.Input ? node.VisibleDataInputs : node.DataOutputs;
+        foreach (var p in list)
+        {
+            if (ReferenceEquals(p, port)) { idx = i; break; }
+            i++;
+        }
+        if (idx < 0) return new Point(-1e6, -1e6);
+
+        // Data rows start below the header, plus the exec row if one is present.
+        double execOffset = (!node.IsContainer && node.HasExecRow) ? GraphNode.ExecRowHeight : 0;
+        double xd = port.Direction == PortDirection.Input ? node.X : node.X + width;
+        double yd = node.Y + headerH + execOffset + GraphNode.PortSpacing + idx * GraphNode.PortSpacing;
+        return new Point(xd, yd);
     }
 
     /// <summary>

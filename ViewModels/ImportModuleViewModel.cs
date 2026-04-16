@@ -43,6 +43,12 @@ public partial class ImportModuleViewModel : ObservableObject
                     Name = c.Name,
                     Description = c.Description,
                     Parameters = c.Parameters,
+                    HasExecIn = c.HasExecIn,
+                    HasExecOut = c.HasExecOut,
+                    PrimaryPipelineParameter = c.PrimaryPipelineParameter,
+                    DataOutputs = c.DataOutputs,
+                    KnownParameterSets = c.KnownParameterSets,
+                    DefaultParameterSet = c.DefaultParameterSet,
                 });
             }
 
@@ -82,7 +88,7 @@ public partial class ImportModuleViewModel : ObservableObject
 
         var catalog = new TemplateCatalogDto
         {
-            Version = 1,
+            Version = 2,
             Category = CategoryName.Trim(),
         };
 
@@ -93,33 +99,31 @@ public partial class ImportModuleViewModel : ObservableObject
                 Name = cmdlet.Name,
                 CmdletName = cmdlet.Name,
                 Description = cmdlet.Description,
+                HasExecIn = cmdlet.HasExecIn,
+                HasExecOut = cmdlet.HasExecOut,
+                PrimaryPipelineParameter = cmdlet.PrimaryPipelineParameter,
+                DataOutputs = cmdlet.DataOutputs.Count > 0
+                    ? cmdlet.DataOutputs
+                    : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
+                KnownParameterSets = cmdlet.KnownParameterSets,
+                DefaultParameterSet = cmdlet.DefaultParameterSet,
             };
 
             foreach (var p in cmdlet.Parameters)
             {
-                if (System.Enum.TryParse<ParamType>(p.Type, out var paramType))
+                var paramType = System.Enum.TryParse<ParamType>(p.Type, out var pt) ? pt : ParamType.String;
+                template.Parameters.Add(new ParameterDef
                 {
-                    template.Parameters.Add(new ParameterDef
-                    {
-                        Name = p.Name,
-                        Type = paramType,
-                        IsMandatory = p.IsMandatory,
-                        DefaultValue = p.DefaultValue,
-                        Description = p.Description,
-                        ValidValues = p.ValidValues ?? [],
-                    });
-                }
-                else
-                {
-                    template.Parameters.Add(new ParameterDef
-                    {
-                        Name = p.Name,
-                        Type = ParamType.String,
-                        IsMandatory = p.IsMandatory,
-                        DefaultValue = p.DefaultValue,
-                        Description = p.Description,
-                    });
-                }
+                    Name = p.Name,
+                    Type = paramType,
+                    IsMandatory = p.IsMandatory,
+                    DefaultValue = p.DefaultValue,
+                    Description = p.Description,
+                    ValidValues = p.ValidValues ?? [],
+                    IsPipelineInput = p.IsPipelineInput,
+                    ParameterSets = p.ParameterSets,
+                    MandatoryInSets = p.MandatoryInSets,
+                });
             }
 
             catalog.Templates.Add(template);
@@ -144,4 +148,12 @@ public partial class SelectableCmdlet : ObservableObject
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public System.Collections.Generic.List<DiscoveredParameter> Parameters { get; set; } = [];
+
+    public bool HasExecIn { get; set; } = true;
+    public bool HasExecOut { get; set; } = true;
+    public string? PrimaryPipelineParameter { get; set; }
+    public System.Collections.Generic.List<DataOutputDef> DataOutputs { get; set; } = [];
+
+    public System.Collections.Generic.List<string> KnownParameterSets { get; set; } = [];
+    public string? DefaultParameterSet { get; set; }
 }

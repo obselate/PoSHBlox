@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -31,12 +32,69 @@ public class NodeGraphCanvas : Control
     private Point _dragOffset;
     private Point _dragStartPos;
 
+    /// <summary>
+    /// Per-node starting position captured on drag-press. When the drag node is
+    /// part of a multi-selection, every selected node's start position lives
+    /// here and each move computes its new position as start + delta. Avoids
+    /// accumulated floating-point drift across many move events.
+    /// </summary>
+    private readonly Dictionary<GraphNode, Point> _multiDragStart = new();
+
+    /// <summary>
+    /// Per-node zone membership snapshot at drag-press, mirroring
+    /// <see cref="_multiDragStart"/>. Undo recorded on release restores each
+    /// node's ParentContainer + ParentZone + child-index so dragging a node
+    /// into a zone (or out of one) is reversible in a single Ctrl+Z along
+    /// with the position change.
+    /// </summary>
+    private readonly Dictionary<GraphNode, (GraphNode? Container, ContainerZone? Zone, int Index)> _multiDragStartParent = new();
+
+    /// <summary>
+    /// Size captured at resize-grip press, used to record a single undo entry
+    /// on release. Continuous drag moves during resize aren't individually
+    /// recorded — we want one entry covering the whole interaction.
+    /// </summary>
+    private Size _resizeStartSize;
+
+    /// <summary>Left-click on empty canvas records this so a drag can morph into a lasso.</summary>
+    private bool _isLassoArmed;
+    private bool _isLassoing;
+    private bool _lassoExtend;   // shift held when lasso started
+    private Point _lassoStart;
+    private Point _lassoEnd;
+
+    /// <summary>Read by the renderer to draw the lasso rect while a lasso is active.</summary>
+    public (bool Active, Point Start, Point End) CurrentLasso
+        => (_isLassoing, _lassoStart, _lassoEnd);
+
     private bool _isDraggingWire;
     private NodePort? _wireStartPort;
     private Point _wireEndPoint;
 
+    /// <summary>
+    /// Non-null while rerouting an existing wire: the removed original connection,
+    /// restored on release if the drop lands anywhere but a compatible pin.
+    /// </summary>
+    private NodeConnection? _reroutingOriginal;
+
     private bool _isResizingContainer;
     private GraphNode? _resizeNode;
+
+    /// <summary>Most recent pointer position in canvas-local coords.</summary>
+    private Point _lastPointerLocal;
+
+    /// <summary>Most recent pointer position in TopLevel coords — good for anchoring popups that live in the window's root Grid.</summary>
+    private Point _lastPointerInWindow;
+
+    /// <summary>Pointer position in window-root coordinate space (for positioning popups).</summary>
+    public Point CurrentPointerPosition => _lastPointerInWindow;
+
+    /// <summary>
+    /// Pointer position in graph (canvas) coordinates — control-local
+    /// minus pan, divided by zoom. Used to anchor paste at the cursor so the
+    /// new nodes land where the user is looking.
+    /// </summary>
+    public Point CurrentCanvasPosition => ScreenToCanvas(_lastPointerLocal);
 
     public NodeGraphCanvas()
     {
@@ -93,48 +151,261 @@ public class NodeGraphCanvas : Control
             {
                 _isResizingContainer = true;
                 _resizeNode = resizeTarget;
+                _resizeStartSize = new Size(resizeTarget.ContainerWidth, resizeTarget.ContainerHeight);
                 e.Handled = true;
                 return;
             }
 
-            // Check port hit (start wire drag)
+            // Chevron click → toggle collapse state on the hit node. Checked
+            // before the general node hit so dragging near the header-right
+            // can still start a node drag; only direct chevron clicks toggle.
+            var chevronNode = HitChevron(canvasPos);
+            if (chevronNode != null)
+            {
+                _vm.ToggleCollapse(chevronNode);
+                e.Handled = true;
+                return;
+            }
+
+            // Check port hit (start wire drag — or reroute an existing wire if
+            // the pressed pin already has a connection).
             var port = HitPort(canvasPos);
             if (port != null)
             {
+                var existing = _vm.Connections.FirstOrDefault(c =>
+                    c.Source == port || c.Target == port);
+
+                if (existing != null)
+                {
+                    // Pick up the existing wire at this end. Anchor the far end;
+                    // the free end follows the cursor. Original is restored on
+                    // release if no valid target is hit. Records the removal so
+                    // committed reroutes are two-step-undoable (first undo =
+                    // remove the new wire, second undo = restore the original).
+                    _wireStartPort = existing.Source == port ? existing.Target : existing.Source;
+                    _reroutingOriginal = existing;
+                    _vm.RemoveConnection(existing);
+                }
+                else
+                {
+                    _wireStartPort = port;
+                    _reroutingOriginal = null;
+                }
+
                 _isDraggingWire = true;
-                _wireStartPort = port;
                 _wireEndPoint = canvasPos;
                 e.Handled = true;
                 return;
             }
 
-            // Check node hit (start node drag)
+            // Check node hit (start node drag). Selection semantics:
+            //   shift+click  → toggle membership, no drag
+            //   click node not in selection → replace selection with this one
+            //   click node already in selection → keep selection, drag all of them
             var node = HitNode(canvasPos);
             if (node != null)
             {
-                _vm.SelectNode(node);
+                bool shift = (e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift;
+                if (shift)
+                {
+                    _vm.ToggleSelection(node);
+                    e.Handled = true;
+                    return;
+                }
+
+                if (!_vm.SelectedNodes.Contains(node))
+                    _vm.SelectNode(node);
+
                 _isDraggingNode = true;
                 _dragNode = node;
                 _dragOffset = new Point(canvasPos.X - node.X, canvasPos.Y - node.Y);
                 _dragStartPos = new Point(node.X, node.Y);
+
+                // Snapshot every selected node's start position so the move
+                // handler can apply a consistent delta to all of them. Also
+                // snapshot zone membership so OnPointerReleased can fold any
+                // reparenting that TrySnapToZone performs into the same undo
+                // entry as the position change — one Ctrl+Z reverts everything.
+                _multiDragStart.Clear();
+                _multiDragStartParent.Clear();
+                foreach (var sel in _vm.SelectedNodes)
+                {
+                    _multiDragStart[sel] = new Point(sel.X, sel.Y);
+                    var idx = sel.ParentZone?.Children.IndexOf(sel) ?? -1;
+                    _multiDragStartParent[sel] = (sel.ParentContainer, sel.ParentZone, idx);
+                }
+
                 e.Handled = true;
                 return;
             }
 
-            // Clicked empty space: deselect
-            _vm.SelectNode(null);
+            // Empty space click: arm a potential lasso. If the user releases
+            // without moving, we treat it as "deselect"; if they drag, we
+            // morph into the lasso selection rectangle. Shift modifier extends
+            // the existing selection instead of replacing it.
+            _isLassoArmed = true;
+            _lassoExtend = (e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift;
+            _lassoStart = canvasPos;
+            _lassoEnd = canvasPos;
+            e.Handled = true;
         }
 
-        // Right-click: delete wire
+        // Right-click: open a context menu sized to what's under the cursor —
+        // node / wire / empty canvas.
         if (props.IsRightButtonPressed)
         {
-            var conn = HitConnection(canvasPos);
-            if (conn != null)
+            var hitNode = HitNode(canvasPos);
+            var hitConn = hitNode == null ? HitConnection(canvasPos) : null;
+            if (hitNode != null)
             {
-                _vm.Connections.Remove(conn);
-                e.Handled = true;
+                // Right-click on a node outside the current selection switches
+                // focus to that single node. Right-click inside an existing
+                // multi-selection keeps the selection so "Delete 5" stays
+                // meaningful.
+                if (!_vm.SelectedNodes.Contains(hitNode))
+                    _vm.SelectNode(hitNode);
+                ShowNodeContextMenu(hitNode);
             }
+            else if (hitConn != null)
+            {
+                ShowWireContextMenu(hitConn);
+            }
+            else
+            {
+                ShowCanvasContextMenu(canvasPos);
+            }
+            e.Handled = true;
         }
+    }
+
+    // ── Context menus ──────────────────────────────────────────
+
+    private void ShowNodeContextMenu(GraphNode node)
+    {
+        var items = new List<(string Label, Action? Action, bool IsSeparator)>();
+        int n = _vm!.SelectedNodes.Count;
+        string nodeWord = n == 1 ? "node" : "nodes";
+        string countTag = n > 1 ? $" ({n})" : "";
+
+        // Duplicate only applies to non-container nodes (DuplicateSelected
+        // skips containers internally — don't show a dead menu entry either).
+        bool anyNonContainer = _vm.SelectedNodes.Any(x => !x.IsContainer);
+        if (anyNonContainer)
+            items.Add(($"Duplicate{countTag}  Ctrl+D", () => _vm.DuplicateSelected(), false));
+
+        items.Add(($"Delete {nodeWord}{countTag}  Del", () => _vm.DeleteSelected(), false));
+
+        if (anyNonContainer)
+        {
+            items.Add(("", null, true));
+            // Label follows the clicked node's current state — matches what C
+            // would do on the primary.
+            items.Add((node.IsCollapsed ? $"Expand{countTag}  C" : $"Collapse{countTag}  C",
+                                           () => _vm.ToggleCollapseSelected(), false));
+        }
+
+        ShowFlyout(items);
+    }
+
+    private void ShowWireContextMenu(NodeConnection conn)
+    {
+        ShowFlyout(new List<(string, Action?, bool)>
+        {
+            ("Insert node...",    () => OpenQuickAddForSplice(conn),   false),
+            ("Delete wire",       () => _vm!.RemoveConnection(conn),   false),
+        });
+    }
+
+    private void OpenQuickAddForSplice(NodeConnection wire)
+    {
+        if (_vm == null) return;
+        var pt = CurrentPointerPosition;
+        // Clamp using the same logic as normal quick-add opens so the popup
+        // never extends off-screen regardless of where the user clicked.
+        const double popupW = 380, popupH = 480, pad = 8;
+        double rootW = 1280, rootH = 720;
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
+        {
+            rootW = topLevel.ClientSize.Width;
+            rootH = topLevel.ClientSize.Height;
+        }
+        double x = Math.Min(Math.Max(pad, pt.X), rootW - popupW - pad);
+        double y = Math.Min(Math.Max(pad, pt.Y), rootH - popupH - pad);
+        _vm.QuickAdd.OpenForSplice(x, y, wire);
+    }
+
+    private void ShowCanvasContextMenu(Point canvasPos)
+    {
+        ShowFlyout(new List<(string, Action?, bool)>
+        {
+            ("Quick add...      Tab", () => OpenQuickAddAtCursor(),          false),
+            ("Add blank node",        () => _vm!.AddNode(),                  false),
+            ("",                      null,                                  true),
+            ("Reset view        Ctrl+0", () => _vm!.ResetView(),             false),
+            ("Zoom to fit all   F",      () => ZoomToFit(selectionOnly: false), false),
+        });
+    }
+
+    /// <summary>
+    /// Open the quick-add popup at the current pointer position, clamped so the
+    /// panel stays inside the window. Both Tab and the "Quick add..." menu item
+    /// route through here.
+    /// </summary>
+    public void OpenQuickAddAtCursor(NodePort? source = null)
+    {
+        if (_vm == null) return;
+        OpenQuickAddAt(CurrentPointerPosition, source);
+    }
+
+    /// <summary>Clamp <paramref name="windowPoint"/> to keep the popup inside the window, then open.</summary>
+    public void OpenQuickAddAt(Point windowPoint, NodePort? source)
+    {
+        if (_vm == null) return;
+
+        // Match the XAML-declared size. If we ever make this dynamic the clamp
+        // can read it from the control once rendered, but constants are fine
+        // and avoid a first-frame layout-dependency.
+        const double popupW = 380;
+        const double popupH = 480;
+        const double pad = 8;
+
+        double rootW = 1280, rootH = 720;
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
+        {
+            rootW = topLevel.ClientSize.Width;
+            rootH = topLevel.ClientSize.Height;
+        }
+
+        double x = windowPoint.X;
+        double y = windowPoint.Y;
+        if (x + popupW + pad > rootW) x = rootW - popupW - pad;
+        if (y + popupH + pad > rootH) y = rootH - popupH - pad;
+        if (x < pad) x = pad;
+        if (y < pad) y = pad;
+
+        _vm.QuickAdd.OpenAt(x, y, source);
+    }
+
+    private void ShowFlyout(IList<(string Label, Action? Action, bool IsSeparator)> items)
+    {
+        var flyout = new MenuFlyout
+        {
+            Placement = PlacementMode.Pointer,
+        };
+        foreach (var (label, action, isSeparator) in items)
+        {
+            if (isSeparator)
+            {
+                flyout.Items.Add(new Separator());
+                continue;
+            }
+            var mi = new MenuItem { Header = label };
+            mi.Classes.Add("graphCtx");
+            if (action != null)
+                mi.Click += (_, _) => action();
+            flyout.Items.Add(mi);
+        }
+        flyout.ShowAt(this, showAtPointer: true);
     }
 
     // ── Input: Pointer Move ────────────────────────────────────
@@ -146,6 +417,9 @@ public class NodeGraphCanvas : Control
 
         var screenPos = e.GetPosition(this);
         var canvasPos = ScreenToCanvas(screenPos);
+        _lastPointerLocal = screenPos;
+        if (TopLevel.GetTopLevel(this) is { } topLevel)
+            _lastPointerInWindow = e.GetPosition(topLevel);
 
         if (_isPanning)
         {
@@ -187,16 +461,55 @@ public class NodeGraphCanvas : Control
             double newX = Math.Round((canvasPos.X - _dragOffset.X) / 10) * 10;
             double newY = Math.Round((canvasPos.Y - _dragOffset.Y) / 10) * 10;
 
-            // If dragging a container, move all descendants (children, grandchildren, etc.)
+            // Delta computed from the drag leader so every selected node moves
+            // in lockstep. When dragging a container, also carry its descendants.
+            double dx = newX - _dragNode.X;
+            double dy = newY - _dragNode.Y;
+
             if (_dragNode.IsContainer)
-            {
-                double dx = newX - _dragNode.X;
-                double dy = newY - _dragNode.Y;
                 MoveDescendants(_dragNode, dx, dy);
-            }
 
             _dragNode.X = newX;
             _dragNode.Y = newY;
+
+            // Move the rest of the selection by the same delta from each
+            // node's start position. Using start snapshots (not the previous
+            // move's positions) avoids accumulated 10px-snap rounding drift.
+            if (_multiDragStart.Count > 1)
+            {
+                double dxTotal = _dragNode.X - _dragStartPos.X;
+                double dyTotal = _dragNode.Y - _dragStartPos.Y;
+                foreach (var (other, start) in _multiDragStart)
+                {
+                    if (ReferenceEquals(other, _dragNode)) continue;
+                    double targetX = start.X + dxTotal;
+                    double targetY = start.Y + dyTotal;
+                    double deltaX = targetX - other.X;
+                    double deltaY = targetY - other.Y;
+                    if (other.IsContainer)
+                        MoveDescendants(other, deltaX, deltaY);
+                    other.X = targetX;
+                    other.Y = targetY;
+                }
+            }
+            return;
+        }
+
+        if (_isLassoArmed)
+        {
+            // ~4px threshold (squared) to distinguish a stationary click from a drag.
+            double dx = canvasPos.X - _lassoStart.X;
+            double dy = canvasPos.Y - _lassoStart.Y;
+            if (dx * dx + dy * dy > 16)
+            {
+                _isLassoing = true;
+                _isLassoArmed = false;
+            }
+        }
+
+        if (_isLassoing)
+        {
+            _lassoEnd = canvasPos;
             return;
         }
 
@@ -209,7 +522,9 @@ public class NodeGraphCanvas : Control
         // Update cursor based on what's under the pointer
         var hoveredPort = HitPort(canvasPos);
         var hoveredResize = HitResizeGrip(canvasPos);
+        var hoveredChevron = HitChevron(canvasPos);
         Cursor = hoveredPort != null ? new Cursor(StandardCursorType.Hand)
+            : hoveredChevron != null ? new Cursor(StandardCursorType.Hand)
             : hoveredResize != null ? new Cursor(StandardCursorType.BottomRightCorner)
             : Cursor.Default;
     }
@@ -221,7 +536,7 @@ public class NodeGraphCanvas : Control
         base.OnPointerReleased(e);
         if (_vm == null) return;
 
-        // Complete wire connection
+        // Complete wire connection (new draw, or reroute commit / cancel).
         if (_isDraggingWire && _wireStartPort != null)
         {
             var canvasPos = ScreenToCanvas(e.GetPosition(this));
@@ -234,25 +549,184 @@ public class NodeGraphCanvas : Control
                 else if (_wireStartPort.Direction == PortDirection.Input && targetPort.Direction == PortDirection.Output)
                     _vm.AddConnection(targetPort, _wireStartPort);
             }
+
+            // Did the intended wire actually land? (AddConnection silently rejects
+            // incompatible kinds/types and dups — a successful commit leaves the
+            // pair present, even if 1:N replacement kept Connections.Count flat.)
+            bool committed = targetPort != null && _vm.Connections.Any(c =>
+                   (c.Source == _wireStartPort && c.Target == targetPort)
+                || (c.Source == targetPort && c.Target == _wireStartPort));
+
+            if (!committed)
+            {
+                if (_reroutingOriginal != null)
+                {
+                    // Reroute drop-off: restore the original wire (existing behavior).
+                    // The press-path recorded its removal; since we're canceling the
+                    // whole interaction, pop that entry so the user's undo history
+                    // doesn't show a phantom "Remove wire" they didn't do.
+                    _vm.Connections.Add(_reroutingOriginal);
+                    _vm.Undo.PopUndo();
+                }
+                else
+                {
+                    // Fresh wire drag released on empty space → open the quick-add
+                    // popup anchored at the cursor with the source pin captured.
+                    // Auto-wire happens in CommitQuickAdd if the user picks a result.
+                    var windowPos = TopLevel.GetTopLevel(this) is { } topLevel
+                        ? e.GetPosition(topLevel)
+                        : e.GetPosition(this);
+                    OpenQuickAddAt(windowPos, _wireStartPort);
+                }
+            }
         }
 
-        // Snap dropped node into container zone (only if it actually moved)
+        // Snap dropped node into container zone (only if it actually moved).
+        // Only the drag leader participates in zone-snap to avoid yanking a
+        // cohesive multi-selection across zones when one node wanders over a
+        // container — users can explicitly drag individual children later.
         if (_isDraggingNode && _dragNode != null)
         {
             double dx = _dragNode.X - _dragStartPos.X;
             double dy = _dragNode.Y - _dragStartPos.Y;
             if (dx * dx + dy * dy > 25) // moved more than ~5px
+            {
                 TrySnapToZone(_dragNode);
+
+                // Record one undo entry for the whole drag (across all selected
+                // nodes if this was a multi-drag). Captures each node's start
+                // and end positions AND zone membership so one Ctrl+Z reverts
+                // both the move and any reparenting TrySnapToZone performed.
+                var moved = _multiDragStart
+                    .Select(kv =>
+                    {
+                        var node = kv.Key;
+                        var startPos = kv.Value;
+                        var endPos = new Point(node.X, node.Y);
+                        var startParent = _multiDragStartParent.TryGetValue(node, out var sp)
+                            ? sp
+                            : (Container: (GraphNode?)null, Zone: (ContainerZone?)null, Index: -1);
+                        var endIdx = node.ParentZone?.Children.IndexOf(node) ?? -1;
+                        var endParent = (Container: node.ParentContainer, Zone: node.ParentZone, Index: endIdx);
+                        return (node, startPos, endPos, startParent, endParent);
+                    })
+                    .Where(m =>
+                        m.startPos != m.endPos
+                        || m.startParent.Container != m.endParent.Container
+                        || m.startParent.Zone != m.endParent.Zone)
+                    .ToList();
+                if (moved.Count > 0)
+                {
+                    _vm.Undo.Record(
+                        undo: () =>
+                        {
+                            foreach (var m in moved)
+                            {
+                                RestoreParent(m.node, m.startParent);
+                                m.node.X = m.startPos.X;
+                                m.node.Y = m.startPos.Y;
+                            }
+                        },
+                        redo: () =>
+                        {
+                            foreach (var m in moved)
+                            {
+                                RestoreParent(m.node, m.endParent);
+                                m.node.X = m.endPos.X;
+                                m.node.Y = m.endPos.Y;
+                            }
+                        },
+                        label: moved.Count == 1 ? "Move node" : $"Move {moved.Count} nodes");
+                }
+            }
+        }
+
+        // Container resize — emit one undo entry for the whole drag (start
+        // size → end size). Skipped if the user pressed but didn't actually
+        // resize (size unchanged).
+        if (_isResizingContainer && _resizeNode != null)
+        {
+            var resized = _resizeNode;
+            var startSize = _resizeStartSize;
+            var endSize = new Size(resized.ContainerWidth, resized.ContainerHeight);
+            if (startSize != endSize)
+            {
+                _vm.Undo.Record(
+                    undo: () =>
+                    {
+                        resized.ContainerWidth = startSize.Width;
+                        resized.ContainerHeight = startSize.Height;
+                        resized.RecalcZoneLayout();
+                    },
+                    redo: () =>
+                    {
+                        resized.ContainerWidth = endSize.Width;
+                        resized.ContainerHeight = endSize.Height;
+                        resized.RecalcZoneLayout();
+                    },
+                    label: "Resize container");
+            }
+        }
+
+        // Commit lasso selection, or treat the un-dragged press as a deselect.
+        if (_isLassoing)
+        {
+            var canvasPos = ScreenToCanvas(e.GetPosition(this));
+            _lassoEnd = canvasPos;
+            double lx = Math.Min(_lassoStart.X, _lassoEnd.X);
+            double ly = Math.Min(_lassoStart.Y, _lassoEnd.Y);
+            double lw = Math.Abs(_lassoEnd.X - _lassoStart.X);
+            double lh = Math.Abs(_lassoEnd.Y - _lassoStart.Y);
+            _vm.SelectNodesInRect(lx, ly, lw, lh, extend: _lassoExtend);
+        }
+        else if (_isLassoArmed)
+        {
+            // Click on empty canvas without drag → clear selection.
+            _vm.ClearSelection();
         }
 
         // Reset all interaction state
         _isPanning = false;
         _isDraggingNode = false;
         _dragNode = null;
+        _multiDragStart.Clear();
+        _multiDragStartParent.Clear();
+        _isLassoArmed = false;
+        _isLassoing = false;
         _isDraggingWire = false;
         _wireStartPort = null;
+        _reroutingOriginal = null;
         _isResizingContainer = false;
         _resizeNode = null;
+    }
+
+    /// <summary>
+    /// Reattach <paramref name="node"/> to the recorded parent state. Handles
+    /// the three transitions: top-level→zone, zone→zone, zone→top-level, plus
+    /// the no-op case. Index is used to restore the original ordering inside
+    /// the zone's Children collection so re-emit order stays stable.
+    /// </summary>
+    private static void RestoreParent(
+        GraphNode node,
+        (GraphNode? Container, ContainerZone? Zone, int Index) target)
+    {
+        // Detach from current zone if any.
+        if (node.ParentZone != null)
+            node.ParentZone.Children.Remove(node);
+
+        node.ParentContainer = target.Container;
+        node.ParentZone = target.Zone;
+
+        if (target.Zone != null)
+        {
+            if (!target.Zone.Children.Contains(node))
+            {
+                if (target.Index >= 0 && target.Index <= target.Zone.Children.Count)
+                    target.Zone.Children.Insert(target.Index, node);
+                else
+                    target.Zone.Children.Add(node);
+            }
+        }
     }
 
     // ── Input: Scroll (zoom) ───────────────────────────────────
@@ -294,12 +768,20 @@ public class NodeGraphCanvas : Control
             node.ParentZone = null;
         }
 
-        double nodeCenterX = node.X + node.EffectiveWidth / 2;
-        double nodeCenterY = node.Y + node.Height / 2;
+        // Majority-overlap test: a zone wins when the node's bounding rect has
+        // > 50% of its area inside the zone. This is more forgiving than the
+        // previous center-point rule — a node whose center sits just past a
+        // zone border but is otherwise mostly inside still snaps in.
+        double nodeW = node.EffectiveWidth;
+        double nodeH = node.Height;
+        double nodeArea = nodeW * nodeH;
 
-        // Collect all matching (container, zone) pairs, then pick the deepest
+        // Tiebreak by nesting depth (prefer innermost) then by overlap area,
+        // so a drop over stacked/nested zones lands in the one the user most
+        // likely intended.
         (GraphNode container, ContainerZone zone)? bestMatch = null;
         int bestDepth = -1;
+        double bestArea = 0;
 
         foreach (var container in _vm.Nodes.Where(n => n.IsContainer))
         {
@@ -312,15 +794,20 @@ public class NodeGraphCanvas : Control
             foreach (var zone in container.Zones)
             {
                 var (zx, zy, zw, zh) = zone.GetAbsoluteRect(container);
-                if (nodeCenterX >= zx && nodeCenterX <= zx + zw &&
-                    nodeCenterY >= zy && nodeCenterY <= zy + zh)
+                double ix = Math.Max(node.X, zx);
+                double iy = Math.Max(node.Y, zy);
+                double ix2 = Math.Min(node.X + nodeW, zx + zw);
+                double iy2 = Math.Min(node.Y + nodeH, zy + zh);
+                double overlap = Math.Max(0, ix2 - ix) * Math.Max(0, iy2 - iy);
+
+                if (nodeArea <= 0 || overlap <= 0.5 * nodeArea) continue;
+
+                int depth = GetNestingDepth(container);
+                if (depth > bestDepth || (depth == bestDepth && overlap > bestArea))
                 {
-                    int depth = GetNestingDepth(container);
-                    if (depth > bestDepth)
-                    {
-                        bestDepth = depth;
-                        bestMatch = (container, zone);
-                    }
+                    bestDepth = depth;
+                    bestArea = overlap;
+                    bestMatch = (container, zone);
                 }
             }
         }
@@ -388,7 +875,8 @@ public class NodeGraphCanvas : Control
         {
             var n = _vm.Nodes[i];
             if (n.IsContainer) continue;
-            if (canvasPos.X >= n.X && canvasPos.X <= n.X + n.Width &&
+            double nw = NodeLayout.GetEffectiveWidth(n);
+            if (canvasPos.X >= n.X && canvasPos.X <= n.X + nw &&
                 canvasPos.Y >= n.Y && canvasPos.Y <= n.Y + n.Height)
                 return n;
         }
@@ -415,6 +903,9 @@ public class NodeGraphCanvas : Control
         {
             foreach (var port in node.Inputs.Concat(node.Outputs))
             {
+                // Hidden pins on collapsed nodes mustn't accept clicks.
+                if (!node.IsPortVisible(port)) continue;
+
                 var portPos = NodeGraphRenderer.GetPortPosition(node, port);
                 double dist = Math.Sqrt(
                     Math.Pow(canvasPos.X - portPos.X, 2) +
@@ -443,6 +934,30 @@ public class NodeGraphCanvas : Control
                     Math.Pow(canvasPos.Y - sample.Y, 2));
                 if (dist < 8) return conn;
             }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Hit-test for the collapse chevron in a regular node's header — a 24×HeaderHeight
+    /// box anchored at the top-right corner. Containers use the Function zone model
+    /// instead and don't carry a chevron.
+    /// </summary>
+    private GraphNode? HitChevron(Point canvasPos)
+    {
+        if (_vm == null) return null;
+
+        double hh = GraphNode.HeaderHeight;
+        for (int i = _vm.Nodes.Count - 1; i >= 0; i--)
+        {
+            var n = _vm.Nodes[i];
+            if (n.IsContainer) continue;
+
+            double w = NodeLayout.GetEffectiveWidth(n);
+            double cx = n.X + w - 24;
+            if (canvasPos.X >= cx && canvasPos.X <= n.X + w &&
+                canvasPos.Y >= n.Y && canvasPos.Y <= n.Y + hh)
+                return n;
         }
         return null;
     }
@@ -495,6 +1010,68 @@ public class NodeGraphCanvas : Control
             }
     }
 
+    // ── Public commands (driven by keyboard shortcuts) ─────────
+
+    /// <summary>
+    /// Fit the viewport to contain all top-level nodes (or just the selected
+    /// node when <paramref name="selectionOnly"/> is true). No-op if the graph
+    /// is empty or the control has no usable size yet.
+    /// </summary>
+    public void ZoomToFit(bool selectionOnly = false)
+    {
+        if (_vm == null) return;
+        if (Bounds.Width < 50 || Bounds.Height < 50) return;
+
+        var set = (selectionOnly && _vm.SelectedNodes.Count > 0
+            ? _vm.SelectedNodes.ToArray()
+            : _vm.Nodes.Where(n => n.ParentContainer == null).ToArray());
+        if (set.Length == 0) return;
+
+        double minX = set.Min(n => n.X);
+        double minY = set.Min(n => n.Y);
+        double maxX = set.Max(n => n.X + (n.IsContainer ? n.ContainerWidth : NodeLayout.GetEffectiveWidth(n)));
+        double maxY = set.Max(n => n.Y + (n.IsContainer ? n.ContainerHeight : n.Height));
+
+        const double pad = 80;
+        double w = (maxX - minX) + pad * 2;
+        double h = (maxY - minY) + pad * 2;
+
+        double zoom = Math.Min(Bounds.Width / w, Bounds.Height / h);
+        zoom = Math.Clamp(zoom, 0.1, 3.0);
+
+        // Center the bounding rect in the viewport at the new zoom.
+        double cx = (minX + maxX) / 2;
+        double cy = (minY + maxY) / 2;
+        _vm.Zoom = zoom;
+        _vm.PanX = Bounds.Width / 2 - cx * zoom;
+        _vm.PanY = Bounds.Height / 2 - cy * zoom;
+    }
+
+    /// <summary>
+    /// Cancel any in-flight drag: wire drag (restoring a rerouted wire if
+    /// applicable), node drag, container resize, or panning. Used by Esc.
+    /// </summary>
+    public void CancelDrag()
+    {
+        if (_isDraggingWire && _reroutingOriginal != null && _vm != null)
+        {
+            _vm.Connections.Add(_reroutingOriginal);
+            _vm.Undo.PopUndo();  // cancel the press-path's Remove record
+        }
+
+        _isPanning = false;
+        _isDraggingNode = false;
+        _dragNode = null;
+        _multiDragStart.Clear();
+        _isLassoArmed = false;
+        _isLassoing = false;
+        _isDraggingWire = false;
+        _wireStartPort = null;
+        _reroutingOriginal = null;
+        _isResizingContainer = false;
+        _resizeNode = null;
+    }
+
     // ── Rendering ──────────────────────────────────────────────
 
     public override void Render(DrawingContext context)
@@ -504,6 +1081,7 @@ public class NodeGraphCanvas : Control
 
         _renderer.Render(context, Bounds, _vm,
             _isDraggingWire, _wireStartPort, _wireEndPoint,
-            _isDraggingNode, _dragNode);
+            _isDraggingNode, _dragNode,
+            _isLassoing, _lassoStart, _lassoEnd);
     }
 }

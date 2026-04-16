@@ -1,0 +1,143 @@
+name: Build
+
+# Trigger on every push to any branch, PRs, and v* tags. workflow_dispatch
+# lets us kick off a build manually for any branch.
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+# contents:write is needed so the branch-pre-release and tagged-release
+# steps can create / update releases. Default token doesn't have this.
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so version tools / changelog generators can see commits.
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Compose the version the build is stamped with:
+      #   - tag v1.2.3     →  1.2.3                        (assembly + informational)
+      #   - branch / PR    →  <baseFromCsproj>.<run>        (assembly)
+      #                       <baseFromCsproj>+<run>.<sha>.<branch>  (informational)
+      # Assembly version must be 4-part numeric; informational is a free string
+      # that surfaces in Properties → Details on the .exe.
+      - name: Compute version
+        id: ver
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content PoSHBlox.csproj
+          $baseVersion = [string]$csproj.Project.PropertyGroup.Version
+          if ($baseVersion.Contains(' ')) { $baseVersion = $baseVersion.Trim() }
+
+          $shortSha   = "${{ github.sha }}".Substring(0, 7)
+          $runNumber  = "${{ github.run_number }}"
+          $refType    = "${{ github.ref_type }}"
+          $refName    = "${{ github.ref_name }}"
+          $branchSafe = ($refName -replace '[^a-zA-Z0-9._-]', '-')
+
+          if ($refType -eq 'tag' -and $refName -match '^v') {
+              $assemblyVersion      = $refName.Substring(1)
+              $informationalVersion = $assemblyVersion
+          } else {
+              $assemblyVersion      = "$baseVersion.$runNumber"
+              $informationalVersion = "$baseVersion+$runNumber.$shortSha.$branchSafe"
+          }
+
+          Write-Host "Assembly:      $assemblyVersion"
+          Write-Host "Informational: $informationalVersion"
+          Write-Host "Branch slug:   $branchSafe"
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "assembly=$assemblyVersion"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "informational=$informationalVersion"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "branch_safe=$branchSafe"
+
+      - name: Restore
+        run: dotnet restore PoSHBlox.csproj
+
+      # PublishSingleFile is already on in the csproj; --self-contained + -r win-x64
+      # gives a standalone .exe that doesn't require .NET to be installed on the
+      # target machine. The -p:* overrides stamp the build with our computed version.
+      - name: Publish (win-x64, self-contained)
+        run: |
+          dotnet publish PoSHBlox.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:Version=${{ steps.ver.outputs.assembly }} `
+            -p:AssemblyVersion=${{ steps.ver.outputs.assembly }} `
+            -p:FileVersion=${{ steps.ver.outputs.assembly }} `
+            -p:InformationalVersion=${{ steps.ver.outputs.informational }} `
+            -o publish
+
+      # PublishSingleFile embeds the managed binaries, but the csproj copies
+      # Templates/*.json and Scripts/*.ps1 alongside the exe — those are needed
+      # at runtime (palette catalogs + introspector script). Zip the whole
+      # publish folder so downloaders get a complete working bundle.
+      - name: Package artifact (zip)
+        id: pkg
+        shell: pwsh
+        run: |
+          $baseName   = "PoSHBlox-${{ steps.ver.outputs.branch_safe }}-${{ steps.ver.outputs.assembly }}"
+          $zipPath    = "$baseName.zip"
+          # Rename the exe inside publish/ before zipping, so extracted contents
+          # match the download name.
+          Rename-Item publish/PoSHBlox.exe "$baseName.exe"
+          Compress-Archive -Path publish/* -DestinationPath $zipPath -CompressionLevel Optimal
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "name=$baseName"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "zip=$zipPath"
+
+      # Every run uploads its zip as a run artifact — accessible via the Actions
+      # tab → workflow run → Artifacts. Covers PR builds where we don't create
+      # a release.
+      - name: Upload run artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pkg.outputs.name }}
+          path: ${{ steps.pkg.outputs.zip }}
+          retention-days: 30
+
+      # Branch pushes (not PRs, not tags): upsert a rolling pre-release named
+      # after the branch. Going to the Releases page, a user can find each
+      # branch's latest build and grab the attached .exe. This is what delivers
+      # "go on GitHub for any branch and grab the .exe."
+      - name: Upsert branch pre-release
+        if: github.event_name == 'push' && github.ref_type == 'branch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: branch-${{ steps.ver.outputs.branch_safe }}
+          name: "Branch build: ${{ github.ref_name }}"
+          body: |
+            Automated build of branch `${{ github.ref_name }}` at `${{ github.sha }}`.
+
+            - Assembly version: `${{ steps.ver.outputs.assembly }}`
+            - Informational: `${{ steps.ver.outputs.informational }}`
+            - Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}>
+
+            This pre-release rolls with the branch — each push overwrites the
+            attached `.exe`. Delete the branch to retire it.
+          prerelease: true
+          make_latest: 'false'
+          files: ${{ steps.pkg.outputs.zip }}
+
+      # Tag pushes matching v* create a proper release. The tag version drives
+      # the stamped AssemblyVersion above, so the .exe's metadata matches.
+      - name: Create tagged release
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ${{ steps.pkg.outputs.zip }}
