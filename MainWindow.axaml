@@ -483,8 +483,16 @@
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
+                                                            <!-- Per-parameter help. Truncated to ~2 lines in-panel; full
+                                                                 text surfaces on hover so long Get-Help descriptions
+                                                                 don't blow out the panel while staying discoverable. -->
                                                             <TextBlock Text="{Binding Description}" FontSize="10"
-                                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
+                                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxLines="2"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       ToolTip.Tip="{Binding Description}"
+                                                                       ToolTip.ShowDelay="300"
                                                                        IsVisible="{Binding !IsBool}" />
 
                                                             <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
