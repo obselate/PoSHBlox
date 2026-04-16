@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -25,6 +26,15 @@ public static class TemplateLoader
         WriteIndented = true,
     };
 
+    /// <summary>
+    /// Cmdlet name → editions (<c>"pwsh"</c> / <c>"powershell"</c>) the catalog was
+    /// introspected against. Built during <see cref="LoadAll"/> from each catalog's
+    /// <see cref="TemplateCatalogDto.IntrospectedHosts"/> entries. Consumed by the
+    /// Run-button mismatch check.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlySet<string>> CmdletEditions { get; private set; }
+        = new Dictionary<string, IReadOnlySet<string>>();
+
     public static List<NodeTemplate> LoadAll()
     {
         var baseDir = AppContext.BaseDirectory;
@@ -32,14 +42,23 @@ public static class TemplateLoader
         var customDir = Path.Combine(baseDir, "Templates", "Custom");
 
         var templates = new List<NodeTemplate>();
+        var editions = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
-        LoadFromDirectory(builtinDir, templates);
-        LoadFromDirectory(customDir, templates);
+        LoadFromDirectory(builtinDir, templates, editions);
+        LoadFromDirectory(customDir, templates, editions);
+
+        CmdletEditions = editions.ToDictionary(
+            kv => kv.Key,
+            kv => (IReadOnlySet<string>)kv.Value,
+            StringComparer.OrdinalIgnoreCase);
 
         return templates;
     }
 
-    private static int LoadFromDirectory(string dir, List<NodeTemplate> templates)
+    private static int LoadFromDirectory(
+        string dir,
+        List<NodeTemplate> templates,
+        Dictionary<string, HashSet<string>> editionsAccumulator)
     {
         if (!Directory.Exists(dir)) return 0;
 
@@ -52,6 +71,13 @@ public static class TemplateLoader
                 var catalog = JsonSerializer.Deserialize<TemplateCatalogDto>(json, Options);
                 if (catalog?.Templates == null) continue;
 
+                // Split "pwsh-7.4.1" / "powershell-5.1" → "pwsh" / "powershell".
+                // Unknown shapes are dropped rather than treated as an edition.
+                var catalogEditions = catalog.IntrospectedHosts
+                    .Select(h => h.Split('-', 2)[0])
+                    .Where(e => e is "pwsh" or "powershell")
+                    .ToList();
+
                 foreach (var t in catalog.Templates)
                 {
                     t.Category = catalog.Category;
@@ -60,6 +86,14 @@ public static class TemplateLoader
                     if (t.Tags.Count == 0)
                         t.Tags = [..PaletteTaxonomy.DeriveTags(t.CmdletName)];
                     templates.Add(t);
+
+                    if (!string.IsNullOrEmpty(t.CmdletName) && catalogEditions.Count > 0)
+                    {
+                        if (!editionsAccumulator.TryGetValue(t.CmdletName, out var set))
+                            editionsAccumulator[t.CmdletName] = set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var e in catalogEditions)
+                            set.Add(e);
+                    }
                 }
                 count++;
             }

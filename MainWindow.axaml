@@ -88,7 +88,45 @@
                 BorderBrush="{DynamicResource BorderPrimaryBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="4,3">
-            <StackPanel Orientation="Horizontal" Spacing="3">
+            <DockPanel LastChildFill="False">
+                <!-- Right-docked status chip: active PowerShell host.
+                     Declared before the left stack so it wins when space is tight. -->
+                <Button DockPanel.Dock="Right"
+                        DataContext="{x:Static vm:HostStatusViewModel.Instance}"
+                        Margin="0,0,4,0" Padding="8,4" CornerRadius="3"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource BgSecondaryBrush}"
+                        Foreground="{DynamicResource TextSecondaryBrush}"
+                        BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                        BorderThickness="1"
+                        FontSize="11"
+                        ToolTip.Tip="Active PowerShell host — click to switch. Restart PoSHBlox to pick up newly-installed hosts.">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                        <ui:SymbolIcon Symbol="Setting" FontSize="12" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Button.Flyout>
+                        <Flyout Placement="Bottom">
+                            <StackPanel Spacing="8" MinWidth="240" Margin="4">
+                                <TextBlock Text="PowerShell host" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <ListBox ItemsSource="{Binding AllHosts}"
+                                         SelectedItem="{Binding SelectedHost, Mode=TwoWay}"
+                                         Background="Transparent" BorderThickness="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DisplayName}" Padding="2,1" FontSize="12" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <TextBlock Text="Restart PoSHBlox to pick up newly-installed hosts."
+                                           FontSize="10" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMutedBrush}" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="3" DockPanel.Dock="Left">
                 <Button Click="OnNewClicked" Padding="10,6" CornerRadius="4"
                         ToolTip.Tip="New blank graph (Ctrl+N)"
                         Background="{DynamicResource BgSaveTintBrush}"
@@ -234,7 +272,8 @@
                     </Button.Resources>
                     <TextBlock Text="Reset View" VerticalAlignment="Center" />
                 </Button>
-            </StackPanel>
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <!-- ══════ Main content: Graph area + resizable Script Panel ══════ -->

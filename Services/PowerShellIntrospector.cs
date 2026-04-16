@@ -31,7 +31,7 @@ public static class PowerShellIntrospector
         if (!File.Exists(scriptPath))
             throw new FileNotFoundException("Introspection script not found.", scriptPath);
 
-        host ??= PowerShellHostRegistry.Default
+        host ??= PowerShellHostRegistry.Active
             ?? throw new InvalidOperationException("No PowerShell host detected on PATH (pwsh.exe or powershell.exe).");
 
         Console.Out.WriteLine($"[regen]   using host '{host.DisplayName}' ({host.Executable})");

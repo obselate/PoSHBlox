@@ -41,12 +41,32 @@ public sealed record PowerShellHost
 public static class PowerShellHostRegistry
 {
     private static readonly Lazy<IReadOnlyList<PowerShellHost>> _all = new(DetectAll);
+    private static PowerShellHost? _active;
+
+    /// <summary>Raised when <see cref="Active"/> changes so UI bindings can refresh.</summary>
+    public static event Action? ActiveHostChanged;
 
     /// <summary>All detected hosts, in preference order (pwsh first when present).</summary>
     public static IReadOnlyList<PowerShellHost> All => _all.Value;
 
-    /// <summary>Preferred host for introspection and Run. Null if no host is detected.</summary>
+    /// <summary>Preferred host when no override is set — pwsh 7+ when present, else 5.1. Null if no host detected.</summary>
     public static PowerShellHost? Default => All.Count > 0 ? All[0] : null;
+
+    /// <summary>
+    /// Host the UI + Run + Introspect should use this session. Defaults to
+    /// <see cref="Default"/>; user can flip via the status chip. Session-only —
+    /// not persisted yet (Phase 4 adds settings).
+    /// </summary>
+    public static PowerShellHost? Active
+    {
+        get => _active ?? Default;
+        set
+        {
+            if (ReferenceEquals(_active, value)) return;
+            _active = value;
+            ActiveHostChanged?.Invoke();
+        }
+    }
 
     /// <summary>Look up by <see cref="PowerShellHost.Id"/>; returns null when absent.</summary>
     public static PowerShellHost? ById(string id) =>

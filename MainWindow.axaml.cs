@@ -324,24 +324,26 @@ public partial class MainWindow : AppWindow
         }
     }
 
-    private void OnRunClicked(object? sender, RoutedEventArgs e)
+    private async void OnRunClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
 
         var script = GenerateScript(vm);
         if (string.IsNullOrWhiteSpace(script)) return;
 
+        var host = PowerShellHostRegistry.Active;
+        if (host == null)
+        {
+            Debug.WriteLine("Failed to run script: no PowerShell host detected on PATH.");
+            return;
+        }
+
+        if (!await ConfirmHostCompatibilityAsync(vm, host)) return;
+
         try
         {
             var tempPath = Path.Combine(Path.GetTempPath(), $"PoSHBlox_{Guid.NewGuid():N}.ps1");
             File.WriteAllText(tempPath, script);
-
-            var host = PowerShellHostRegistry.Default;
-            if (host == null)
-            {
-                Debug.WriteLine("Failed to run script: no PowerShell host detected on PATH.");
-                return;
-            }
 
             var psi = new ProcessStartInfo
             {
@@ -369,6 +371,45 @@ public partial class MainWindow : AppWindow
         {
             Debug.WriteLine($"Failed to run script: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Checks the graph's cmdlets against <see cref="TemplateLoader.CmdletEditions"/>.
+    /// If any cmdlet was only introspected against an edition that isn't the active
+    /// host's, prompts the user to continue or cancel.
+    /// </summary>
+    private async Task<bool> ConfirmHostCompatibilityAsync(GraphCanvasViewModel vm, PowerShellHost host)
+    {
+        var editionMap = TemplateLoader.CmdletEditions;
+        if (editionMap.Count == 0) return true;
+
+        var mismatched = vm.Nodes
+            .Select(n => n.CmdletName)
+            .Where(c => !string.IsNullOrEmpty(c))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(c => editionMap.TryGetValue(c, out var eds) && !eds.Contains(host.Edition))
+            .ToList();
+
+        if (mismatched.Count == 0) return true;
+
+        var preview = mismatched.Take(6).ToList();
+        var more = mismatched.Count - preview.Count;
+        var list = string.Join(", ", preview) + (more > 0 ? $" (+{more} more)" : "");
+
+        var dialog = new ContentDialog
+        {
+            Title = "PowerShell host mismatch",
+            Content = $"{mismatched.Count} cmdlet(s) in this graph were introspected against a different "
+                      + $"PowerShell edition than the active host ({host.DisplayName}):\n\n"
+                      + $"{list}\n\n"
+                      + "Parameter names or availability may differ. Continue anyway?",
+            PrimaryButtonText = "Run anyway",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     private async void OnOpenClicked(object? sender, RoutedEventArgs e)
