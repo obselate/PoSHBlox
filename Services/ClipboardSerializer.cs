@@ -28,11 +28,10 @@ public static class ClipboardSerializer
     public const string MagicString = "pblx-clip";
     public const int CurrentVersion = 2;
 
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options)
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public sealed class Payload

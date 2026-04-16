@@ -21,11 +21,10 @@ public static class ProjectSerializer
 {
     public const int CurrentVersion = 2;
 
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options)
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     /// <summary>

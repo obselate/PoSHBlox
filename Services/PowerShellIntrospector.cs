@@ -19,10 +19,7 @@ namespace PoSHBlox.Services;
 /// </summary>
 public static class PowerShellIntrospector
 {
-    private static readonly JsonSerializerOptions Options = new()
-    {
-        TypeInfoResolver = PblxJsonContext.Default,
-    };
+    private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options);
 
     private static string? _resolvedHost;
 

@@ -21,18 +21,21 @@ namespace PoSHBlox.Services;
 /// </summary>
 public static class TemplateRegenerator
 {
-    private static readonly JsonSerializerOptions ReadOptions = new()
+    // Copy from the source-gen context's baked options so PropertyNamingPolicy
+    // (camelCase) and the string-enum converter carry through. Setting only
+    // TypeInfoResolver on a fresh JsonSerializerOptions attaches the resolver
+    // but drops the policy — deserialize then fails to map JSON keys like
+    // "targets" to C# Targets and the manifest load silently returns empty.
+    private static readonly JsonSerializerOptions ReadOptions = new(PblxJsonContext.Default.Options)
     {
         ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true,
-        TypeInfoResolver = PblxJsonContext.Default,
     };
 
-    private static readonly JsonSerializerOptions WriteOptions = new()
+    private static readonly JsonSerializerOptions WriteOptions = new(PblxJsonContext.Default.Options)
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public class Options

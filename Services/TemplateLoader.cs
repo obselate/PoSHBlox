@@ -14,15 +14,15 @@ namespace PoSHBlox.Services;
 /// </summary>
 public static class TemplateLoader
 {
-    private static readonly JsonSerializerOptions Options = new()
-    {
-        TypeInfoResolver = PblxJsonContext.Default,
-    };
+    // Copy from the source-gen context's baked options so the camelCase
+    // PropertyNamingPolicy (and string-enum converter) flow through. Just
+    // setting TypeInfoResolver on a bare JsonSerializerOptions attaches
+    // the resolver but drops the attribute-declared policies.
+    private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options);
 
-    private static readonly JsonSerializerOptions WriteOptions = new()
+    private static readonly JsonSerializerOptions WriteOptions = new(PblxJsonContext.Default.Options)
     {
         WriteIndented = true,
-        TypeInfoResolver = PblxJsonContext.Default,
     };
 
     public static List<NodeTemplate> LoadAll()
