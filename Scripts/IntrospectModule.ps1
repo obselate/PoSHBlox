@@ -223,7 +223,23 @@ foreach ($cmd in $commands) {
             }
         }
 
+        # Description precedence:
+        #   1. [Parameter(HelpMessage='...')] attribute    -- author-set, concise.
+        #   2. Get-Help's per-parameter 'description' text -- MS-maintained doc
+        #      prose, usually a paragraph; we collapse to a single line and cap.
+        #   3. empty string                                -- don't block the UI.
+        # The one-line cap keeps the properties panel tidy; users can read
+        # fuller help via Get-Help in a shell for now.
         $helpMsg = ($paramAttrs | Select-Object -First 1).HelpMessage
+        if (-not $helpMsg -and $help -and $help.parameters -and $help.parameters.parameter) {
+            $ph = $help.parameters.parameter | Where-Object { $_.name -eq $paramName } | Select-Object -First 1
+            if ($ph -and $ph.description) {
+                $text = ($ph.description | ForEach-Object { $_.Text }) -join ' '
+                $text = ($text -replace '\r?\n', ' ' -replace '\s{2,}', ' ').Trim()
+                if ($text.Length -gt 160) { $text = $text.Substring(0, 157) + '...' }
+                $helpMsg = $text
+            }
+        }
         if (-not $helpMsg) { $helpMsg = "" }
 
         if ($isPipelineInput -and -not $primaryPipelineParam) {
