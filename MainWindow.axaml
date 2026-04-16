@@ -17,6 +17,17 @@
     </uiw:AppWindow.DataContext>
 
     <uiw:AppWindow.Styles>
+        <!-- Expandable parameter description: 2 lines by default, full text on hover. -->
+        <Style Selector="TextBlock.paramDesc">
+            <Setter Property="MaxLines" Value="2" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="TextBlock.paramDesc:pointerover">
+            <Setter Property="MaxLines" Value="1000" />
+            <Setter Property="TextTrimming" Value="None" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+
         <!-- Cheat sheet row styles — target by class, idiomatic Avalonia. -->
         <Style Selector="TextBlock.cheatKey">
             <Setter Property="FontFamily" Value="{DynamicResource FontMono}" />
@@ -483,27 +494,17 @@
                                                                 <TextBlock Text="{Binding Type, StringFormat='[{0}]'}" FontSize="9"
                                                                            Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
                                                             </StackPanel>
-                                                            <!-- Per-parameter help. 2 lines by default; on hover the
-                                                                 TextBlock expands to show the full description inline.
-                                                                 Background="Transparent" is required for the TextBlock
-                                                                 to receive pointer events — a null Background makes it
-                                                                 invisible to hit-testing and :pointerover never fires. -->
-                                                            <TextBlock Text="{Binding Description}" FontSize="10"
+                                                            <!-- Per-parameter help. 2 lines by default; expands to full on
+                                                                 hover via the paramDesc class style defined at window level
+                                                                 (local TextBlock.Styles inside a DataTemplate didn't take). -->
+                                                            <TextBlock Text="{Binding Description}"
+                                                                       Classes="paramDesc"
+                                                                       FontSize="10"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                                        Background="Transparent"
                                                                        TextWrapping="Wrap"
-                                                                       MaxLines="2"
-                                                                       TextTrimming="CharacterEllipsis"
                                                                        Cursor="Hand"
-                                                                       IsVisible="{Binding !IsBool}">
-                                                                <TextBlock.Styles>
-                                                                    <Style Selector="TextBlock:pointerover">
-                                                                        <Setter Property="MaxLines" Value="1000" />
-                                                                        <Setter Property="TextTrimming" Value="None" />
-                                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-                                                                    </Style>
-                                                                </TextBlock.Styles>
-                                                            </TextBlock>
+                                                                       IsVisible="{Binding !IsBool}" />
 
                                                             <!-- Wired chip: replaces the literal editor when a wire feeds this parameter's pin. -->
                                                             <Border IsVisible="{Binding IsWired}"
