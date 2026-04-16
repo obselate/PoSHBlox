@@ -15,28 +15,31 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  # Compute the stamped version exactly once so every downstream job + matrix
+  # entry agrees on the same numbers. Without this, two matrix entries might
+  # observe different tag state between their checkouts.
+  version:
     runs-on: windows-latest
+    outputs:
+      assembly:         ${{ steps.ver.outputs.assembly }}
+      informational:    ${{ steps.ver.outputs.informational }}
+      branch_safe:      ${{ steps.ver.outputs.branch_safe }}
+      is_main_release:  ${{ steps.ver.outputs.is_main_release }}
+      release_tag:      ${{ steps.ver.outputs.release_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Fetch full history so version tools / changelog generators can see commits.
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
       # Compose the version the build is stamped with:
-      #   - tag v1.2.3     →  1.2.3                        (assembly + informational)
+      #   - tag v1.2.3     →  1.2.3                              (assembly + informational)
       #   - main + fresh bump (no v<csproj-version> tag yet)
-      #                    →  <baseFromCsproj>               (assembly + informational)
+      #                    →  <baseFromCsproj>                    (assembly + informational)
       #                       also flags is_main_release=True so the release
-      #                       step below creates the tag + release.
+      #                       job creates the tag + release.
       #   - other branches / PRs
-      #                    →  <baseFromCsproj>.<run>        (assembly)
+      #                    →  <baseFromCsproj>.<run>              (assembly)
       #                       <baseFromCsproj>+<run>.<sha>.<branch>  (informational)
       # Assembly version must be 4-part numeric; informational is a free string
       # that surfaces in Properties → Details on the .exe.
@@ -55,9 +58,9 @@ jobs:
           $branchSafe = ($refName -replace '[^a-zA-Z0-9._-]', '-')
 
           # Detect "main with a fresh version bump" — a push to main whose
-          # csproj <Version> doesn't yet have a matching v<version> tag on the
-          # remote. When true, stamp the build with clean semver and the
-          # downstream step will cut a proper tagged release.
+          # csproj <Version> doesn't yet have a matching v<version> tag on
+          # the remote. When true, stamp the build with clean semver and the
+          # downstream release job cuts a proper tagged release.
           $isMainRelease = $false
           if ($refType -eq 'branch' -and $refName -eq 'main' -and '${{ github.event_name }}' -eq 'push') {
             git fetch origin --tags --quiet 2>$null
@@ -87,25 +90,45 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "is_main_release=$isMainRelease"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "release_tag=v$baseVersion"
 
-      - name: Restore
-        run: dotnet restore PoSHBlox.csproj
+  # Build one zip per RID, in parallel. Each zip contains a self-contained
+  # single-file .exe that runs on a fresh Windows install without any .NET
+  # runtime preinstalled. PublishSingleFile + compression + native-libraries-
+  # self-extract are already declared in the csproj; the CLI flags below just
+  # select runtime + stamp the version metadata.
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-arm64]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # PublishSingleFile is already on in the csproj; --self-contained + -r win-x64
-      # gives a standalone .exe that doesn't require .NET to be installed on the
-      # target machine. The -p:* overrides stamp the build with our computed version.
-      - name: Publish (win-x64, self-contained)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore PoSHBlox.csproj -r ${{ matrix.rid }}
+
+      - name: Publish (${{ matrix.rid }}, self-contained, single-file)
         run: |
           dotnet publish PoSHBlox.csproj `
             -c Release `
-            -r win-x64 `
+            -r ${{ matrix.rid }} `
             --self-contained true `
-            -p:Version=${{ steps.ver.outputs.assembly }} `
-            -p:AssemblyVersion=${{ steps.ver.outputs.assembly }} `
-            -p:FileVersion=${{ steps.ver.outputs.assembly }} `
-            -p:InformationalVersion=${{ steps.ver.outputs.informational }} `
+            -p:Version=${{ needs.version.outputs.assembly }} `
+            -p:AssemblyVersion=${{ needs.version.outputs.assembly }} `
+            -p:FileVersion=${{ needs.version.outputs.assembly }} `
+            -p:InformationalVersion=${{ needs.version.outputs.informational }} `
             -o publish
 
-      # PublishSingleFile embeds the managed binaries, but the csproj copies
+      # PublishSingleFile embeds managed binaries, but the csproj copies
       # Templates/*.json and Scripts/*.ps1 alongside the exe — those are needed
       # at runtime (palette catalogs + introspector script). Zip the whole
       # publish folder so downloaders get a complete working bundle.
@@ -113,18 +136,15 @@ jobs:
         id: pkg
         shell: pwsh
         run: |
-          $baseName   = "PoSHBlox-${{ steps.ver.outputs.branch_safe }}-${{ steps.ver.outputs.assembly }}"
-          $zipPath    = "$baseName.zip"
-          # Rename the exe inside publish/ before zipping, so extracted contents
-          # match the download name.
-          Rename-Item publish/PoSHBlox.exe "$baseName.exe"
+          $baseName = "PoSHBlox-${{ needs.version.outputs.branch_safe }}-${{ needs.version.outputs.assembly }}-${{ matrix.rid }}"
+          $zipPath  = "$baseName.zip"
           Compress-Archive -Path publish/* -DestinationPath $zipPath -CompressionLevel Optimal
           Add-Content -Path $env:GITHUB_OUTPUT -Value "name=$baseName"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "zip=$zipPath"
 
       # Every run uploads its zip as a run artifact — accessible via the Actions
-      # tab → workflow run → Artifacts. Covers PR builds where we don't create
-      # a release.
+      # tab → workflow run → Artifacts. Covers PR builds where the release job
+      # doesn't fire.
       - name: Upload run artifact
         uses: actions/upload-artifact@v4
         with:
@@ -132,56 +152,68 @@ jobs:
           path: ${{ steps.pkg.outputs.zip }}
           retention-days: 30
 
+  # Single release job that downloads all per-RID artifacts and attaches them
+  # to one GitHub release. Skipped on PRs (no pushes, no tags). Three branches
+  # inside handle the three cases: non-main branch pushes → rolling pre-release;
+  # main-branch pushes with a fresh <Version> → tagged release; v* tag pushes
+  # → tagged release (hand-cut hotfix path).
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Download all run artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: PoSHBlox-*
+          path: downloaded
+          merge-multiple: true
+
       # Branch pushes (not PRs, not tags, NOT main): upsert a rolling pre-release
-      # named after the branch. Going to the Releases page, a user can find each
-      # branch's latest build and grab the attached .exe. This is what delivers
-      # "go on GitHub for any branch and grab the .exe." Main is excluded since
-      # main-branch pushes cut proper tagged releases (see below) — we don't
-      # want both a rolling `branch-main` pre-release AND a semver release.
+      # named after the branch, carrying every RID. Main is excluded — main-
+      # branch pushes cut proper tagged releases below, we don't want both.
       - name: Upsert branch pre-release
-        if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref != 'refs/heads/main'
+        if: github.ref_type == 'branch' && github.ref != 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: branch-${{ steps.ver.outputs.branch_safe }}
+          tag_name: branch-${{ needs.version.outputs.branch_safe }}
           name: "Branch build: ${{ github.ref_name }}"
           body: |
             Automated build of branch `${{ github.ref_name }}` at `${{ github.sha }}`.
 
-            - Assembly version: `${{ steps.ver.outputs.assembly }}`
-            - Informational: `${{ steps.ver.outputs.informational }}`
+            - Assembly version: `${{ needs.version.outputs.assembly }}`
+            - Informational: `${{ needs.version.outputs.informational }}`
             - Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}>
 
+            Downloads:
+            - `…-win-x64.zip` — Intel / AMD 64-bit Windows
+            - `…-win-arm64.zip` — ARM64 Windows (Surface Pro X, Copilot+ PCs)
+
             This pre-release rolls with the branch — each push overwrites the
-            attached `.exe`. Delete the branch to retire it.
+            attached zips. Delete the branch to retire it.
           prerelease: true
           make_latest: 'false'
-          files: ${{ steps.pkg.outputs.zip }}
+          files: downloaded/*.zip
 
-      # Main-branch pushes whose csproj <Version> doesn't have a matching tag yet
-      # create a real tagged release. softprops/action-gh-release creates the
-      # tag against the current commit when tag_name doesn't exist remotely, so
-      # we get v<version> pointing at the merge commit plus an attached .exe
-      # stamped with clean semver (no run-number suffix — see compute-version
-      # step above). Bumping csproj <Version> is the trigger for cutting a
-      # release; if the version matches an existing tag the step is a no-op
-      # and the run just uploads a plain artifact.
+      # Main-branch pushes whose csproj <Version> doesn't match an existing tag
+      # cut a real tagged release against the merge commit. Bumping <Version>
+      # in csproj is the single trigger for a release.
       - name: Create main-branch release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ver.outputs.is_main_release == 'True'
+        if: github.ref == 'refs/heads/main' && needs.version.outputs.is_main_release == 'True'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.release_tag }}
-          name: ${{ steps.ver.outputs.release_tag }}
+          tag_name: ${{ needs.version.outputs.release_tag }}
+          name: ${{ needs.version.outputs.release_tag }}
           generate_release_notes: true
           make_latest: 'true'
-          files: ${{ steps.pkg.outputs.zip }}
+          files: downloaded/*.zip
 
-      # Tag pushes matching v* (e.g. hand-cut v1.2.3) create a proper release.
-      # The tag version drives the stamped AssemblyVersion above, so the .exe's
-      # metadata matches. Kept alongside the main-branch path for emergencies
-      # (cut a release from a non-main commit, or hotfix a missed one).
+      # Tag pushes matching v* (e.g. hand-cut v1.2.3 off a non-main commit for
+      # a hotfix) create a proper release. Kept alongside the main-branch path
+      # as an escape hatch.
       - name: Create tagged release
         if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: ${{ steps.pkg.outputs.zip }}
+          files: downloaded/*.zip
