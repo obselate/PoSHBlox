@@ -1,0 +1,13 @@
+Hostname,IP,Role,Owner,Status,LastCheckin
+web-01,10.0.1.10,WebServer,alice,Active,2026-04-10
+web-02,10.0.1.11,WebServer,alice,Active,2026-04-15
+db-01,10.0.2.10,Database,bob,Active,2026-04-16
+db-02,10.0.2.11,Database,bob,Decommissioned,2025-12-01
+app-01,10.0.3.10,AppServer,carol,Active,2026-04-12
+app-02,10.0.3.11,AppServer,carol,Active,2026-04-14
+legacy-01,10.0.9.10,Legacy,dave,Decommissioned,2024-08-22
+web-01,10.0.1.10,WebServer,alice,Active,2026-04-10
+cache-01,10.0.4.10,Cache,eve,Active,2026-04-17
+mon-01,10.0.5.10,Monitoring,frank,Active,2026-04-13
+app-02,10.0.3.11,AppServer,carol,Active,2026-04-14
+backup-old,10.0.9.20,Legacy,dave,Decommissioned,2024-05-01
