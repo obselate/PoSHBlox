@@ -1,0 +1,799 @@
+{
+  "version": 3,
+  "metadata": {
+    "createdUtc": "2026-04-17T22:15:19.5771678Z",
+    "modifiedUtc": "2026-04-17T23:45:49.8799284Z"
+  },
+  "view": {
+    "panX": 157.76719238432003,
+    "panY": -27.904941195100633,
+    "zoom": 0.8558910449100005
+  },
+  "nodes": [
+    {
+      "id": "a46dc0bc",
+      "title": "Get-ChildItem",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-ChildItem",
+      "outputVariable": "",
+      "x": 390,
+      "y": 370,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [
+        "Items",
+        "LiteralItems"
+      ],
+      "activeParameterSet": "Items",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "id": "61d2a70f",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "a97466ee",
+          "name": "Path",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Path",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "f30ded2f",
+          "name": "LiteralPath",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "LiteralPath"
+        },
+        {
+          "id": "d94d24eb",
+          "name": "Filter",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "Filter"
+        },
+        {
+          "id": "1b2c9d1c",
+          "name": "Include",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Include"
+        },
+        {
+          "id": "b42a2e85",
+          "name": "Exclude",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Exclude"
+        },
+        {
+          "id": "58564a2d",
+          "name": "Depth",
+          "kind": "Data",
+          "dataType": "Int",
+          "parameterName": "Depth"
+        },
+        {
+          "id": "ef9b6493",
+          "name": "Attributes",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Attributes"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "562b630a",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "82664484",
+          "name": "FileInfo",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "defaultValue": "C:\\",
+          "description": "Specifies a path to one or more locations. If not specified, the default location is the current directory (\u0060.\u0060). Wildcards are accepted. Use care when using the **Path** parameter with the **Recurse** parameter. For more information, see the [NOTES](#notes) section of this article.",
+          "validValues": [],
+          "value": "C:\\",
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Items"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a path to one or more locations. The value of **LiteralPath** is used exactly as it\u0027s typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell to not interpret any characters as escape sequences. For more information, see [about_Quoting_Rules](../Microsoft.PowerShell.Core/About/about_Quoting_Rules.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "LiteralItems"
+          ],
+          "mandatoryInSets": [
+            "LiteralItems"
+          ]
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a filter to qualify the **Path** parameter. The [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider is the only installed PowerShell provider that supports filters. Filters are more efficient than other parameters. The provider applies filter when the cmdlet gets the objects rather than having PowerShell filter the objects after they\u0027re retrieved. The filter string is passed to the .NET API to enumerate files. The API only supports \u0060*\u0060 and \u0060?\u0060 wildcards.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies an array of one or more string patterns to be matched as the cmdlet gets child items. Any matching item is included in the output. Enter a path element or pattern, such as \u0060\u0022*.txt\u0022\u0060. Wildcard characters are permitted. The **Include** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory. The **Include** and **Exclude** parameters can be used together. However, the exclusions are applied after the inclusions, which can affect the final output.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies an array of one or more string patterns to be matched as the cmdlet gets child items. Any matching item is excluded from the output. Enter a path element or pattern, such as \u0060*.txt\u0060 or \u0060A*\u0060. Wildcard characters are accepted. A trailing asterisk (\u0060*\u0060) in the **Path** parameter is optional. For example, \u0060-Path C:\\Test\\Logs\u0060 or \u0060-Path C:\\Test\\Logs\\*\u0060. If a trailing asterisk (\u0060*\u0060) is included, the command recurses into the **Path** parameter\u0027s subdirectories. Without the asterisk (\u0060*\u0060), the contents of the **Path** parameter are displayed. More details are included in Example 5 and the Notes section. The **Include** and **Exclude** parameters can be used together. However, the exclusions are applied after the inclusions, which can affect the final output.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Recurse",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Gets the items in the specified locations and in all child items of the locations.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Depth",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "This parameter was added in PowerShell 5.0 and enables you to control the depth of recursion. By default, \u0060Get-ChildItem\u0060 displays the contents of the parent directory. The **Depth** parameter determines the number of subdirectory levels that are included in the recursion and displays the contents. For example, \u0060-Depth 2\u0060 includes the **Path** parameter\u0027s directory, first level of subdirectories, and second level of subdirectories. By default directory names and filenames are included in the output. \u003E [!NOTE] \u003E On a Windows computer from PowerShell or **cmd.exe**, you can display a graphical view of a \u003E directory structure with the **tree.com** command.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows the cmdlet to get items that otherwise can\u0027t be accessed by the user, such as hidden or system files. The **Force** parameter doesn\u0027t override security restrictions. Implementation varies by provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Name",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Gets only the names of the items in the location. The output is a string object that can be sent down the pipeline to other commands. The names returned are relative to the value of the **Path** parameter.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Attributes",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. Gets files and folders with the specified attributes. This parameter supports all attributes and lets you specify complex combinations of attributes. For example, to get non-system files (not directories) that are encrypted or compressed, type: \u0060Get-ChildItem -Attributes !Directory\u002B!System\u002BEncrypted, !Directory\u002B!System\u002BCompressed\u0060 To find files and folders with commonly used attributes, use the **Attributes** parameter. Or, the parameters **Directory**, **File**, **Hidden**, **ReadOnly**, and **System**. The **Attributes** parameter supports the following values: - \u0060Archive\u0060 - \u0060Compressed\u0060 - \u0060Device\u0060 - \u0060Directory\u0060 - \u0060Encrypted\u0060 - \u0060Hidden\u0060 - \u0060IntegrityStream\u0060 - \u0060Normal\u0060 - \u0060NoScrubData\u0060 - \u0060NotContentIndexed\u0060 - \u0060Offline\u0060 - \u0060ReadOnly\u0060 - \u0060ReparsePoint\u0060 - \u0060SparseFile\u0060 - \u0060System\u0060 - \u0060Temporary\u0060 For a description of these attributes, see the [FileAttributes](xref:System.IO.FileAttributes) enumeration. To combine attributes, use the following operators: - \u0060!\u0060 (NOT) - \u0060\u002B\u0060 (AND) - \u0060,\u0060 (OR) Don\u0027t use spaces between an operator and its attribute. Spaces are accepted after commas. For common attributes, use the following abbreviations: - \u0060D\u0060 (Directory) - \u0060H\u0060 (Hidden) - \u0060R\u0060 (Read-only) - \u0060S\u0060 (System)",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "FollowSymlink",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. By default, the \u0060Get-ChildItem\u0060 cmdlet displays symbolic links to directories found during recursion, but doesn\u0027t recurse into them. Use the **FollowSymlink** parameter to search the directories that target those symbolic links. The **FollowSymlink** is a dynamic parameter and is supported only in the **FileSystem** provider. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Directory",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get a list of directories, use the **Directory** parameter or the **Attributes** parameter with the **Directory** property. You can use the **Recurse** parameter with **Directory**.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "File",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get a list of files, use the **File** parameter. You can use the **Recurse** parameter with **File**.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Hidden",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get only hidden items, use the **Hidden** parameter or the **Attributes** parameter with the **Hidden** property. By default, \u0060Get-ChildItem\u0060 doesn\u0027t display hidden items. Use the **Force** parameter to get hidden items.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ReadOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get only read-only items, use the **ReadOnly** parameter or the **Attributes** parameter **ReadOnly** property.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "System",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. Gets only system files and directories. To get only system files and folders, use the **System** parameter or **Attributes** parameter **System** property.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "UseTransaction",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "3f93656f",
+      "title": "$HOME",
+      "category": "Values",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 180,
+      "y": 270,
+      "width": 200,
+      "kind": "Value",
+      "valueExpression": "$HOME",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "e9406a4f",
+          "name": "",
+          "kind": "Data",
+          "dataType": "Path",
+          "isPrimary": true
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "89fb7229",
+      "title": "ForEach-Object",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 690,
+      "y": 370,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "ForEach",
+      "containerWidth": 680,
+      "containerHeight": 540,
+      "zones": [
+        {
+          "name": "Body"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "da4fc7e5",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "4e1caa6d",
+          "name": "Source",
+          "kind": "Data",
+          "dataType": "Collection",
+          "isPrimaryPipelineTarget": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "89c45108",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "3b99299b",
+          "name": "Item",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "IterationVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Name for the current item (e.g. proc, file). Leave blank to use $_. Required only when nesting ForEach loops.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "c731509f",
+      "title": "If / Else",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 720,
+      "y": 470,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "IfElse",
+      "containerWidth": 630,
+      "containerHeight": 420,
+      "zones": [
+        {
+          "name": "Then"
+        },
+        {
+          "name": "Else"
+        }
+      ],
+      "parentNodeId": "89fb7229",
+      "parentZoneName": "Body",
+      "inputs": [
+        {
+          "id": "de434aef",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "2601f693",
+          "name": "Condition",
+          "kind": "Data",
+          "dataType": "ScriptBlock",
+          "parameterName": "Condition"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "daa6edf5",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Condition",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Boolean expression to evaluate \u2014 e.g. $count -gt 0. Wire a node in to compute dynamically.",
+          "validValues": [],
+          "value": "$_.Length -gt 1MB",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "4708ce79",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 740,
+      "y": 550,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c731509f",
+      "parentZoneName": "Then",
+      "inputs": [
+        {
+          "id": "6413213a",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "9ec7d295",
+          "name": "Object",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Object",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "7ae51c89",
+          "name": "Separator",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Separator"
+        },
+        {
+          "id": "a5fe15c6",
+          "name": "ForegroundColor",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "ForegroundColor"
+        },
+        {
+          "id": "28b8745d",
+          "name": "BackgroundColor",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "BackgroundColor"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "d93f27d0",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "3b330ce9",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Objects to display in the host.",
+          "validValues": [],
+          "value": "\u0022LARGE:$($_.Name) $([math]::Round($_.Length/1MB,2)) MB\u0022",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Separator",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a separator string to insert between objects displayed by the host.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the text color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "Yellow",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the background color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "de021d9e",
+      "title": "Write-Host",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "outputVariable": "",
+      "x": 1050,
+      "y": 550,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "c731509f",
+      "parentZoneName": "Else",
+      "inputs": [
+        {
+          "id": "1a7f8f92",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "f0e76b23",
+          "name": "Object",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Object",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "1394d53e",
+          "name": "Separator",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Separator"
+        },
+        {
+          "id": "1e811f78",
+          "name": "ForegroundColor",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "ForegroundColor"
+        },
+        {
+          "id": "e6dcd099",
+          "name": "BackgroundColor",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "BackgroundColor"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "e2039dfa",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "45befbed",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Objects to display in the host.",
+          "validValues": [],
+          "value": "\u0022small: $($_.Name)\u0022",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Separator",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a separator string to insert between objects displayed by the host.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the text color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "DarkGray",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the background color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "3f93656f",
+      "targetNodeId": "a46dc0bc",
+      "sourcePortId": "e9406a4f",
+      "targetPortId": "a97466ee"
+    },
+    {
+      "sourceNodeId": "a46dc0bc",
+      "targetNodeId": "89fb7229",
+      "sourcePortId": "562b630a",
+      "targetPortId": "da4fc7e5"
+    },
+    {
+      "sourceNodeId": "a46dc0bc",
+      "targetNodeId": "89fb7229",
+      "sourcePortId": "82664484",
+      "targetPortId": "4e1caa6d"
+    }
+  ]
+}
