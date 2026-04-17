@@ -41,7 +41,9 @@ public sealed record PowerShellHost
 public static class PowerShellHostRegistry
 {
     private static readonly Lazy<IReadOnlyList<PowerShellHost>> _all = new(DetectAll);
+    private static readonly Lazy<PowerShellHost?> _persistedActive = new(LoadPersistedActive);
     private static PowerShellHost? _active;
+    private static bool _activeInitialized;
 
     /// <summary>Raised when <see cref="Active"/> changes so UI bindings can refresh.</summary>
     public static event Action? ActiveHostChanged;
@@ -53,19 +55,41 @@ public static class PowerShellHostRegistry
     public static PowerShellHost? Default => All.Count > 0 ? All[0] : null;
 
     /// <summary>
-    /// Host the UI + Run + Introspect should use this session. Defaults to
-    /// <see cref="Default"/>; user can flip via the status chip. Session-only —
-    /// not persisted yet (Phase 4 adds settings).
+    /// Host the UI + Run + Introspect should use. On first read, resolves to the
+    /// user's persisted preference (if that host is still detected) or falls back
+    /// to <see cref="Default"/>. Setting this both raises <see cref="ActiveHostChanged"/>
+    /// and writes <see cref="AppSettings.PreferredHostId"/> so the choice survives
+    /// restarts.
     /// </summary>
     public static PowerShellHost? Active
     {
-        get => _active ?? Default;
+        get
+        {
+            if (!_activeInitialized)
+            {
+                _activeInitialized = true;
+                _active = _persistedActive.Value;
+            }
+            return _active ?? Default;
+        }
         set
         {
+            _activeInitialized = true;
             if (ReferenceEquals(_active, value)) return;
             _active = value;
+            AppSettings.PreferredHostId = value?.Id;
             ActiveHostChanged?.Invoke();
         }
+    }
+
+    private static PowerShellHost? LoadPersistedActive()
+    {
+        var id = AppSettings.PreferredHostId;
+        if (string.IsNullOrEmpty(id)) return null;
+        var match = ById(id);
+        if (match == null)
+            Console.Out.WriteLine($"[host] saved preference '{id}' no longer detected — falling back to default.");
+        return match;
     }
 
     /// <summary>Look up by <see cref="PowerShellHost.Id"/>; returns null when absent.</summary>

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PoSHBlox.Services;
 
 namespace PoSHBlox.ViewModels;
@@ -14,6 +16,17 @@ namespace PoSHBlox.ViewModels;
 public sealed partial class HostStatusViewModel : ObservableObject
 {
     public static HostStatusViewModel Instance { get; } = new();
+
+    /// <summary>True while <see cref="ReintrospectAllCommand"/> is running. Disables the button + shows status.</summary>
+    [ObservableProperty] private bool _isReintrospecting;
+
+    /// <summary>Last report from <see cref="ReintrospectAllCommand"/> — surfaced under the button.</summary>
+    [ObservableProperty] private string _reintrospectStatus = "";
+
+    /// <summary>Visibility helper for the status TextBlock — true when a message is live.</summary>
+    public bool HasReintrospectStatus => !string.IsNullOrEmpty(ReintrospectStatus);
+
+    partial void OnReintrospectStatusChanged(string value) => OnPropertyChanged(nameof(HasReintrospectStatus));
 
     private HostStatusViewModel()
     {
@@ -49,4 +62,35 @@ public sealed partial class HostStatusViewModel : ObservableObject
 
     /// <summary>Whether the flyout should surface switch controls (hidden with only one host).</summary>
     public bool HasMultipleHosts => AllHosts.Count > 1;
+
+    /// <summary>
+    /// Re-scan every Custom catalog against all detected hosts so per-param
+    /// <c>SupportedEditions</c> is repopulated. Runs on a background thread —
+    /// each module scan is itself IO-bound (process launch + wait), but running
+    /// serially keeps stderr readable and avoids flooding the system with PS
+    /// processes.
+    /// </summary>
+    [RelayCommand]
+    private async Task ReintrospectAll()
+    {
+        if (IsReintrospecting) return;
+        IsReintrospecting = true;
+        ReintrospectStatus = "Re-introspecting custom catalogs…";
+
+        try
+        {
+            var report = await Task.Run(CatalogReintrospector.RunAsync);
+            ReintrospectStatus = report.Failed == 0
+                ? $"Done. {report.Succeeded} rescanned, {report.Skipped} skipped."
+                : $"Done. {report.Succeeded} rescanned, {report.Failed} failed, {report.Skipped} skipped — check log.";
+        }
+        catch (System.Exception ex)
+        {
+            ReintrospectStatus = $"Failed: {ex.Message}";
+        }
+        finally
+        {
+            IsReintrospecting = false;
+        }
+    }
 }

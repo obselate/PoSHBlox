@@ -14,6 +14,7 @@ namespace PoSHBlox.Services;
 [JsonSerializable(typeof(ClipboardSerializer.Payload))]
 [JsonSerializable(typeof(List<DiscoveredCmdlet>))]
 [JsonSerializable(typeof(RegenManifest))]
+[JsonSerializable(typeof(AppSettingsData))]
 public partial class PblxJsonContext : JsonSerializerContext
 {
 }

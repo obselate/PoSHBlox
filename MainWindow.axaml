@@ -119,6 +119,24 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
+                                <TextBlock Text="Your choice persists across restarts."
+                                           FontSize="10" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMutedBrush}" />
+                                <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,2" />
+                                <TextBlock Text="Custom catalogs" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <Button Command="{Binding ReintrospectAllCommand}"
+                                        IsEnabled="{Binding !IsReintrospecting}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left"
+                                        Padding="8,5" FontSize="12"
+                                        ToolTip.Tip="Re-run introspection against every Templates/Custom/*.json so per-parameter host-support flags catch up to newly-installed hosts.">
+                                    <TextBlock Text="Re-introspect all custom modules" />
+                                </Button>
+                                <TextBlock Text="{Binding ReintrospectStatus}"
+                                           FontSize="10" TextWrapping="Wrap"
+                                           IsVisible="{Binding HasReintrospectStatus}"
+                                           Foreground="{DynamicResource TextMutedBrush}" />
                                 <TextBlock Text="Restart PoSHBlox to pick up newly-installed hosts."
                                            FontSize="10" TextWrapping="Wrap"
                                            Foreground="{DynamicResource TextMutedBrush}" />
