@@ -19,6 +19,42 @@ public partial class GraphNode : ObservableObject
     public bool IsCmdletNode => !string.IsNullOrEmpty(CmdletName);
 
     /// <summary>
+    /// Structural role of the node. <see cref="NodeKind.Cmdlet"/> is the
+    /// full V2 shape; <see cref="NodeKind.Value"/> is a compact single-output
+    /// literal producer (see <c>values.json</c> catalog).
+    /// </summary>
+    public NodeKind Kind { get; set; } = NodeKind.Cmdlet;
+    public bool IsValueNode => Kind == NodeKind.Value;
+
+    /// <summary>True for free-form script-body nodes — not a cmdlet wrapper and not a value literal.</summary>
+    public bool IsScriptNode => !IsCmdletNode && !IsValueNode;
+
+    /// <summary>
+    /// For <see cref="NodeKind.Value"/> nodes: the PowerShell expression this
+    /// node emits. May be a fixed literal (<c>$true</c>, <c>$PSScriptRoot</c>)
+    /// or a template containing <c>{0}</c>, which is substituted with
+    /// <c>Parameters[0].EffectiveValue</c> at codegen / render time (enables
+    /// parametric nodes like <c>$env:{0}</c>).
+    /// </summary>
+    public string ValueExpression { get; set; } = "";
+
+    /// <summary>
+    /// Resolve <see cref="ValueExpression"/> against the node's first parameter
+    /// (if any) for rendering and codegen. Fixed value nodes fall through with
+    /// no substitution.
+    /// </summary>
+    public string ResolvedValueExpression
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(ValueExpression)) return "";
+            if (!ValueExpression.Contains("{0}")) return ValueExpression;
+            var arg = Parameters.Count > 0 ? Parameters[0].EffectiveValue : "";
+            return ValueExpression.Replace("{0}", arg ?? "");
+        }
+    }
+
+    /// <summary>
     /// User-defined output variable name. If set, the node's output is stored as $ThisName.
     /// If blank, auto-generated from Title + short ID when a variable is needed.
     /// </summary>
@@ -83,6 +119,9 @@ public partial class GraphNode : ObservableObject
     // ── Layout constants ───────────────────────────────────────
     public const double HeaderHeight = 34;
     public const double PortSpacing = 26;
+
+    /// <summary>Fixed body height for <see cref="NodeKind.Value"/> nodes — one row, no header.</summary>
+    public const double ValueNodeHeight = 30;
 
     /// <summary>Height of the dedicated exec-pin row that sits between the header and data rows.</summary>
     public const double ExecRowHeight = 20;
@@ -211,14 +250,16 @@ public partial class GraphNode : ObservableObject
 
     public double Height => IsContainer
         ? ContainerHeight
-        : Math.Max(
-            HeaderHeight
-              + (HasExecRow ? ExecRowHeight : 0)
-              + PortSpacing
-              + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
-              + PortSpacing
-              + (HiddenDataInputCount > 0 ? PortSpacing : 0),
-            HeaderHeight + PortSpacing * 2);
+        : IsValueNode
+            ? ValueNodeHeight
+            : Math.Max(
+                HeaderHeight
+                  + (HasExecRow ? ExecRowHeight : 0)
+                  + PortSpacing
+                  + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
+                  + PortSpacing
+                  + (HiddenDataInputCount > 0 ? PortSpacing : 0),
+                HeaderHeight + PortSpacing * 2);
 
     /// <summary>
     /// Reactive re-layout hook: when IsCollapsed flips, the layout-derived

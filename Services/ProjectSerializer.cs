@@ -89,6 +89,8 @@ public static class ProjectSerializer
             Y = node.Y,
             Width = node.Width,
             IsCollapsed = node.IsCollapsed,
+            Kind = node.Kind.ToString(),
+            ValueExpression = node.ValueExpression,
             KnownParameterSets = node.KnownParameterSets,
             ActiveParameterSet = node.ActiveParameterSet,
             ContainerType = node.ContainerType.ToString(),
@@ -190,9 +192,13 @@ public static class ProjectSerializer
                 Y = dto.Y,
                 Width = dto.Width,
                 IsCollapsed = dto.IsCollapsed,
+                ValueExpression = dto.ValueExpression,
                 KnownParameterSets = dto.KnownParameterSets,
                 ActiveParameterSet = dto.ActiveParameterSet,
             };
+
+            if (Enum.TryParse<NodeKind>(dto.Kind, ignoreCase: true, out var kind))
+                node.Kind = kind;
 
             if (Enum.TryParse<ContainerType>(dto.ContainerType, out var ct))
                 node.ContainerType = ct;

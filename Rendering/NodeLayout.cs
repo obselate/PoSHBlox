@@ -18,6 +18,9 @@ public static class NodeLayout
     /// <summary>Minimum node width regardless of content.</summary>
     public const double MinRegularNodeWidth = 200;
 
+    /// <summary>Minimum width for compact value nodes — roughly holds <c>$PSScriptRoot</c> plus the pin.</summary>
+    public const double MinValueNodeWidth = 120;
+
     /// <summary>Horizontal padding between the two pin columns inside a node body.</summary>
     private const double ColumnGutter = 40;
 
@@ -34,6 +37,14 @@ public static class NodeLayout
     public static double GetEffectiveWidth(GraphNode node)
     {
         if (node.IsContainer) return node.ContainerWidth;
+
+        if (node.IsValueNode)
+        {
+            // Sized to the resolved expression text: left padding, text, gap, pin reserve.
+            double textW = MeasureWidth(node.ResolvedValueExpression, 12, FontWeight.SemiBold);
+            double required = textW + 20 + GraphTheme.PortRadius + 10;
+            return Math.Max(MinValueNodeWidth, required);
+        }
 
         // Title drives the header's minimum width: text + side padding + chevron
         // reserve + optional badge reserve when the node has validation issues.

@@ -713,7 +713,7 @@
                                                 </ItemsControl>
                                             </StackPanel>
 
-                                            <StackPanel IsVisible="{Binding !SelectedNode.IsCmdletNode}">
+                                            <StackPanel IsVisible="{Binding SelectedNode.IsScriptNode}">
                                                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
 
                                                 <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold"

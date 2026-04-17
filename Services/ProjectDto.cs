@@ -61,6 +61,15 @@ public class PblxNode
     /// <summary>Per-node collapse state — hides non-mandatory unwired empty data inputs.</summary>
     public bool IsCollapsed { get; set; }
 
+    /// <summary>
+    /// Structural role (<c>Cmdlet</c> / <c>Value</c>). Defaults to <c>Cmdlet</c>
+    /// so pre-kind files load as regular cmdlet nodes.
+    /// </summary>
+    public string Kind { get; set; } = "Cmdlet";
+
+    /// <summary>Value-node expression template (literal or <c>{0}</c>-parametric); empty for cmdlet nodes.</summary>
+    public string ValueExpression { get; set; } = "";
+
     /// <summary>Parameter sets declared by the cmdlet; empty = single-set / legacy.</summary>
     public string[] KnownParameterSets { get; set; } = [];
 

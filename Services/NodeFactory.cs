@@ -35,6 +35,9 @@ public static class NodeFactory
         if (template.ContainerType != ContainerType.None)
             return CreateContainer(template.ContainerType, x, y);
 
+        if (template.Kind == NodeKind.Value)
+            return CreateValueNode(template, x, y);
+
         var node = new GraphNode
         {
             Title = template.Name,
@@ -51,6 +54,47 @@ public static class NodeFactory
 
         CopyParameters(node, template);
         ConfigurePorts(node, template);
+
+        return node;
+    }
+
+    /// <summary>
+    /// Spawn a compact value node: no exec pins, no per-param data inputs, a
+    /// single typed data output. Codegen inlines <see cref="GraphNode.ValueExpression"/>
+    /// at any consumer — the node itself never appears in the generated script.
+    /// </summary>
+    private static GraphNode CreateValueNode(NodeTemplate template, double x, double y)
+    {
+        var node = new GraphNode
+        {
+            Kind = NodeKind.Value,
+            Title = template.Name,
+            Category = template.Category,
+            ValueExpression = template.ValueExpression,
+            X = x,
+            Y = y,
+        };
+
+        CopyParameters(node, template);
+
+        // Strip the default V2 shape assembled in GraphNode's ctor; rebuild as
+        // single-output compact.
+        node.Inputs.Clear();
+        node.Outputs.Clear();
+
+        var outType = template.DataOutputs.Count > 0
+            ? template.DataOutputs[0].Type
+            : ParamType.Any;
+
+        node.Outputs.Add(new NodePort
+        {
+            Name = "",
+            Kind = PortKind.Data,
+            Direction = PortDirection.Output,
+            DataType = outType,
+            IsPrimary = true,
+            Owner = node,
+        });
 
         return node;
     }

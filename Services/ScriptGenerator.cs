@@ -105,17 +105,21 @@ public class ScriptGenerator
     /// </summary>
     private void EmitExecScope(StringBuilder sb, List<GraphNode> scope, int indent)
     {
-        var scopeIds = scope.Select(n => n.Id).ToHashSet();
+        // Value nodes never generate statements — they only exist as inline
+        // references from the consumer. Exclude them from the exec walk so
+        // the "unreachable helper" pass below doesn't accidentally emit them.
+        var execScope = scope.Where(n => !n.IsValueNode).ToList();
+        var scopeIds = execScope.Select(n => n.Id).ToHashSet();
 
         // Roots: ordered to match document order for stable output.
-        var roots = scope.Where(n => IsExecRoot(n, scopeIds)).ToList();
+        var roots = execScope.Where(n => IsExecRoot(n, scopeIds)).ToList();
 
         foreach (var root in roots)
             WalkExec(sb, root, scopeIds, indent);
 
         // Catch any nodes unreachable via exec (e.g. disconnected helpers).
         // Emit them as standalone statements so the user sees them in output.
-        foreach (var n in scope)
+        foreach (var n in execScope)
         {
             if (_emitted.Contains(n.Id)) continue;
             WalkExec(sb, n, scopeIds, indent);
@@ -328,6 +332,12 @@ public class ScriptGenerator
     private string ResolveUpstreamRef(NodePort sourcePort)
     {
         var owner = sourcePort.Owner!;
+
+        // Value nodes: emit the literal expression directly. No variable is
+        // introduced — the node itself never appears in the generated script.
+        if (owner.IsValueNode)
+            return owner.ResolvedValueExpression;
+
         if (owner.ContainerType == ContainerType.ForEach && sourcePort.Name == "Item")
         {
             if (_foreachVarMap.TryGetValue(owner.Id, out var named) && named != null)
