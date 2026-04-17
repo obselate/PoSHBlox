@@ -195,7 +195,17 @@ $edition = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershe
 
 $results = @()
 
+$skipped = 0
 foreach ($cmd in $commands) {
+  try {
+    # Wildcard-fallback CommandInfo objects can have null Parameters when the
+    # module isn't fully loaded. Skip those rather than fail the whole batch.
+    if (-not $cmd.Parameters) {
+        [Console]::Error.WriteLine("[introspect]   skip $($cmd.Name): Parameters is null (module not loaded)")
+        $skipped++
+        continue
+    }
+
     $synopsis = ""
     try {
         $help = Get-Help $cmd.Name -ErrorAction SilentlyContinue
@@ -338,6 +348,17 @@ foreach ($cmd in $commands) {
         knownParameterSets        = @($knownSets)
         defaultParameterSet       = $defaultSet
     }
+  } catch {
+    # One bad CommandInfo shouldn't poison the whole scan — stub objects from
+    # the wildcard-fallback path can throw on any metadata accessor.
+    [Console]::Error.WriteLine("[introspect]   skip $($cmd.Name): $($_.Exception.Message)")
+    $skipped++
+    continue
+  }
+}
+
+if ($skipped -gt 0) {
+    [Console]::Error.WriteLine("[introspect] skipped $skipped of $($commands.Count) command(s) during enumeration")
 }
 
 $results | ConvertTo-Json -Depth 6 -Compress
