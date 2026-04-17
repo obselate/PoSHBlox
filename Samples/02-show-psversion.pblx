@@ -1,0 +1,1400 @@
+{
+  "version": 3,
+  "metadata": {
+    "createdUtc": "2026-04-17T17:07:35.4486118Z",
+    "modifiedUtc": "2026-04-17T19:33:56.0657374Z"
+  },
+  "view": {
+    "panX": 188.42561311711685,
+    "panY": 395.421506036036,
+    "zoom": 1.005428918918919
+  },
+  "nodes": [
+    {
+      "id": "31381608",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 480,
+      "y": 210,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [
+        "EqualSet",
+        "ScriptBlockSet",
+        "CaseSensitiveEqualSet",
+        "NotEqualSet",
+        "CaseSensitiveNotEqualSet",
+        "GreaterThanSet",
+        "CaseSensitiveGreaterThanSet",
+        "LessThanSet",
+        "CaseSensitiveLessThanSet",
+        "GreaterOrEqualSet",
+        "CaseSensitiveGreaterOrEqualSet",
+        "LessOrEqualSet",
+        "CaseSensitiveLessOrEqualSet",
+        "LikeSet",
+        "CaseSensitiveLikeSet",
+        "NotLikeSet",
+        "CaseSensitiveNotLikeSet",
+        "MatchSet",
+        "CaseSensitiveMatchSet",
+        "NotMatchSet",
+        "CaseSensitiveNotMatchSet",
+        "ContainsSet",
+        "CaseSensitiveContainsSet",
+        "NotContainsSet",
+        "CaseSensitiveNotContainsSet",
+        "InSet",
+        "CaseSensitiveInSet",
+        "NotInSet",
+        "CaseSensitiveNotInSet",
+        "IsSet",
+        "IsNotSet",
+        "Not"
+      ],
+      "activeParameterSet": "LikeSet",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "id": "b6290690",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "d207fa65",
+          "name": "InputObject",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "InputObject",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "fe75ab13",
+          "name": "FilterScript",
+          "kind": "Data",
+          "dataType": "ScriptBlock",
+          "parameterName": "FilterScript"
+        },
+        {
+          "id": "ab7a6cf6",
+          "name": "Property",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "Property"
+        },
+        {
+          "id": "4f264065",
+          "name": "Value",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "Value"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "e5659d78",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "4adb9c82",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the objects to filter. You can also pipe the objects to \u0060Where-Object\u0060. When you use the **InputObject** parameter with \u0060Where-Object\u0060, instead of piping command results to \u0060Where-Object\u0060, the cmdlet treats the **InputObject** as a single object. This is true even if the value is a collection that\u0027s the result of a command, such as \u0060-InputObject (Get-Process)\u0060. Because **InputObject** can\u0027t return individual properties from an array or collection of objects, we recommend that, if you use \u0060Where-Object\u0060 to filter a collection of objects for those objects that have specific values in defined properties, you use \u0060Where-Object\u0060 in the pipeline, as shown in the examples in this topic.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Name -like \u0022*pattern*\u0022",
+          "description": "Specifies the script block that\u0027s used to filter the objects. Enclose the script block in braces (\u0060{}\u0060). The parameter name, **FilterScript**, is optional.",
+          "validValues": [],
+          "value": "$_.Name -like \u0022*pattern*\u0022",
+          "parameterSets": [
+            "ScriptBlockSet"
+          ],
+          "mandatoryInSets": [
+            "ScriptBlockSet"
+          ]
+        },
+        {
+          "name": "Property",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the name of a property of the input object. The property must be an instance property, not a static property. This is a positional parameter, so the name, **Property**, is optional. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "Name",
+          "parameterSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet",
+            "Not"
+          ],
+          "mandatoryInSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet",
+            "Not"
+          ]
+        },
+        {
+          "name": "Value",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a property value. The parameter name, **Value**, is optional. This parameter accepts wildcard characters when used with the following comparison parameters: - **CLike** - **CNotLike** - **Like** - **NotLike** This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "PS*",
+          "parameterSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "EQ",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "EqualSet"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "CEQ",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveEqualSet"
+          ]
+        },
+        {
+          "name": "NE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "NotEqualSet"
+          ],
+          "mandatoryInSets": [
+            "NotEqualSet"
+          ]
+        },
+        {
+          "name": "CNE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveNotEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotEqualSet"
+          ]
+        },
+        {
+          "name": "GT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "GreaterThanSet"
+          ],
+          "mandatoryInSets": [
+            "GreaterThanSet"
+          ]
+        },
+        {
+          "name": "CGT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveGreaterThanSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveGreaterThanSet"
+          ]
+        },
+        {
+          "name": "LT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "LessThanSet"
+          ],
+          "mandatoryInSets": [
+            "LessThanSet"
+          ]
+        },
+        {
+          "name": "CLT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less-than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveLessThanSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLessThanSet"
+          ]
+        },
+        {
+          "name": "GE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "GreaterOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "GreaterOrEqualSet"
+          ]
+        },
+        {
+          "name": "CGE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveGreaterOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveGreaterOrEqualSet"
+          ]
+        },
+        {
+          "name": "LE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "LessOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "LessOrEqualSet"
+          ]
+        },
+        {
+          "name": "CLE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less-than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveLessOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLessOrEqualSet"
+          ]
+        },
+        {
+          "name": "Like",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (\u0060*\u0060). For example: \u0060Get-Process | Where-Object ProcessName -Like \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "true",
+          "isSwitch": true,
+          "parameterSets": [
+            "LikeSet"
+          ],
+          "mandatoryInSets": [
+            "LikeSet"
+          ]
+        },
+        {
+          "name": "CLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (\u0060*\u0060). This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveLikeSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLikeSet"
+          ]
+        },
+        {
+          "name": "NotLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match a value that includes wildcard characters (\u0060*\u0060). For example: \u0060Get-Process | Where-Object ProcessName -NotLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "NotLikeSet"
+          ],
+          "mandatoryInSets": [
+            "NotLikeSet"
+          ]
+        },
+        {
+          "name": "CNotLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match a value that includes wildcard characters. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CNotLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveNotLikeSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotLikeSet"
+          ]
+        },
+        {
+          "name": "Match",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -Match \u0022shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "MatchSet"
+          ],
+          "mandatoryInSets": [
+            "MatchSet"
+          ]
+        },
+        {
+          "name": "CMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -CMatch \u0022Shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveMatchSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveMatchSet"
+          ]
+        },
+        {
+          "name": "NotMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects when the property value doesn\u0027t match the specified regular expression. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -NotMatch \u0022powershell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "NotMatchSet"
+          ],
+          "mandatoryInSets": [
+            "NotMatchSet"
+          ]
+        },
+        {
+          "name": "CNotMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -CNotMatch \u0022Shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveNotMatchSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotMatchSet"
+          ]
+        },
+        {
+          "name": "Contains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if any item in the property value of the object is an exact match for the specified value. For example: \u0060Get-Process | Where-Object ProcessName -Contains \u0022Svchost\u0022\u0060 If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "ContainsSet"
+          ],
+          "mandatoryInSets": [
+            "ContainsSet"
+          ]
+        },
+        {
+          "name": "CContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects from a collection if the property value of the object is an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CContains \u0022svchost\u0022\u0060 **CContains** refers to a collection of values and is true if the collection contains an item that is an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveContainsSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveContainsSet"
+          ]
+        },
+        {
+          "name": "NotContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if none of the items in the property value is an exact match for the specified value. For example: \u0060Get-Process | Where-Object ProcessName -NotContains \u0022Svchost\u0022\u0060 **NotContains** refers to a collection of values and is true if the collection doesn\u0027t contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "NotContainsSet"
+          ],
+          "mandatoryInSets": [
+            "NotContainsSet"
+          ]
+        },
+        {
+          "name": "CNotContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value of the object isn\u0027t an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CNotContains \u0022svchost\u0022\u0060 **NotContains** and **CNotContains** refer to a collection of values and are true when the collection doesn\u0027t contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveNotContainsSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotContainsSet"
+          ]
+        },
+        {
+          "name": "In",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches any of the specified values. For example: \u0060Get-Process | Where-Object -Property ProcessName -In -Value \u0022Svchost\u0022, \u0022TaskHost\u0022, \u0022WsmProvHost\u0022\u0060 If the input is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. \u0060Where-Object\u0060 returns the object only if the value of the **Property** parameter and any value of **Value** are the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "InSet"
+          ],
+          "mandatoryInSets": [
+            "InSet"
+          ]
+        },
+        {
+          "name": "CIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value includes the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -CIn ProcessName\u0060 **CIn** resembles **CContains**, except that the property and value positions are reversed. For example, the following statements are both true. \u0060\u0022abc\u0022, \u0022def\u0022 -CContains \u0022abc\u0022\u0060 \u0060\u0022abc\u0022 -CIn \u0022abc\u0022, \u0022def\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveInSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveInSet"
+          ]
+        },
+        {
+          "name": "NotIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an exact match for any of the specified values. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -NotIn -Property ProcessName\u0060 If the value of **Value** is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. \u0060Where-Object\u0060 returns the object only if the value of **Property** and any value of **Value** aren\u0027t the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "NotInSet"
+          ],
+          "mandatoryInSets": [
+            "NotInSet"
+          ]
+        },
+        {
+          "name": "CNotIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -CNotIn -Property ProcessName\u0060 **NotIn** and **CNotIn** operators resemble **NotContains** and **CNotContains**, except that the property and value positions are reversed. For example, the following statements are true. \u0060\u0022abc\u0022, \u0022def\u0022 -CNotContains \u0022Abc\u0022\u0060 \u0060\u0022abc\u0022 -CNotIn \u0022Abc\u0022, \u0022def\u0022\u0060",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "CaseSensitiveNotInSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotInSet"
+          ]
+        },
+        {
+          "name": "Is",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is an instance of the specified .NET type. Enclose the type name in square brackets. For example, \u0060Get-Process | Where-Object StartTime -Is [datetime]\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "IsSet"
+          ],
+          "mandatoryInSets": [
+            "IsSet"
+          ]
+        },
+        {
+          "name": "IsNot",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an instance of the specified .NET type. For example, \u0060Get-Process | where StartTime -IsNot [datetime]\u0060 This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "IsNotSet"
+          ],
+          "mandatoryInSets": [
+            "IsNotSet"
+          ]
+        },
+        {
+          "name": "Not",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property doesn\u0027t exist or has a value of \u0060$null\u0060 or \u0060$false\u0060. For example: \u0060Get-Service | Where-Object -Not \u0022DependentServices\u0022\u0060 This parameter was introduced in Windows PowerShell 6.1.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "Not"
+          ],
+          "mandatoryInSets": [
+            "Not"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "099ebe6d",
+      "title": "Select-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-Object",
+      "outputVariable": "",
+      "x": 780,
+      "y": 210,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [
+        "DefaultParameter",
+        "SkipLastParameter",
+        "IndexParameter",
+        "SkipIndexParameter"
+      ],
+      "activeParameterSet": "DefaultParameter",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "id": "1811b852",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "5cd45a11",
+          "name": "InputObject",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "InputObject",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "bd51960f",
+          "name": "Property",
+          "kind": "Data",
+          "dataType": "Collection",
+          "parameterName": "Property"
+        },
+        {
+          "id": "dafe0067",
+          "name": "ExcludeProperty",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "ExcludeProperty"
+        },
+        {
+          "id": "f361488c",
+          "name": "ExpandProperty",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "ExpandProperty"
+        },
+        {
+          "id": "6a6173ed",
+          "name": "Last",
+          "kind": "Data",
+          "dataType": "Int",
+          "parameterName": "Last"
+        },
+        {
+          "id": "7a7c6044",
+          "name": "First",
+          "kind": "Data",
+          "dataType": "Int",
+          "parameterName": "First"
+        },
+        {
+          "id": "4d261a8e",
+          "name": "Skip",
+          "kind": "Data",
+          "dataType": "Int",
+          "parameterName": "Skip"
+        },
+        {
+          "id": "4947e0de",
+          "name": "SkipLast",
+          "kind": "Data",
+          "dataType": "Int",
+          "parameterName": "SkipLast"
+        },
+        {
+          "id": "82befdb4",
+          "name": "Index",
+          "kind": "Data",
+          "dataType": "Collection",
+          "parameterName": "Index"
+        },
+        {
+          "id": "2185fcf0",
+          "name": "SkipIndex",
+          "kind": "Data",
+          "dataType": "Collection",
+          "parameterName": "SkipIndex"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "e9290e0f",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "dc9021b2",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies objects to send to the cmdlet through the pipeline. This parameter enables you to pipe objects to \u0060Select-Object\u0060. When you pass objects to the **InputObject** parameter, instead of using the pipeline, \u0060Select-Object\u0060 treats the **InputObject** as a single object, even if the value is a collection. It is recommended that you use the pipeline when passing collections to \u0060Select-Object\u0060.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Property",
+          "type": "Collection",
+          "defaultValue": "Name, Status",
+          "description": "Specifies the properties to select. These properties are added as **NoteProperty** members to the output objects. Wildcards are permitted. If the input object doesn\u0027t have the property named, the value of the new **NoteProperty** is set to \u0060$null\u0060. The value of the **Property** parameter can be a new calculated property. To create a calculated, property, use a hash table. Valid keys are: - Name (or Label) - \u0060\u003Cstring\u003E\u0060 - Expression - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "value": "Name,Value",
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ExcludeProperty",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the properties that this cmdlet excludes from the operation. Wildcards are permitted. Beginning in PowerShell 6, it\u0027s no longer required to include the **Property** parameter for **ExcludeProperty** to work.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ExpandProperty",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a property to select, and indicates that an attempt should be made to expand that property. If the input object pipeline doesn\u0027t have the property named, \u0060Select-Object\u0060 returns an error. This parameter supports wildcards. However, the wildcard character must resolve to a single property name. If the wildcard character resolves to more than one property name, \u0060Select-Object\u0060 returns an error. When you use **ExpandProperty**, \u0060Select-Object\u0060 attempts to expand the specified property for every - If the specified property is an array, each value of the array is included in the output. - If the specified property is an object, the objects properties are expanded for every **InputObject** In either case, the output objects\u0027 **Type** matches the expanded property\u0027s **Type**. There is a side-effect when using **ExpandProperty**. The \u0060Select-Object\u0060 adds the selected properties to the original object as **NoteProperty** members. If the **Property** parameter is specified, \u0060Select-Object\u0060 attempts to add each selected property as a **NoteProperty** to every outputted object. \u003E [!WARNING] \u003E If you receive an error that a property can\u0027t be processed because a property with that name \u003E already exists, consider the following. Note that when using **ExpandProperty**, \u0060Select-Object\u0060 \u003E can\u0027t replace an existing property. This means: \u003E \u003E - If the expanded object has a property of the same name, the command returns an error. \u003E - If the _Selected_ object has a property of the same name as an _Expanded_ object\u0027s property, the \u003E command returns an error.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Specifies that if a subset of the input objects has identical properties and values, only a single member of the subset should be selected. **Unique** selects values _after_ other filtering parameters are applied. This parameter is case-sensitive. As a result, strings that differ only in character casing are considered to be unique. Add the **CaseInsensitive** parameter to perform case-insensitive comparisons.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "CaseInsensitive",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "By default, when you use the **Unique** parameter the cmdlet uses case-sensitive comparisons. When you use this parameter, the cmdlet uses case-insensitive comparisons. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Last",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the number of objects to select from the end of an array of input objects.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "DefaultParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "First",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the number of objects to select from the beginning of an array of input objects.",
+          "validValues": [],
+          "value": "1",
+          "parameterSets": [
+            "DefaultParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Skip",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Skips (doesn\u0027t select) the specified number of items. By default, the **Skip** parameter counts from the beginning of the collection of objects. If the command uses the **Last** parameter, it counts from the end of the collection. Unlike the **Index** parameter, which starts counting at 0, the **Skip** parameter begins at 1. Beginning in PowerShell 7.4, you can use the **Skip** parameter with the **SkipLast** parameter to skip items from both the beginning and end of the collection.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "SkipLast",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Skips (doesn\u0027t select) the specified number of items from the end of the list or array. Works in the same way as using **Skip** together with **Last** parameter. Unlike the **Index** parameter, which starts counting at 0, the **SkipLast** parameter begins at 1. Beginning in PowerShell 7.4, you can use the **Skip** parameter with the **SkipLast** parameter to skip items from both the beginning and end of the collection.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Wait",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet turns off optimization. PowerShell runs commands in the order that they appear in the command pipeline and lets them generate all objects. By default, if you include a \u0060Select-Object\u0060 command with the **First** or **Index** parameters in a command pipeline, PowerShell stops the command that generates the objects as soon as the selected number of objects is generated. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [
+            "DefaultParameter",
+            "IndexParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Index",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Selects objects from an array based on their index values. Enter the indexes in a comma-separated list. Indexes in an array begin with 0, where 0 represents the first value and (n-1) represents the last value.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "IndexParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "SkipIndex",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Skips (doesn\u0027t select) the objects from an array based on their index values. Enter the indexes in a comma-separated list. Indexes in an array begin with 0, where 0 represents the first value and (n-1) represents the last value. This parameter was introduced in Windows PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "SkipIndexParameter"
+          ],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "98e8bcba",
+      "title": "Format-Table",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "outputVariable": "",
+      "x": 1070,
+      "y": 210,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "id": "8753bccf",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "dde94456",
+          "name": "Property",
+          "kind": "Data",
+          "dataType": "Collection",
+          "parameterName": "Property"
+        },
+        {
+          "id": "cdb34eb2",
+          "name": "GroupBy",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "GroupBy"
+        },
+        {
+          "id": "47aac914",
+          "name": "View",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "View"
+        },
+        {
+          "id": "807682fb",
+          "name": "Expand",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "Expand"
+        },
+        {
+          "id": "e77c216f",
+          "name": "InputObject",
+          "kind": "Data",
+          "dataType": "Object",
+          "parameterName": "InputObject",
+          "isPrimaryPipelineTarget": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "82876b34",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "048d6974",
+          "name": "FormatStartData",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet adjusts the column size and number of columns based on the width of the data. By default, the column size and number are determined by the view.",
+          "validValues": [],
+          "value": "true",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "RepeatHeader",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Repeats displaying the header of a table after every screen full. The repeated header is useful when the output is piped to a pager such as \u0060less\u0060 or \u0060more\u0060 or paging with a screen reader.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "HideTableHeaders",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Omits the column headings from the table.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Displays text that exceeds the column width on the next line. By default, text that exceeds the column width is truncated.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Property",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies the object properties that appear in the display and the order in which they appear. Type one or more property names, separated by commas, or use a hash table to display a calculated property. Wildcards are permitted. If you omit this parameter, the properties that appear in the display depend on the first object\u0027s properties. For example, if the first object has **PropertyA** and **PropertyB** but subsequent objects have **PropertyA**, **PropertyB**, and **PropertyC**, then only the **PropertyA** and **PropertyB** headers are displayed. The **Property** parameter is optional. You can\u0027t use the **Property** and **View** parameters in the same command. The value of the **Property** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - Name (or Label) \u0060\u003Cstring\u003E\u0060 - Expression - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - FormatString - \u0060\u003Cstring\u003E\u0060 - Width - \u0060\u003Cint32\u003E\u0060 - must be greater than \u00600\u0060 - Alignment - value can be \u0060Left\u0060, \u0060Center\u0060, or \u0060Right\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "GroupBy",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies sorted output in separate tables based on a property value. For example, you can use **GroupBy** to list services in separate tables based on their status. Enter an expression or a property. The **GroupBy** parameter expects that the objects are sorted. Use the \u0060Sort-Object\u0060 cmdlet before using \u0060Format-Table\u0060 to group the objects. The value of the **GroupBy** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - Name (or Label) - \u0060\u003Cstring\u003E\u0060 - Expression - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - FormatString - \u0060\u003Cstring\u003E\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "View",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Beginning in PowerShell 6, the default views are defined in PowerShell \u0060C#\u0060 source code. The \u0060*.format.ps1xml\u0060 files from PowerShell 5.1 and earlier versions don\u0027t exist in PowerShell 6 and later versions. The **View** parameter lets you specify an alternate format or custom view for the table. You can use the default PowerShell views or create custom views. For more information about how to create a custom view, see [about_Format.ps1xml](../Microsoft.PowerShell.Core/About/about_Format.ps1xml.md). The alternate and custom views for the **View** parameter must use the table format, otherwise, \u0060Format-Table\u0060 fails. If the alternate view is a list, use the \u0060Format-List\u0060 cmdlet. If the alternate view isn\u0027t a list or a table, use the \u0060Format-Custom\u0060 cmdlet. You can\u0027t use the **Property** and **View** parameters in the same command.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ShowError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter sends errors through the pipeline. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "DisplayError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet displays errors on the command line. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet directs the cmdlet to display all the error information. Use with the **DisplayError** or **ShowError** parameter. By default, when an error object is written to the error or display streams, only some error information is displayed. Also required when formatting certain .NET types. For more information, see the [Notes](#notes) section.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Expand",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the format of the collection object and the objects in the collection. This parameter is designed to format objects that support the [ICollection](xref:System.Collections.ICollection)([System.Collections](xref:System.Collections)) interface. The default value is **EnumOnly**. The acceptable values for this parameter are as follows: - **EnumOnly**: Displays the properties of the objects in the collection. - **CoreOnly**: Displays the properties of the collection object. - **Both**: Displays the properties of the collection object and the properties of objects in the collection.",
+          "validValues": [
+            "CoreOnly",
+            "EnumOnly",
+            "Both"
+          ],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the objects to format. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "e28070b5",
+      "title": "$PSVersionTable",
+      "category": "Values",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 10,
+      "y": 170,
+      "width": 200,
+      "kind": "Value",
+      "valueExpression": "$PSVersionTable",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "7c2d133b",
+          "name": "",
+          "kind": "Data",
+          "dataType": "HashTable",
+          "isPrimary": true
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "id": "048d5bd7",
+      "title": "Enumerate",
+      "category": "Custom",
+      "scriptBody": "",
+      "cmdletName": "ForEach-Object",
+      "outputVariable": "",
+      "x": 220,
+      "y": 210,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "id": "a972b115",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "5b1bf323",
+          "name": "InputObject",
+          "kind": "Data",
+          "dataType": "Any",
+          "parameterName": "InputObject",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "aae03a6c",
+          "name": "Process",
+          "kind": "Data",
+          "dataType": "ScriptBlock",
+          "parameterName": "Process"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "0e1cd652",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "7a58f347",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Collection",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Any",
+          "defaultValue": "",
+          "description": "The hashtable/dictionary/enumerable to expand. Wired from upstream via the pipe.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Process",
+          "type": "ScriptBlock",
+          "defaultValue": "$_.GetEnumerator()",
+          "description": "Per-item scriptblock. Default unrolls hashtables into DictionaryEntry rows (Name / Value). Replace if you need a different transform.",
+          "validValues": [],
+          "value": "$_.GetEnumerator()",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "31381608",
+      "targetNodeId": "099ebe6d",
+      "sourcePortId": "4adb9c82",
+      "targetPortId": "5cd45a11"
+    },
+    {
+      "sourceNodeId": "31381608",
+      "targetNodeId": "099ebe6d",
+      "sourcePortId": "e5659d78",
+      "targetPortId": "1811b852"
+    },
+    {
+      "sourceNodeId": "099ebe6d",
+      "targetNodeId": "98e8bcba",
+      "sourcePortId": "dc9021b2",
+      "targetPortId": "e77c216f"
+    },
+    {
+      "sourceNodeId": "e28070b5",
+      "targetNodeId": "048d5bd7",
+      "sourcePortId": "7c2d133b",
+      "targetPortId": "5b1bf323"
+    },
+    {
+      "sourceNodeId": "048d5bd7",
+      "targetNodeId": "31381608",
+      "sourcePortId": "7a58f347",
+      "targetPortId": "d207fa65"
+    },
+    {
+      "sourceNodeId": "048d5bd7",
+      "targetNodeId": "31381608",
+      "sourcePortId": "0e1cd652",
+      "targetPortId": "b6290690"
+    },
+    {
+      "sourceNodeId": "099ebe6d",
+      "targetNodeId": "98e8bcba",
+      "sourcePortId": "e9290e0f",
+      "targetPortId": "8753bccf"
+    }
+  ]
+}

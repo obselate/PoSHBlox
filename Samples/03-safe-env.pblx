@@ -1,0 +1,399 @@
+{
+  "version": 3,
+  "metadata": {
+    "createdUtc": "2026-04-17T20:15:47.6839677Z",
+    "modifiedUtc": "2026-04-17T20:38:29.0010121Z"
+  },
+  "view": {
+    "panX": 13.421544561403522,
+    "panY": -70.69222807017572,
+    "zoom": 1.152664105263158
+  },
+  "nodes": [
+    {
+      "id": "7f53a79d",
+      "title": "Try / Catch / Finally",
+      "category": "Control Flow",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 640,
+      "y": 430,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "TryCatch",
+      "containerWidth": 620,
+      "containerHeight": 390,
+      "zones": [
+        {
+          "name": "Try"
+        },
+        {
+          "name": "Catch"
+        },
+        {
+          "name": "Finally"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "5f6b904c",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "0fc11a65",
+          "name": "ErrorAction",
+          "kind": "Data",
+          "dataType": "Enum",
+          "parameterName": "ErrorAction"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "07df59cc",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ErrorAction",
+          "type": "Enum",
+          "defaultValue": "Stop",
+          "description": "Sets $ErrorActionPreference inside the try block. \u0027Stop\u0027 converts non-terminating errors so catch fires \u2014 the typical choice.",
+          "validValues": [
+            "Stop",
+            "Continue",
+            "SilentlyContinue"
+          ],
+          "value": "Stop",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "ea7924ef",
+      "title": "Get-Item",
+      "category": "File / Folder",
+      "scriptBody": "",
+      "cmdletName": "Get-Item",
+      "outputVariable": "",
+      "x": 660,
+      "y": 510,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [
+        "Path",
+        "LiteralPath"
+      ],
+      "activeParameterSet": "Path",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "7f53a79d",
+      "parentZoneName": "Try",
+      "inputs": [
+        {
+          "id": "a50afe88",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "046268c3",
+          "name": "Path",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Path",
+          "isPrimaryPipelineTarget": true
+        },
+        {
+          "id": "4d06e697",
+          "name": "LiteralPath",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "LiteralPath"
+        },
+        {
+          "id": "a15dc11f",
+          "name": "Filter",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "Filter"
+        },
+        {
+          "id": "e00a8d30",
+          "name": "Include",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Include"
+        },
+        {
+          "id": "12c5e7c3",
+          "name": "Exclude",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Exclude"
+        },
+        {
+          "id": "102433df",
+          "name": "Credential",
+          "kind": "Data",
+          "dataType": "Credential",
+          "parameterName": "Credential"
+        },
+        {
+          "id": "fc0a8c94",
+          "name": "Stream",
+          "kind": "Data",
+          "dataType": "StringArray",
+          "parameterName": "Stream"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "1d06d415",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "95e099bb",
+          "name": "FileInfo",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the path to an item. This cmdlet gets the item at the specified location. Wildcard characters are permitted. This parameter is required, but the parameter name **Path** is optional. Use a dot (\u0060.\u0060) to specify the current location. Use the wildcard character (\u0060*\u0060) to specify all the items in the current location.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Path"
+          ],
+          "mandatoryInSets": [
+            "Path"
+          ]
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a path to one or more locations. The value of **LiteralPath** is used exactly as it\u0027s typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences. For more information, see [about_Quoting_Rules](../Microsoft.Powershell.Core/About/about_Quoting_Rules.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [
+            "LiteralPath"
+          ],
+          "mandatoryInSets": [
+            "LiteralPath"
+          ]
+        },
+        {
+          "name": "Filter",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a filter to qualify the **Path** parameter. The [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider is the only installed PowerShell provider that supports filters. Filters are more efficient than other parameters. The provider applies filter when the cmdlet gets the objects rather than having PowerShell filter the objects after they\u0027re retrieved. The filter string is passed to the .NET API to enumerate files. The API only supports \u0060*\u0060 and \u0060?\u0060 wildcards.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet includes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Include** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, an item or items that this cmdlet excludes in the operation. The value of this parameter qualifies the **Path** parameter. Enter a path element or pattern, such as \u0060*.txt\u0060. Wildcard characters are permitted. The **Exclude** parameter is effective only when the command includes the contents of an item, such as \u0060C:\\Windows\\*\u0060, where the wildcard character specifies the contents of the \u0060C:\\Windows\u0060 directory.",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets items that can\u0027t otherwise be accessed, such as hidden items. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions.",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "\u003E [!NOTE] \u003E This parameter isn\u0027t supported by any providers installed with PowerShell. \u003E To impersonate another user, or elevate your credentials when running this cmdlet, \u003E use [Invoke-Command](../Microsoft.PowerShell.Core/Invoke-Command.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Stream",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "This is a dynamic parameter made available by the **FileSystem** provider. This parameter is only available on Windows. Gets the specified alternative data stream from the file. Enter the stream name. Wildcards are supported. To get all streams, use an asterisk (\u0060*\u0060). This parameter is valid on directories, but note that directories do not have data streams by default. This parameter was introduced in PowerShell 3.0. As of PowerShell 7.2, \u0060Get-Item\u0060 can get alternative data streams from directories as well as files. For more information, see [about_FileSystem_Provider](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md).",
+          "validValues": [],
+          "value": "",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "UseTransaction",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
+          "validValues": [],
+          "value": "",
+          "isSwitch": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "9aa88048",
+      "title": "$env:",
+      "category": "Values",
+      "scriptBody": "# Your script here",
+      "cmdletName": "",
+      "outputVariable": "",
+      "x": 300,
+      "y": 410,
+      "width": 200,
+      "kind": "Value",
+      "valueExpression": "$env:{0}",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "9cd39bac",
+          "name": "",
+          "kind": "Data",
+          "dataType": "String",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "VariableName",
+          "type": "String",
+          "defaultValue": "ComputerName",
+          "description": "Name of the environment variable (no $env: prefix). Examples: ComputerName, UserName, Path.",
+          "validValues": [],
+          "value": "SystemRoot",
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "b7cc1b7d",
+      "title": "Write-Warning",
+      "category": "Output",
+      "scriptBody": "",
+      "cmdletName": "Write-Warning",
+      "outputVariable": "",
+      "x": 960,
+      "y": 510,
+      "width": 200,
+      "kind": "Cmdlet",
+      "valueExpression": "",
+      "knownParameterSets": [],
+      "activeParameterSet": "",
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "parentNodeId": "7f53a79d",
+      "parentZoneName": "Catch",
+      "inputs": [
+        {
+          "id": "a64a5b1e",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "14cec533",
+          "name": "Message",
+          "kind": "Data",
+          "dataType": "String",
+          "parameterName": "Message",
+          "isPrimaryPipelineTarget": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "6b25b01d",
+          "name": "",
+          "kind": "Exec",
+          "dataType": "Any"
+        },
+        {
+          "id": "534aac4a",
+          "name": "Out",
+          "kind": "Data",
+          "dataType": "Any",
+          "isPrimary": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the warning message.",
+          "validValues": [],
+          "value": "Env var unset or path inaccessible: $($_.Exception.Message)",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "9aa88048",
+      "targetNodeId": "ea7924ef",
+      "sourcePortId": "9cd39bac",
+      "targetPortId": "046268c3"
+    }
+  ]
+}
