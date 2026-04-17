@@ -209,9 +209,10 @@ public class NodeGraphRenderer
             ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
-        // Title + category badge
+        // Title + badge. Match the container inset — exec pin column sits at
+        // X+16 ±8 one row below, so titles at +14 read as a column collision.
         var title = MakeText(node.Title, 13, FontWeight.Bold, GraphTheme.TextPrimary);
-        ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
+        ctx.DrawText(title, new Point(node.X + 32, node.Y + (hh - title.Height) / 2));
 
         // Collapse-state chevron on the header (right side, dim). Indicates the
         // node can be collapsed/expanded — wired to the C keyboard shortcut /
