@@ -211,13 +211,35 @@ public class ScriptGenerator
         string tailVar = MakeVariableNameForNode(chain[^1]);
         foreach (var n in chain) _varMap[n.Id] = tailVar;
 
+        // If the head's primary-pipeline-target pin is wired to an upstream
+        // that *isn't* already chained in front of it (classic case: a Value
+        // node feeding Where-Object's InputObject), prepend that upstream as
+        // the pipeline's first element instead of binding it as -InputObject.
+        // -InputObject on filtering cmdlets treats the value as a single
+        // object — enumerators / collections don't iterate — so the only way
+        // Where / Select / Sort see rows is via the actual |-pipe.
+        string? pipelineHead = null;
+        bool headConsumesPipeInput = false;
+        var headPipeTarget = chain[0].PrimaryPipelineTarget;
+        if (headPipeTarget != null)
+        {
+            var upstream = FirstConnectionTargeting(headPipeTarget);
+            if (upstream != null && upstream.Source.Owner != null
+                && !chain.Contains(upstream.Source.Owner))
+            {
+                pipelineHead = ResolveUpstreamRef(upstream.Source);
+                headConsumesPipeInput = true;
+            }
+        }
+
         // Chain expression. Each node may emit a splat hashtable into the
         // preamble StringBuilder first; the inline part joins with `|`.
         var preamble = new StringBuilder();
         var parts = new List<string>();
+        if (pipelineHead != null) parts.Add(pipelineHead);
         for (int i = 0; i < chain.Count; i++)
         {
-            bool collapseInput = i > 0; // everyone but the head consumes | upstream
+            bool collapseInput = i > 0 || headConsumesPipeInput;
             parts.Add(BuildNodeExpression(chain[i], collapseInput, pad, preamble));
         }
         string pipeline = string.Join(" | ", parts);
