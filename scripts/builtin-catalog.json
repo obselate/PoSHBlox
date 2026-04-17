@@ -9,16 +9,27 @@
           "module": "Microsoft.PowerShell.Management",
           "cmdlets": [
             "Get-ChildItem",
+            "Get-Item",
             "Copy-Item",
             "Move-Item",
             "Remove-Item",
+            "Rename-Item",
+            "New-Item",
+            "Test-Path",
+            "Resolve-Path",
             "Get-Content",
-            "Set-Content"
+            "Set-Content",
+            "Add-Content",
+            "Clear-Content"
           ]
         },
         {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [ "Join-Path", "Split-Path" ]
+        },
+        {
           "module": "Microsoft.PowerShell.Security",
-          "cmdlets": [ "Get-Acl" ]
+          "cmdlets": [ "Get-Acl", "Set-Acl" ]
         }
       ]
     },
@@ -30,11 +41,14 @@
           "module": "Microsoft.PowerShell.Management",
           "cmdlets": [
             "Get-Process",
+            "Start-Process",
             "Stop-Process",
+            "Wait-Process",
             "Get-Service",
             "Start-Service",
             "Stop-Service",
-            "Restart-Service"
+            "Restart-Service",
+            "Set-Service"
           ]
         }
       ]
@@ -48,8 +62,10 @@
           "cmdlets": [
             "Get-ItemProperty",
             "Set-ItemProperty",
-            "New-Item",
-            "Remove-ItemProperty"
+            "New-ItemProperty",
+            "Clear-ItemProperty",
+            "Remove-ItemProperty",
+            "New-Item"
           ]
         }
       ]
@@ -67,12 +83,20 @@
           "cmdlets": [ "Invoke-Command" ]
         },
         {
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": [ "Invoke-WebRequest", "Invoke-RestMethod" ]
+        },
+        {
           "module": "NetTCPIP",
           "cmdlets": [ "Test-NetConnection", "Get-NetIPAddress" ]
         },
         {
           "module": "NetAdapter",
           "cmdlets": [ "Get-NetAdapter" ]
+        },
+        {
+          "module": "DnsClient",
+          "cmdlets": [ "Resolve-DnsName" ]
         }
       ]
     },
@@ -90,10 +114,17 @@
             "Select-Object",
             "Sort-Object",
             "Group-Object",
-            "Export-Csv",
-            "ConvertTo-Json",
+            "Measure-Object",
+            "Compare-Object",
             "Select-String",
-            "Measure-Object"
+            "ConvertTo-Json",
+            "ConvertFrom-Json",
+            "Export-Csv",
+            "Import-Csv",
+            "ConvertTo-Csv",
+            "ConvertFrom-Csv",
+            "Out-File",
+            "Tee-Object"
           ]
         }
       ]
@@ -110,6 +141,8 @@
             "Write-Warning",
             "Write-Error",
             "Write-Verbose",
+            "Write-Debug",
+            "Write-Information",
             "Format-Table",
             "Format-List"
           ]
@@ -117,6 +150,57 @@
         {
           "module": "Microsoft.PowerShell.Core",
           "cmdlets": [ "Out-Host", "Out-Null" ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/Utility.json",
+      "category": "Utility / Date",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": [
+            "Get-Date",
+            "Start-Sleep",
+            "Measure-Command",
+            "Get-Random"
+          ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Management",
+          "cmdlets": [ "Get-Location", "Set-Location" ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/VariableModule.json",
+      "category": "Variable / Module",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": [ "Get-Variable", "Set-Variable" ]
+        },
+        {
+          "module": "Microsoft.PowerShell.Core",
+          "cmdlets": [
+            "Get-Module",
+            "Import-Module",
+            "Remove-Module"
+          ]
+        }
+      ]
+    },
+    {
+      "outputFile": "Templates/Builtin/Security.json",
+      "category": "Security",
+      "sources": [
+        {
+          "module": "Microsoft.PowerShell.Security",
+          "cmdlets": [
+            "Get-Credential",
+            "ConvertTo-SecureString",
+            "ConvertFrom-SecureString"
+          ]
         }
       ]
     }

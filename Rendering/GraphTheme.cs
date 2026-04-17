@@ -100,6 +100,9 @@ public static class GraphTheme
         ["Control Flow"]      = Color.FromRgb(112, 96, 168),  // #7060A8 purple
         ["Output"]            = Color.FromRgb(212, 148, 58),  // #D4943A amber
         ["Annotation"]        = Color.FromRgb(100, 110, 120), // #646E78 neutral gray
+        ["Utility / Date"]    = Color.FromRgb(91, 168, 154),  // #5BA89A teal
+        ["Variable / Module"] = Color.FromRgb(120, 160, 200), // #78A0C8 softer steel-blue
+        ["Security"]          = Color.FromRgb(208, 80, 80),   // #D05050 red-warning
     };
 
     public static Color GetCategoryColor(string category)
