@@ -406,7 +406,12 @@ public partial class GraphNode : ObservableObject
 
     /// <summary>
     /// Recalculate zone rectangles based on current container size.
-    /// Single-zone containers fill the body; dual-zone containers split side by side.
+    /// Single-zone containers fill the body; dual-zone splits side by side;
+    /// three-zone splits as a 70/30 vertical stack — zones[0] and zones[1]
+    /// side-by-side in the top band, zones[2] full-width below. That matches
+    /// Try/Catch/Finally semantics: Try and Catch are parallel exception
+    /// paths, Finally runs after either and deserves its own row. Finally's
+    /// smaller share reflects that it's frequently empty.
     /// </summary>
     public void RecalcZoneLayout()
     {
@@ -424,16 +429,33 @@ public partial class GraphNode : ObservableObject
             z.Width = ContainerWidth - pad * 2;
             z.Height = bodyH;
         }
-        else
+        else if (Zones.Count == 2)
         {
             double halfW = (ContainerWidth - pad * 3) / 2;
-            for (int i = 0; i < Math.Min(Zones.Count, 2); i++)
+            for (int i = 0; i < 2; i++)
             {
                 Zones[i].OffsetX = pad + i * (halfW + pad);
                 Zones[i].OffsetY = bodyTop;
                 Zones[i].Width = halfW;
                 Zones[i].Height = bodyH;
             }
+        }
+        else
+        {
+            double topH = (bodyH - pad) * 0.70;
+            double bottomH = (bodyH - pad) * 0.30;
+            double halfW = (ContainerWidth - pad * 3) / 2;
+            for (int i = 0; i < 2; i++)
+            {
+                Zones[i].OffsetX = pad + i * (halfW + pad);
+                Zones[i].OffsetY = bodyTop;
+                Zones[i].Width = halfW;
+                Zones[i].Height = topH;
+            }
+            Zones[2].OffsetX = pad;
+            Zones[2].OffsetY = bodyTop + topH + pad;
+            Zones[2].Width = ContainerWidth - pad * 2;
+            Zones[2].Height = bottomH;
         }
     }
 }

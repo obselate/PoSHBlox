@@ -327,9 +327,11 @@ public class NodeGraphRenderer
             ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
-        // Title + badge
+        // Title + badge. Start well clear of the ExecIn triangle, which extends
+        // from the node's left edge out to +24 (pin centered at +16, triangle
+        // ±8). 32 gives a small visual gap past the triangle tip.
         var title = MakeText(node.Title, 14, FontWeight.Bold, GraphTheme.TextPrimary);
-        ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
+        ctx.DrawText(title, new Point(node.X + 32, node.Y + (hh - title.Height) / 2));
 
         // Zones — highlight zone under cursor when dragging a node
         foreach (var zone in node.Zones)
