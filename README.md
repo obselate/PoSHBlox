@@ -25,7 +25,7 @@ PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes o
 
 ### Features
 
-- **Node palette** with 50+ built-in cmdlet templates across 9 categories (File/Folder, Process/Service, Registry, Network/Remote, String/Data, Output, Control Flow, Custom, Annotation)
+- **Node palette** with 85+ built-in cmdlet templates across 12 categories (File/Folder, Process/Service, Registry, Network/Remote, String/Data, Output, Utility/Date, Variable/Module, Security, Control Flow, Custom, Annotation)
 - **Control flow containers** -- If/Else, ForEach, Try/Catch, While loops, Functions, and Labels -- with support for nesting containers inside containers
 - **Live script preview** and one-click Run in a PowerShell window — prefers pwsh 7+ when installed, falls back to Windows PowerShell 5.1
 - **Pipeline-aware code generation** -- chains piped cmdlets, assigns variables at branch points, and detects cycles
