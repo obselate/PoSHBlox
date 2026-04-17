@@ -35,6 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Samples\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AvaloniaResource Include="Assets\poshblox-icon-512.png" />
     <AvaloniaResource Include="Assets\poshblox.ico" />
     <AvaloniaResource Include="Assets\Fonts\JetBrainsMono-Regular.ttf" />
