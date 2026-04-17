@@ -285,8 +285,11 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            ParamType.String or ParamType.Path =>
-                $"-{Name} \"{val.Replace("\"", "`\"")}\"",
+            // Single-quoted: textbox content is literal. No $-expansion, no
+            // backtick escapes — the only escape is '' for an embedded quote.
+            // Users type plain text; codegen handles the wrapping.
+            ParamType.String or ParamType.Path or ParamType.Enum =>
+                $"-{Name} '{val.Replace("'", "''")}'",
 
             ParamType.Int =>
                 $"-{Name} {val}",
@@ -300,24 +303,21 @@ public partial class NodeParameter : ObservableObject
             ParamType.Bool =>
                 $"-{Name} ${val.ToLowerInvariant()}",
 
-            // Collection and StringArray both receive a comma-separated string
-            // from the UI and expand to a PowerShell array. Without this, a value
-            // like "A,B,C" would emit as `-Property "A,B,C"`, which cmdlets like
-            // Select-Object treat as a single literal property name.
+            // Comma-separated input expands to a single-quoted array. A value
+            // like "A,B,C" must emit as @('A','B','C') — emitting it bare
+            // would make Select-Object treat it as one literal property name.
+            // Edge: items that themselves contain commas need a different
+            // input affordance (chip editor) — documented limitation.
             ParamType.StringArray or ParamType.Collection =>
-                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"'{s.Replace("'", "''")}'"))})",
 
             ParamType.ScriptBlock =>
                 $"-{Name} {{ {val} }}",
 
-            ParamType.Enum =>
-                $"-{Name} \"{val}\"",
-
             // Any / Object / Credential / HashTable have no canonical literal
             // form — the user's value is passed through as a raw PowerShell
             // expression. Quoting these would break $cred references and
-            // @{...} hashtable literals (the previous default wrapped them
-            // in double quotes, turning them into plain strings).
+            // @{...} hashtable literals.
             _ => $"-{Name} {val}"
         };
     }
@@ -335,8 +335,9 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            ParamType.String or ParamType.Path =>
-                $"{Name} = \"{val.Replace("\"", "`\"")}\"",
+            // Single-quoted literal — see ToPowerShellArg for the rationale.
+            ParamType.String or ParamType.Path or ParamType.Enum =>
+                $"{Name} = '{val.Replace("'", "''")}'",
 
             ParamType.Int =>
                 $"{Name} = {val}",
@@ -350,13 +351,10 @@ public partial class NodeParameter : ObservableObject
                 $"{Name} = ${val.ToLowerInvariant()}",
 
             ParamType.StringArray or ParamType.Collection =>
-                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"'{s.Replace("'", "''")}'"))})",
 
             ParamType.ScriptBlock =>
                 $"{Name} = {{ {val} }}",
-
-            ParamType.Enum =>
-                $"{Name} = \"{val}\"",
 
             // Any / Object / Credential / HashTable: user value is a raw
             // expression, not a literal — see ToPowerShellArg's matching case.

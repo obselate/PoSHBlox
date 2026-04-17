@@ -664,12 +664,13 @@ public class ScriptGenerator
             ParamType.Bool => $" = ${v.ToLowerInvariant()}",
             ParamType.ScriptBlock => $" = {{ {v} }}",
             ParamType.StringArray or ParamType.Collection =>
-                $" = @({string.Join(", ", v.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+                $" = @({string.Join(", ", v.Split(',', StringSplitOptions.TrimEntries).Select(s => $"'{s.Replace("'", "''")}'"))})",
             // Any / Object / Credential / HashTable: pass through as raw expr.
             ParamType.Any or ParamType.Object or ParamType.Credential or ParamType.HashTable =>
                 $" = {v}",
-            // String / Path / Enum: quoted literal with embedded-quote escape.
-            _ => $" = \"{v.Replace("\"", "`\"")}\"",
+            // String / Path / Enum: single-quoted literal. No $-expansion or
+            // backtick interpretation — only '' escapes an embedded quote.
+            _ => $" = '{v.Replace("'", "''")}'",
         };
     }
 
