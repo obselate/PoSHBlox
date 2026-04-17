@@ -100,6 +100,13 @@
       "dataOutputs": [{ "name": "Out", "type": "HashTable", "isPrimary": true }]
     },
     {
+      "name": "$PSVersionTable entries",
+      "description": "PSVersionTable enumerated as DictionaryEntry rows (Name / Value). Use when you need to pipe through Where-Object / Select-Object — the raw hashtable goes through as a single object and can't be filtered row-by-row.",
+      "kind": "Value",
+      "valueExpression": "$PSVersionTable.GetEnumerator()",
+      "dataOutputs": [{ "name": "Out", "type": "Collection", "isPrimary": true }]
+    },
+    {
       "name": "$env:",
       "description": "Environment variable read (parametric). Type the variable name in the properties panel — the node re-titles as $env:<name>.",
       "kind": "Value",
