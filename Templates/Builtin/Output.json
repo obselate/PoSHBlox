@@ -618,7 +618,7 @@
       "parameters": [
         {
           "name": "Object",
-          "type": "Object",
+          "type": "String",
           "defaultValue": "",
           "description": "Objects to display in the host.",
           "validValues": [],
@@ -645,7 +645,7 @@
         },
         {
           "name": "Separator",
-          "type": "Object",
+          "type": "String",
           "defaultValue": "",
           "description": "Specifies a separator string to insert between objects displayed by the host.",
           "validValues": [],
@@ -742,7 +742,7 @@
       "parameters": [
         {
           "name": "MessageData",
-          "type": "Object",
+          "type": "String",
           "isMandatory": true,
           "defaultValue": "",
           "description": "Specifies an informational message that you want to display to users as they run a script or command. For best results, enclose the informational message in quotation marks.",
