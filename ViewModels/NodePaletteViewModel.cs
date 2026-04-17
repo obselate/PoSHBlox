@@ -247,9 +247,12 @@ public partial class NodePaletteViewModel : ObservableObject
         // No filters — prepend a Recent pseudo-category when we have spawns this session.
         if (RecentCmdletNames.Count > 0)
         {
-            var byKey = allTemplates.ToDictionary(
-                t => string.IsNullOrEmpty(t.CmdletName) ? t.Name : t.CmdletName,
-                t => t);
+            // Some cmdlets (e.g. New-Item) legitimately appear in multiple catalog
+            // categories; keep the first template seen for the Recent lookup so
+            // the same key doesn't throw on ToDictionary.
+            var byKey = allTemplates
+                .GroupBy(t => string.IsNullOrEmpty(t.CmdletName) ? t.Name : t.CmdletName)
+                .ToDictionary(g => g.Key, g => g.First());
             var recent = RecentCmdletNames
                 .Select(k => byKey.TryGetValue(k, out var tpl) ? tpl : null)
                 .Where(t => t != null)
