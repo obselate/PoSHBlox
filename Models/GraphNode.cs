@@ -80,8 +80,31 @@ public partial class GraphNode : ObservableObject
     /// </summary>
     public string[] KnownParameterSets { get; set; } = [];
 
-    /// <summary>Currently-active parameter set. Empty when <see cref="KnownParameterSets"/> is empty.</summary>
-    [ObservableProperty] private string _activeParameterSet = "";
+    /// <summary>
+    /// Currently-active parameter set. Empty only when <see cref="KnownParameterSets"/>
+    /// is empty. The setter rejects empty writes when the node has known sets —
+    /// Avalonia's ComboBox can TwoWay-write an empty SelectedItem back during
+    /// DataContext transitions (reselecting the node after deselecting clears
+    /// the ItemsSource briefly, which clears SelectedItem, which propagates
+    /// back to this property). Without the guard, clicking off and back onto
+    /// a node silently erased the user's explicit set choice.
+    /// </summary>
+    public string ActiveParameterSet
+    {
+        get => _activeParameterSet;
+        set
+        {
+            if (string.IsNullOrEmpty(value) && KnownParameterSets.Length > 0) return;
+            if (SetProperty(ref _activeParameterSet, value))
+            {
+                // Active-set changes flip visibility + height the same way collapse does.
+                OnPropertyChanged(nameof(Height));
+                OnPropertyChanged(nameof(VisibleDataInputs));
+                OnPropertyChanged(nameof(HiddenDataInputCount));
+            }
+        }
+    }
+    private string _activeParameterSet = "";
 
     /// <summary>True when the cmdlet declares more than one set — drives the picker's visibility.</summary>
     public bool HasMultipleSets => KnownParameterSets.Length > 1;
@@ -230,14 +253,6 @@ public partial class GraphNode : ObservableObject
 
         if (!IsCollapsed) return true;
         return IsDataInputVisibleWhenCollapsed(port);
-    }
-
-    partial void OnActiveParameterSetChanged(string value)
-    {
-        // Active-set changes flip visibility + height the same way collapse does.
-        OnPropertyChanged(nameof(Height));
-        OnPropertyChanged(nameof(VisibleDataInputs));
-        OnPropertyChanged(nameof(HiddenDataInputCount));
     }
 
     // ── Computed layout properties ─────────────────────────────
