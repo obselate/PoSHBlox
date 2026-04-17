@@ -11,27 +11,40 @@
     schema check — does not introspect against a live PowerShell host.
 
 .PARAMETER Path
-    Override the catalog root. Defaults to ../Templates/Builtin relative
-    to this script.
+    One or more catalog roots to audit. Accepts an array. Defaults to
+    ../Templates/Builtin plus ../Templates/Custom (source-tree layout);
+    for runtime-imported catalogs, point this at
+    <app>/bin/<config>/net10.0/Templates/Custom where SaveCustomCatalogAsync
+    writes new user imports.
 
 .PARAMETER FailOnError
     Exit non-zero if any Error-severity finding is reported. For CI use.
 
 .EXAMPLE
     pwsh ./Tools/Audit-Templates.ps1
+    pwsh ./Tools/Audit-Templates.ps1 -Path bin/Debug/net10.0/Templates/Custom
 #>
 [CmdletBinding()]
 param(
-    [string]$Path,
+    [string[]]$Path,
     [switch]$FailOnError
 )
 
 $ErrorActionPreference = 'Stop'
 
-if (-not $Path) {
-    $Path = Join-Path $PSScriptRoot '..' 'Templates' 'Builtin'
+if (-not $Path -or $Path.Count -eq 0) {
+    $defaults = @(
+        (Join-Path $PSScriptRoot '..' 'Templates' 'Builtin'),
+        (Join-Path $PSScriptRoot '..' 'Templates' 'Custom')
+    )
+    $Path = $defaults | Where-Object { Test-Path $_ }
+    if (-not $Path) {
+        Write-Error "No default catalog folders found under Templates/. Pass -Path explicitly."
+        exit 1
+    }
 }
-$Path = (Resolve-Path $Path).Path
+
+$Path = @($Path | ForEach-Object { (Resolve-Path $_).Path })
 
 $ValidParamTypes = @(
     'Any','String','Int','Bool','Path','StringArray','Object',
@@ -203,24 +216,32 @@ function Test-Template {
 }
 
 # ── Walk catalogs ─────────────────────────────────────────────
-$catalogs = Get-ChildItem -Path $Path -Filter '*.json' -File
-Write-Host "Auditing $($catalogs.Count) catalog file(s) in $Path" -ForegroundColor Cyan
+$catalogs = @()
+foreach ($root in $Path) {
+    $catalogs += Get-ChildItem -Path $root -Filter '*.json' -File
+}
+Write-Host "Auditing $($catalogs.Count) catalog file(s) across:" -ForegroundColor Cyan
+foreach ($root in $Path) { Write-Host "  $root" -ForegroundColor Cyan }
 
 foreach ($file in $catalogs) {
+    # Include the parent folder so findings from Builtin vs Custom are
+    # distinguishable in the output table.
+    $label = "$(Split-Path $file.Directory.FullName -Leaf)/$($file.Name)"
+
     try {
         $cat = Get-Content -Raw -LiteralPath $file.FullName | ConvertFrom-Json
     } catch {
-        Add-Finding Error $file.Name '<catalog>' "Failed to parse JSON: $($_.Exception.Message)"
+        Add-Finding Error $label '<catalog>' "Failed to parse JSON: $($_.Exception.Message)"
         continue
     }
 
     if (-not $cat.templates) {
-        Add-Finding Warning $file.Name '<catalog>' 'Catalog has no templates array.'
+        Add-Finding Warning $label '<catalog>' 'Catalog has no templates array.'
         continue
     }
 
     foreach ($tpl in $cat.templates) {
-        Test-Template -cat $cat -tpl $tpl -file $file.Name
+        Test-Template -cat $cat -tpl $tpl -file $label
     }
 }
 
