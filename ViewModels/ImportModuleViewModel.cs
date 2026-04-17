@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PoSHBlox.Models;
@@ -9,27 +11,109 @@ using PoSHBlox.Services;
 
 namespace PoSHBlox.ViewModels;
 
+/// <summary>
+/// Drives the Import dialog: populates a list of modules discovered via
+/// <see cref="PowerShellModuleDiscovery"/> across all detected hosts, filters
+/// on user search, and auto-introspects whichever module the user selects so
+/// the cmdlet checklist is always one click (plus scan time) away from Save.
+/// </summary>
 public partial class ImportModuleViewModel : ObservableObject
 {
-    [ObservableProperty] private string _moduleName = "";
+    [ObservableProperty] private string _searchText = "";
+    [ObservableProperty] private AvailableModule? _selectedModule;
+    [ObservableProperty] private bool _isLoadingModules;
     [ObservableProperty] private string _categoryName = "";
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private string _statusMessage = "";
 
-    /// <summary>Host ids from the last successful scan — stamped into the saved catalog.</summary>
-    private System.Collections.Generic.List<string> _lastScanHostIds = [];
+    /// <summary>Full, unfiltered module list as returned by DiscoverAsync.</summary>
+    public ObservableCollection<AvailableModule> AvailableModules { get; } = new();
+
+    /// <summary>Currently visible rows — reduced from <see cref="AvailableModules"/> by <see cref="SearchText"/>.</summary>
+    public ObservableCollection<AvailableModule> FilteredModules { get; } = new();
 
     public ObservableCollection<SelectableCmdlet> DiscoveredCmdlets { get; } = new();
 
-    [RelayCommand]
-    private async System.Threading.Tasks.Task ScanModule()
-    {
-        if (string.IsNullOrWhiteSpace(ModuleName))
-        {
-            StatusMessage = "Enter a module name first.";
-            return;
-        }
+    /// <summary>Host ids from the last successful scan — stamped into the saved catalog.</summary>
+    private List<string> _lastScanHostIds = [];
 
+    public ImportModuleViewModel()
+    {
+        // Kick discovery immediately so the list is warming while the user
+        // focuses the dialog. LoadModules handles its own errors.
+        _ = LoadModulesAsync();
+    }
+
+    [RelayCommand]
+    private Task RefreshModules() => LoadModulesAsync();
+
+    private async Task LoadModulesAsync()
+    {
+        if (IsLoadingModules) return;
+        IsLoadingModules = true;
+        StatusMessage = "Discovering modules on all hosts…";
+        AvailableModules.Clear();
+        FilteredModules.Clear();
+        DiscoveredCmdlets.Clear();
+
+        try
+        {
+            var result = await PowerShellModuleDiscovery.DiscoverAsync();
+            foreach (var m in result.Modules)
+                AvailableModules.Add(m);
+            RebuildFilter();
+
+            if (result.Modules.Count == 0)
+            {
+                StatusMessage = result.HostErrors.Count > 0
+                    ? $"No modules found. {string.Join("; ", result.HostErrors)}"
+                    : "No modules found.";
+            }
+            else if (result.HostErrors.Count > 0)
+            {
+                StatusMessage = $"Loaded {result.Modules.Count} module(s). Warnings: {string.Join("; ", result.HostErrors)}";
+            }
+            else
+            {
+                StatusMessage = $"Loaded {result.Modules.Count} module(s). Pick one to scan.";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Module discovery failed: {ex.Message}";
+            Debug.WriteLine($"[ImportModule] Discovery failed: {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingModules = false;
+        }
+    }
+
+    partial void OnSearchTextChanged(string value) => RebuildFilter();
+
+    private void RebuildFilter()
+    {
+        FilteredModules.Clear();
+        var needle = SearchText?.Trim() ?? "";
+        IEnumerable<AvailableModule> source = AvailableModules;
+        if (needle.Length > 0)
+        {
+            source = AvailableModules.Where(m =>
+                m.Name.Contains(needle, StringComparison.OrdinalIgnoreCase) ||
+                (m.Description?.Contains(needle, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+        foreach (var m in source)
+            FilteredModules.Add(m);
+    }
+
+    partial void OnSelectedModuleChanged(AvailableModule? value)
+    {
+        if (value == null) return;
+        _ = ScanSelectedAsync(value);
+    }
+
+    private async Task ScanSelectedAsync(AvailableModule module)
+    {
         DiscoveredCmdlets.Clear();
         IsScanning = true;
 
@@ -42,11 +126,11 @@ public partial class ImportModuleViewModel : ObservableObject
         }
 
         var hostLabels = string.Join(" + ", hosts.Select(h => h.DisplayName));
-        StatusMessage = $"Scanning {ModuleName} against {hostLabels}...";
+        StatusMessage = $"Scanning {module.Name} against {hostLabels}…";
 
         try
         {
-            var perHostResults = await PowerShellIntrospector.IntrospectModuleAllHostsAsync(ModuleName.Trim());
+            var perHostResults = await PowerShellIntrospector.IntrospectModuleAllHostsAsync(module.Name);
             if (perHostResults.Count == 0)
             {
                 StatusMessage = "All hosts failed to scan the module — check stderr for details.";
@@ -80,17 +164,13 @@ public partial class ImportModuleViewModel : ObservableObject
                 });
             }
 
-            // Pick resolved name from whichever result has one; they're the same module.
             var resolvedName = perHostResults
                 .Select(r => r.ResolvedModuleName)
-                .FirstOrDefault(n => !string.IsNullOrEmpty(n)) ?? ModuleName.Trim();
+                .FirstOrDefault(n => !string.IsNullOrEmpty(n)) ?? module.Name;
             CategoryName = resolvedName;
 
-            var matchNote = resolvedName != ModuleName.Trim()
-                ? $" (resolved to {resolvedName})"
-                : "";
-            var hostCount = perHostResults.Count;
-            StatusMessage = $"Found {merged.Count} cmdlet(s) across {hostCount} host(s){matchNote}.";
+            var matchNote = resolvedName != module.Name ? $" (resolved to {resolvedName})" : "";
+            StatusMessage = $"Found {merged.Count} cmdlet(s) across {perHostResults.Count} host(s){matchNote}.";
         }
         catch (Exception ex)
         {
@@ -104,7 +184,7 @@ public partial class ImportModuleViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async System.Threading.Tasks.Task SaveSelected()
+    private async Task SaveSelected()
     {
         var selected = DiscoveredCmdlets.Where(c => c.IsSelected).ToList();
         if (selected.Count == 0)
@@ -123,7 +203,7 @@ public partial class ImportModuleViewModel : ObservableObject
         {
             Version = 2,
             Category = CategoryName.Trim(),
-            IntrospectedHosts = new System.Collections.Generic.List<string>(_lastScanHostIds),
+            IntrospectedHosts = new List<string>(_lastScanHostIds),
         };
 
         foreach (var cmdlet in selected)
@@ -141,12 +221,12 @@ public partial class ImportModuleViewModel : ObservableObject
                     : [new DataOutputDef { Name = "Out", Type = ParamType.Any, IsPrimary = true }],
                 KnownParameterSets = cmdlet.KnownParameterSets,
                 DefaultParameterSet = cmdlet.DefaultParameterSet,
-                SupportedEditions = new System.Collections.Generic.List<string>(cmdlet.SupportedEditions),
+                SupportedEditions = new List<string>(cmdlet.SupportedEditions),
             };
 
             foreach (var p in cmdlet.Parameters)
             {
-                var paramType = System.Enum.TryParse<ParamType>(p.Type, out var pt) ? pt : ParamType.String;
+                var paramType = Enum.TryParse<ParamType>(p.Type, out var pt) ? pt : ParamType.String;
                 template.Parameters.Add(new ParameterDef
                 {
                     Name = p.Name,
@@ -158,7 +238,7 @@ public partial class ImportModuleViewModel : ObservableObject
                     IsPipelineInput = p.IsPipelineInput,
                     ParameterSets = p.ParameterSets,
                     MandatoryInSets = p.MandatoryInSets,
-                    SupportedEditions = new System.Collections.Generic.List<string>(p.SupportedEditions),
+                    SupportedEditions = new List<string>(p.SupportedEditions),
                 });
             }
 
@@ -183,16 +263,16 @@ public partial class SelectableCmdlet : ObservableObject
     [ObservableProperty] private bool _isSelected = true;
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
-    public System.Collections.Generic.List<DiscoveredParameter> Parameters { get; set; } = [];
+    public List<DiscoveredParameter> Parameters { get; set; } = [];
 
     public bool HasExecIn { get; set; } = true;
     public bool HasExecOut { get; set; } = true;
     public string? PrimaryPipelineParameter { get; set; }
-    public System.Collections.Generic.List<DataOutputDef> DataOutputs { get; set; } = [];
+    public List<DataOutputDef> DataOutputs { get; set; } = [];
 
-    public System.Collections.Generic.List<string> KnownParameterSets { get; set; } = [];
+    public List<string> KnownParameterSets { get; set; } = [];
     public string? DefaultParameterSet { get; set; }
 
     /// <summary>Editions this cmdlet was discovered in (merged across hosts).</summary>
-    public System.Collections.Generic.List<string> SupportedEditions { get; set; } = [];
+    public List<string> SupportedEditions { get; set; } = [];
 }

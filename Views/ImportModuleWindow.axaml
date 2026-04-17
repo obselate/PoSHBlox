@@ -4,7 +4,7 @@
         xmlns:vm="using:PoSHBlox.ViewModels"
         x:Class="PoSHBlox.Views.ImportModuleWindow"
         Title="PoSHBlox — Import"
-        Width="520" Height="620"
+        Width="620" Height="700"
         Background="{DynamicResource BgPrimaryBrush}"
         FontFamily="{DynamicResource FontMono}"
         WindowStartupLocation="CenterOwner"
@@ -16,23 +16,16 @@
 
     <DockPanel Margin="16">
 
-        <!-- Module name + Scan -->
-        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-            <Button DockPanel.Dock="Right" Content="Scan" Margin="8,0,0,0"
-                    Command="{Binding ScanModuleCommand}"
-                    IsEnabled="{Binding !IsScanning}"
-                    ToolTip.Tip="Scan module for available cmdlets"
-                    Padding="14,7" CornerRadius="4"
-                    Background="{DynamicResource BgRunTintBrush}"
-                    Foreground="{DynamicResource TextRunBrush}">
-                <Button.Resources>
-                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource CoreTealAccent700}" />
-                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource CoreTealAccent900}" />
-                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource CoreTealAccent200}" />
-                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource CoreTealAccent300}" />
-                </Button.Resources>
-            </Button>
-            <TextBox Text="{Binding ModuleName, Mode=TwoWay}" Watermark="Module name (e.g. ActiveDirectory)"
+        <!-- Search + Refresh -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Button DockPanel.Dock="Right" Content="Refresh" Margin="8,0,0,0"
+                    Command="{Binding RefreshModulesCommand}"
+                    IsEnabled="{Binding !IsLoadingModules}"
+                    ToolTip.Tip="Re-scan Get-Module -ListAvailable on every detected host"
+                    Padding="12,7" CornerRadius="4"
+                    Background="{DynamicResource BgSecondaryBrush}"
+                    Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBox Text="{Binding SearchText, Mode=TwoWay}" Watermark="Filter modules…"
                      Background="{DynamicResource BgSecondaryBrush}"
                      Foreground="{DynamicResource TextPrimaryBrush}"
                      BorderBrush="{DynamicResource BorderPrimaryBrush}"
@@ -41,11 +34,12 @@
 
         <!-- Status line -->
         <TextBlock DockPanel.Dock="Bottom" Text="{Binding StatusMessage}" FontSize="11"
-                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0" />
+                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"
+                   TextWrapping="Wrap" />
 
-        <!-- Save button -->
+        <!-- Save row -->
         <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
-            <TextBox DockPanel.Dock="Left" Width="220"
+            <TextBox DockPanel.Dock="Left" Width="240"
                      Text="{Binding CategoryName, Mode=TwoWay}" Watermark="Category name"
                      Background="{DynamicResource BgSecondaryBrush}"
                      Foreground="{DynamicResource TextPrimaryBrush}"
@@ -67,15 +61,16 @@
         </DockPanel>
 
         <!-- Separator -->
-        <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
+        <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,8" />
 
-        <!-- Label -->
-        <TextBlock DockPanel.Dock="Top" Text="DISCOVERED CMDLETS" FontSize="11" FontWeight="SemiBold"
-                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,6" />
+        <!-- Discovered cmdlets label -->
+        <TextBlock DockPanel.Dock="Bottom" Text="DISCOVERED CMDLETS" FontSize="11" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,4" />
 
         <!-- Cmdlet list with checkboxes -->
-        <Border Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
-                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1">
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1"
+                Height="220">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl ItemsSource="{Binding DiscoveredCmdlets}" Margin="4">
                     <ItemsControl.ItemTemplate>
@@ -97,6 +92,62 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
+        </Border>
+
+        <!-- Available modules label -->
+        <TextBlock DockPanel.Dock="Top" Text="AVAILABLE MODULES" FontSize="11" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,4" />
+
+        <!-- Module picker (fills remaining space) -->
+        <Border Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
+                BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1">
+            <ListBox ItemsSource="{Binding FilteredModules}"
+                     SelectedItem="{Binding SelectedModule, Mode=TwoWay}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel LastChildFill="True">
+                            <!-- Right-aligned rectangular badge, visible only when edition-exclusive -->
+                            <Border DockPanel.Dock="Right" CornerRadius="3"
+                                    Padding="6,2" Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding HasBadge}"
+                                    BorderThickness="1">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{StaticResource CoreAmberAction900}" />
+                                </Border.Background>
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{StaticResource CoreAmberAction700}" />
+                                </Border.BorderBrush>
+                                <TextBlock Text="{Binding BadgeText}" FontSize="10">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{StaticResource CoreAmberAction300}" />
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </Border>
+                            <StackPanel Spacing="1">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{Binding Version}" FontSize="10" Margin="8,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextMutedBrush}" />
+                                </DockPanel>
+                                <TextBlock Text="{Binding Description}" FontSize="10"
+                                           Foreground="{DynamicResource TextMutedBrush}" TextWrapping="NoWrap"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Border>
 
     </DockPanel>
