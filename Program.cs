@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using PoSHBlox.Services;
+using PoSHBlox.ViewModels;
 
 namespace PoSHBlox;
 
@@ -16,6 +17,7 @@ class Program
         // Dev tools run headless (no GUI, no Avalonia):
         //   --regen-builtin  <Module> <OutputFile> [--category "Name"] [--only Cmd1,Cmd2]
         //   --regen-manifest <ManifestFile> [--dry-run]
+        //   --emit           <PblxFile>  → writes the generated script to stdout
         if (args.Length > 0)
         {
             switch (args[0])
@@ -26,6 +28,9 @@ class Program
                 case "--regen-manifest":
                     AttachHostConsole();
                     return RunRegenManifest(args);
+                case "--emit":
+                    AttachHostConsole();
+                    return RunEmit(args);
             }
         }
 
@@ -147,5 +152,41 @@ class Program
         }
 
         return TemplateRegenerator.RegenerateFromManifestAsync(manifestPath, dryRun).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Emit the generated PowerShell for a .pblx file to stdout. Headless
+    /// driver for parse-check sweeps — paired with Tools/Parse-Check-Samples.ps1
+    /// which pipes the output into [Parser]::ParseInput to flag codegen bugs.
+    /// </summary>
+    private static int RunEmit(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.Error.WriteLine("usage: PoSHBlox --emit <PblxFile>");
+            return 1;
+        }
+
+        var path = args[1];
+        if (!File.Exists(path))
+        {
+            Console.Error.WriteLine($"file not found: {path}");
+            return 1;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(path);
+            var vm = new GraphCanvasViewModel();
+            ProjectSerializer.Deserialize(json, vm);
+            var script = new ScriptGenerator(vm.Nodes, vm.Connections).Generate();
+            Console.Out.Write(script);
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"emit failed for {path}: {ex.Message}");
+            return 2;
+        }
     }
 }
