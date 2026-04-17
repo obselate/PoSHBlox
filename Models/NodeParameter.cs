@@ -313,7 +313,12 @@ public partial class NodeParameter : ObservableObject
             ParamType.Enum =>
                 $"-{Name} \"{val}\"",
 
-            _ => $"-{Name} \"{val}\""
+            // Any / Object / Credential / HashTable have no canonical literal
+            // form — the user's value is passed through as a raw PowerShell
+            // expression. Quoting these would break $cred references and
+            // @{...} hashtable literals (the previous default wrapped them
+            // in double quotes, turning them into plain strings).
+            _ => $"-{Name} {val}"
         };
     }
 
@@ -353,7 +358,9 @@ public partial class NodeParameter : ObservableObject
             ParamType.Enum =>
                 $"{Name} = \"{val}\"",
 
-            _ => $"{Name} = \"{val}\""
+            // Any / Object / Credential / HashTable: user value is a raw
+            // expression, not a literal — see ToPowerShellArg's matching case.
+            _ => $"{Name} = {val}"
         };
     }
 }

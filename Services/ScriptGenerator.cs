@@ -613,9 +613,7 @@ public class ScriptGenerator
                     sb.AppendLine($"        [Parameter({string.Join(", ", attrs)})]");
 
                 var comma = i < arguments.Count - 1 ? "," : "";
-                var defaultVal = !string.IsNullOrWhiteSpace(arg.DefaultValue) && arg.Type != ParamType.Bool
-                    ? $" = \"{arg.DefaultValue}\""
-                    : "";
+                var defaultVal = FormatFunctionDefault(arg);
                 sb.AppendLine($"        [{arg.PowerShellTypeName}]${arg.Name}{defaultVal}{comma}");
                 if (i < arguments.Count - 1) sb.AppendLine();
             }
@@ -646,6 +644,33 @@ public class ScriptGenerator
 
         sb.AppendLine("}");
         sb.AppendLine();
+    }
+
+    /// <summary>
+    /// Format a function-argument default as a PowerShell literal of the
+    /// argument's declared type. Returns "" when the default is blank
+    /// (param emits without a default). Prior implementation always
+    /// double-quoted the default, which broke typed params: <c>[int]$n = "42"</c>
+    /// and <c>[scriptblock]$cb = "{ ... }"</c> are both wrong.
+    /// </summary>
+    private static string FormatFunctionDefault(NodeParameter arg)
+    {
+        var v = arg.DefaultValue;
+        if (string.IsNullOrWhiteSpace(v)) return "";
+
+        return arg.Type switch
+        {
+            ParamType.Int => $" = {v}",
+            ParamType.Bool => $" = ${v.ToLowerInvariant()}",
+            ParamType.ScriptBlock => $" = {{ {v} }}",
+            ParamType.StringArray or ParamType.Collection =>
+                $" = @({string.Join(", ", v.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+            // Any / Object / Credential / HashTable: pass through as raw expr.
+            ParamType.Any or ParamType.Object or ParamType.Credential or ParamType.HashTable =>
+                $" = {v}",
+            // String / Path / Enum: quoted literal with embedded-quote escape.
+            _ => $" = \"{v.Replace("\"", "`\"")}\"",
+        };
     }
 
     // ── Exec-graph helpers ─────────────────────────────────────
