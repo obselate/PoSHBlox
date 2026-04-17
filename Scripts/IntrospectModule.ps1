@@ -123,6 +123,19 @@ if (-not (Get-Module -Name $actualName) -and
     } catch { }
 }
 
+# Last-resort import: -Force -Global bypasses stuck "already tried" state
+# that PS 5.1 can enter for compiled modules (Microsoft.PowerShell.Security
+# in particular). Safe because the host process is single-use and exits
+# after this script runs.
+if (-not (Get-Module -Name $actualName) -and
+    -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
+{
+    try {
+        Import-Module $actualName -Force -Global -DisableNameChecking `
+            -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
+    } catch { }
+}
+
 # Collect the commands we will introspect. Preferred: Get-Command -Module,
 # which picks up everything that belongs to the module including dynamically
 # added functions. Fallback: iterate declared exports individually -- each
@@ -130,12 +143,21 @@ if (-not (Get-Module -Name $actualName) -and
 # yet, and returns CommandInfo objects we can pass to the enumeration loop.
 $commands = @(Get-Command -Module $actualName -CommandType Cmdlet,Function -ErrorAction SilentlyContinue | Sort-Object Name)
 if ($commands.Count -eq 0 -and $declaredExports.Count -gt 0) {
+    # PS 5.1 compiled-module quirk: Microsoft.PowerShell.Security can load
+    # but not respond to -Module filtering. Resolve each declared export by
+    # plain name first, then by module-qualified name as a last resort.
     $collected = @()
     foreach ($name in $declaredExports) {
-        $c = Get-Command $name -ErrorAction SilentlyContinue
+        $c = Get-Command $name -ErrorAction SilentlyContinue |
+             Where-Object { $_.CommandType -in 'Cmdlet','Function' } |
+             Select-Object -First 1
+        if (-not $c) {
+            $c = Get-Command "$actualName\$name" -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+        }
         if ($c) { $collected += $c }
     }
-    $commands = @($collected | Sort-Object Name)
+    $commands = @($collected | Sort-Object Name -Unique)
 }
 
 if ($commands.Count -eq 0) {
