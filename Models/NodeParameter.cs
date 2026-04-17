@@ -285,11 +285,14 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            // Single-quoted: textbox content is literal. No $-expansion, no
-            // backtick escapes — the only escape is '' for an embedded quote.
-            // Users type plain text; codegen handles the wrapping.
+            // Double-quoted: textbox content is wrapped as a PowerShell
+            // interpolated string. Users can embed $var or $(...) and get
+            // runtime expansion. The only characters that need escaping
+            // are backtick (the escape char itself) and the quote.
+            // NOTE: backtick must be escaped first, otherwise the
+            // subsequent " → `" replacement would itself be clobbered.
             ParamType.String or ParamType.Path or ParamType.Enum =>
-                $"-{Name} '{val.Replace("'", "''")}'",
+                $"-{Name} \"{val.Replace("`", "``").Replace("\"", "`\"")}\"",
 
             ParamType.Int =>
                 $"-{Name} {val}",
@@ -303,13 +306,14 @@ public partial class NodeParameter : ObservableObject
             ParamType.Bool =>
                 $"-{Name} ${val.ToLowerInvariant()}",
 
-            // Comma-separated input expands to a single-quoted array. A value
-            // like "A,B,C" must emit as @('A','B','C') — emitting it bare
+            // Comma-separated input expands to a double-quoted array. Each
+            // element is escaped the same way as a String literal. A value
+            // like "A,B,C" must emit as @("A","B","C") — emitting it bare
             // would make Select-Object treat it as one literal property name.
             // Edge: items that themselves contain commas need a different
             // input affordance (chip editor) — documented limitation.
             ParamType.StringArray or ParamType.Collection =>
-                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"'{s.Replace("'", "''")}'"))})",
+                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s.Replace("`", "``").Replace("\"", "`\"")}\""))})",
 
             ParamType.ScriptBlock =>
                 $"-{Name} {{ {val} }}",
@@ -335,9 +339,9 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            // Single-quoted literal — see ToPowerShellArg for the rationale.
+            // Double-quoted literal — see ToPowerShellArg for the rationale.
             ParamType.String or ParamType.Path or ParamType.Enum =>
-                $"{Name} = '{val.Replace("'", "''")}'",
+                $"{Name} = \"{val.Replace("`", "``").Replace("\"", "`\"")}\"",
 
             ParamType.Int =>
                 $"{Name} = {val}",
@@ -351,7 +355,7 @@ public partial class NodeParameter : ObservableObject
                 $"{Name} = ${val.ToLowerInvariant()}",
 
             ParamType.StringArray or ParamType.Collection =>
-                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"'{s.Replace("'", "''")}'"))})",
+                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s.Replace("`", "``").Replace("\"", "`\"")}\""))})",
 
             ParamType.ScriptBlock =>
                 $"{Name} = {{ {val} }}",
