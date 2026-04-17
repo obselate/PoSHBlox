@@ -56,8 +56,11 @@ public static class PortCompatibility
     /// <summary>
     /// Does a data pin of type <paramref name="src"/> flow into a pin of type
     /// <paramref name="tgt"/>? <c>Any</c> and <c>Object</c> are universal sinks;
-    /// <c>StringArray</c> and <c>Collection</c> are interchangeable; otherwise
-    /// exact type match is required.
+    /// <c>StringArray</c> and <c>Collection</c> are interchangeable; a single
+    /// <c>String</c> or <c>Path</c> flows into a <c>StringArray</c> sink —
+    /// PowerShell auto-wraps scalars into one-element arrays for <c>[string[]]</c>
+    /// params. <c>String</c> and <c>Path</c> are mutually assignable since paths
+    /// are strings with a domain label. Otherwise exact type match is required.
     /// </summary>
     public static bool IsDataTypeCompatible(ParamType src, ParamType tgt)
     {
@@ -65,6 +68,9 @@ public static class PortCompatibility
         if (tgt == ParamType.Object) return true;
         if ((src == ParamType.StringArray && tgt == ParamType.Collection) ||
             (src == ParamType.Collection && tgt == ParamType.StringArray)) return true;
+        if ((src == ParamType.String || src == ParamType.Path) && tgt == ParamType.StringArray) return true;
+        if ((src == ParamType.String && tgt == ParamType.Path) ||
+            (src == ParamType.Path && tgt == ParamType.String)) return true;
         return src == tgt;
     }
 }
