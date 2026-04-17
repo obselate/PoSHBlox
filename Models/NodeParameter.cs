@@ -240,7 +240,11 @@ public partial class NodeParameter : ObservableObject
             ParamType.Bool =>
                 val.Equals("true", StringComparison.OrdinalIgnoreCase) ? $"-{Name}" : "",
 
-            ParamType.StringArray =>
+            // Collection and StringArray both receive a comma-separated string
+            // from the UI and expand to a PowerShell array. Without this, a value
+            // like "A,B,C" would emit as `-Property "A,B,C"`, which cmdlets like
+            // Select-Object treat as a single literal property name.
+            ParamType.StringArray or ParamType.Collection =>
                 $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
 
             ParamType.ScriptBlock =>
@@ -280,7 +284,7 @@ public partial class NodeParameter : ObservableObject
             ParamType.Bool =>
                 $"{Name} = ${val.ToLowerInvariant()}",
 
-            ParamType.StringArray =>
+            ParamType.StringArray or ParamType.Collection =>
                 $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
 
             ParamType.ScriptBlock =>
