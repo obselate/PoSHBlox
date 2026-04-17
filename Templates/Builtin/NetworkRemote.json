@@ -27,7 +27,10 @@
         "RepeatPing",
         "TraceRoute",
         "MtuSizeDetect",
-        "TcpPort"
+        "TcpPort",
+        "Default",
+        "Source",
+        "Quiet"
       ],
       "defaultParameterSet": "DefaultPing",
       "supportedEditions": [

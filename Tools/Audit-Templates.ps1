@@ -158,7 +158,10 @@ function Test-Template {
         }
 
         # ValidValues only meaningful for String/Enum-shaped params.
-        if (@($p.validValues).Count -gt 0 -and $pType -notin @('String','Enum','Path')) {
+        # @($null).Count is 1, not 0 — filter nulls out so missing JSON
+        # properties don't read as a single-element array.
+        $validCount = @($p.validValues | Where-Object { $_ }).Count
+        if ($validCount -gt 0 -and $pType -notin @('String','Enum','Path')) {
             Add-Finding Warning $file $name "Parameter '$($p.name)' has validValues but type '$pType' isn't enum-like." $pName
         }
 

@@ -15,9 +15,11 @@ namespace PoSHBlox.Services;
 /// <item>Cmdlets are keyed by <c>Name</c>, case-insensitive.</item>
 /// <item>The first result contributes the base record; subsequent results layer
 ///       on their edition into <c>SupportedEditions</c> and merge parameters.</item>
-/// <item>Fields like <c>Description</c>, <c>DataOutputs</c>, <c>KnownParameterSets</c>
-///       come from the first result that had the cmdlet — we prefer <c>pwsh</c>
-///       by passing results in that order from the registry.</item>
+/// <item>Fields like <c>Description</c> and <c>DataOutputs</c> come from the
+///       first result that had the cmdlet — we prefer <c>pwsh</c> by passing
+///       results in that order from the registry. <c>KnownParameterSets</c>
+///       is unioned across editions so 5.1-only sets that 5.1-only params
+///       reference don't dangle.</item>
 /// <item>Parameters are keyed by <c>Name</c>, case-insensitive. Multi-edition
 ///       params union <c>ParameterSets</c> / <c>MandatoryInSets</c> / <c>ValidValues</c>
 ///       so a set declared only on 5.1 still shows up in the catalog.</item>
@@ -49,6 +51,13 @@ public static class IntrospectionMerger
 
                 if (!existing.SupportedEditions.Contains(edition, StringComparer.OrdinalIgnoreCase))
                     existing.SupportedEditions.Add(edition);
+
+                // Union KnownParameterSets across editions — otherwise 5.1-only
+                // sets stay dangling in per-param ParameterSets without being
+                // declared at the cmdlet level, which the auditor flags as
+                // "undeclared set" references.
+                existing.KnownParameterSets = existing.KnownParameterSets
+                    .Union(cmdlet.KnownParameterSets, StringComparer.OrdinalIgnoreCase).ToList();
 
                 MergeParameters(existing, cmdlet, edition);
             }

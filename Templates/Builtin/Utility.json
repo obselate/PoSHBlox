@@ -26,7 +26,9 @@
         "DateAndFormat",
         "DateAndUFormat",
         "UnixTimeSecondsAndFormat",
-        "UnixTimeSecondsAndUFormat"
+        "UnixTimeSecondsAndUFormat",
+        "net",
+        "UFormat"
       ],
       "defaultParameterSet": "DateAndFormat",
       "supportedEditions": [

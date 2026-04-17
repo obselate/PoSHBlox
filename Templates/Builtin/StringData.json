@@ -1652,7 +1652,7 @@
         },
         {
           "name": "Encoding",
-          "type": "Object",
+          "type": "Enum",
           "defaultValue": "",
           "description": "Specifies the encoding for the exported CSV file. The default value is \u0060utf8NoBOM\u0060. The acceptable values for this parameter are as follows: - \u0060ascii\u0060: Uses the encoding for the ASCII (7-bit) character set. - \u0060ansi\u0060: Uses the encoding for the for the current culture\u0027s ANSI code page. This option was added - \u0060bigendianunicode\u0060: Encodes in UTF-16 format using the big-endian byte order. - \u0060bigendianutf32\u0060: Encodes in UTF-32 format using the big-endian byte order. - \u0060oem\u0060: Uses the default encoding for MS-DOS and console programs. - \u0060unicode\u0060: Encodes in UTF-16 format using the little-endian byte order. - \u0060utf7\u0060: Encodes in UTF-7 format. - \u0060utf8\u0060: Encodes in UTF-8 format. - \u0060utf8BOM\u0060: Encodes in UTF-8 format with Byte Order Mark (BOM) - \u0060utf8NoBOM\u0060: Encodes in UTF-8 format without Byte Order Mark (BOM) - \u0060utf32\u0060: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like \u0060-Encoding 1251\u0060) or string names of registered code pages (like \u0060-Encoding \u0022windows-1251\u0022\u0060). For more information, see the .NET documentation for [Encoding.CodePage](xref:System.Text.Encoding.CodePage%2A). Starting with PowerShell 7.4, you can use the \u0060Ansi\u0060 value for the **Encoding** parameter to pass the numeric ID for the current culture\u0027s ANSI code page without having to specify it manually. \u003E [!NOTE] \u003E **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you \u003E specify \u0060utf7\u0060 for the **Encoding** parameter.",
           "validValues": [
@@ -1924,7 +1924,9 @@
         "DelimiterPath",
         "DelimiterLiteralPath",
         "CulturePath",
-        "CultureLiteralPath"
+        "CultureLiteralPath",
+        "Delimiter",
+        "UseCulture"
       ],
       "defaultParameterSet": "DelimiterPath",
       "supportedEditions": [
@@ -2027,7 +2029,7 @@
         },
         {
           "name": "Encoding",
-          "type": "Object",
+          "type": "Enum",
           "defaultValue": "",
           "description": "Specifies the encoding for the imported CSV file. The default value is \u0060utf8NoBOM\u0060. The acceptable values for this parameter are as follows: - \u0060ascii\u0060: Uses the encoding for the ASCII (7-bit) character set. - \u0060ansi\u0060: Uses the encoding for the for the current culture\u0027s ANSI code page. This option was added in PowerShell 7.4. - \u0060bigendianunicode\u0060: Encodes in UTF-16 format using the big-endian byte order. - \u0060bigendianutf32\u0060: Encodes in UTF-32 format using the big-endian byte order. - \u0060oem\u0060: Uses the default encoding for MS-DOS and console programs. - \u0060unicode\u0060: Encodes in UTF-16 format using the little-endian byte order. - \u0060utf7\u0060: Encodes in UTF-7 format. - \u0060utf8\u0060: Encodes in UTF-8 format. - \u0060utf8BOM\u0060: Encodes in UTF-8 format with Byte Order Mark (BOM) - \u0060utf8NoBOM\u0060: Encodes in UTF-8 format without Byte Order Mark (BOM) - \u0060utf32\u0060: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like \u0060-Encoding 1251\u0060) or string names of registered code pages (like \u0060-Encoding \u0022windows-1251\u0022\u0060). For more information, see the .NET documentation for [Encoding.CodePage](/dotnet/api/system.text.encoding.codepage?view=netcore-2.2). Starting with PowerShell 7.4, you can use the \u0060Ansi\u0060 value for the **Encoding** parameter to pass the numeric ID for the current culture\u0027s ANSI code page without having to specify it manually. \u003E [!NOTE] \u003E **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you \u003E specify \u0060utf7\u0060 for the **Encoding** parameter.",
           "validValues": [
@@ -2316,7 +2318,7 @@
         },
         {
           "name": "Encoding",
-          "type": "Object",
+          "type": "Enum",
           "defaultValue": "",
           "description": "Specifies the type of encoding for the target file. The default value is \u0060utf8NoBOM\u0060. The acceptable values for this parameter are as follows: - \u0060ascii\u0060: Uses the encoding for the ASCII (7-bit) character set. - \u0060ansi\u0060: Uses the encoding for the for the current culture\u0027s ANSI code page. This option was added in PowerShell 7.4. - \u0060bigendianunicode\u0060: Encodes in UTF-16 format using the big-endian byte order. - \u0060bigendianutf32\u0060: Encodes in UTF-32 format using the big-endian byte order. - \u0060oem\u0060: Uses the default encoding for MS-DOS and console programs. - \u0060unicode\u0060: Encodes in UTF-16 format using the little-endian byte order. - \u0060utf7\u0060: Encodes in UTF-7 format. - \u0060utf8\u0060: Encodes in UTF-8 format. - \u0060utf8BOM\u0060: Encodes in UTF-8 format with Byte Order Mark (BOM) - \u0060utf8NoBOM\u0060: Encodes in UTF-8 format without Byte Order Mark (BOM) - \u0060utf32\u0060: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like \u0060-Encoding 1251\u0060) or string names of registered code pages (like \u0060-Encoding \u0022windows-1251\u0022\u0060). For more information, see the .NET documentation for [Encoding.CodePage](/dotnet/api/system.text.encoding.codepage?view=netcore-2.2). Starting with PowerShell 7.4, you can use the \u0060Ansi\u0060 value for the **Encoding** parameter to pass the numeric ID for the current culture\u0027s ANSI code page without having to specify it manually. \u003E [!NOTE] \u003E **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you \u003E specify \u0060utf7\u0060 for the **Encoding** parameter.",
           "validValues": [
@@ -3796,7 +3798,7 @@
         },
         {
           "name": "Encoding",
-          "type": "Object",
+          "type": "Enum",
           "defaultValue": "",
           "description": "Specifies the type of encoding for the target file. The default value is \u0060utf8NoBOM\u0060. The acceptable values for this parameter are as follows: - \u0060ascii\u0060: Uses the encoding for the ASCII (7-bit) character set. - \u0060ansi\u0060: Uses the encoding for the for the current culture\u0027s ANSI code page. This option was added in PowerShell 7.4. - \u0060bigendianunicode\u0060: Encodes in UTF-16 format using the big-endian byte order. - \u0060bigendianutf32\u0060: Encodes in UTF-32 format using the big-endian byte order. - \u0060oem\u0060: Uses the default encoding for MS-DOS and console programs. - \u0060unicode\u0060: Encodes in UTF-16 format using the little-endian byte order. - \u0060utf7\u0060: Encodes in UTF-7 format. - \u0060utf8\u0060: Encodes in UTF-8 format. - \u0060utf8BOM\u0060: Encodes in UTF-8 format with Byte Order Mark (BOM) - \u0060utf8NoBOM\u0060: Encodes in UTF-8 format without Byte Order Mark (BOM) - \u0060utf32\u0060: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like \u0060-Encoding 1251\u0060) or string names of registered code pages (like \u0060-Encoding \u0022windows-1251\u0022\u0060). For more information, see the .NET documentation for [Encoding.CodePage](/dotnet/api/system.text.encoding.codepage?view=netcore-2.2). Starting with PowerShell 7.4, you can use the \u0060Ansi\u0060 value for the **Encoding** parameter to pass the numeric ID for the current culture\u0027s ANSI code page without having to specify it manually. \u003E [!NOTE] \u003E **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you \u003E specify \u0060utf7\u0060 for the **Encoding** parameter.",
           "validValues": [
@@ -4081,7 +4083,7 @@
         },
         {
           "name": "Encoding",
-          "type": "Object",
+          "type": "Enum",
           "defaultValue": "",
           "description": "Specifies the type of encoding for the target file. The default value is \u0060utf8NoBOM\u0060. The acceptable values for this parameter are as follows: - \u0060ascii\u0060: Uses the encoding for the ASCII (7-bit) character set. - \u0060ansi\u0060: Uses the encoding for the for the current culture\u0027s ANSI code page. This option was added in PowerShell 7.4. - \u0060bigendianunicode\u0060: Encodes in UTF-16 format using the big-endian byte order. - \u0060oem\u0060: Uses the default encoding for MS-DOS and console programs. - \u0060unicode\u0060: Encodes in UTF-16 format using the little-endian byte order. - \u0060utf7\u0060: Encodes in UTF-7 format. - \u0060utf8\u0060: Encodes in UTF-8 format. - \u0060utf8BOM\u0060: Encodes in UTF-8 format with Byte Order Mark (BOM) - \u0060utf8NoBOM\u0060: Encodes in UTF-8 format without Byte Order Mark (BOM) - \u0060utf32\u0060: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like \u0060-Encoding 1251\u0060) or string names of registered code pages (like \u0060-Encoding \u0022windows-1251\u0022\u0060). For more information, see the .NET documentation for [Encoding.CodePage](/dotnet/api/system.text.encoding.codepage?view=netcore-2.2). Starting with PowerShell 7.4, you can use the \u0060Ansi\u0060 value for the **Encoding** parameter to pass the numeric ID for the current culture\u0027s ANSI code page without having to specify it manually. This parameter was introduced in PowerShell 7.2. \u003E [!NOTE] \u003E **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you \u003E specify \u0060utf7\u0060 for the **Encoding** parameter.",
           "validValues": [],
