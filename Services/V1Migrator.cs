@@ -29,25 +29,8 @@ internal static class V1Migrator
         var primaryPipelineTargetByNode = new Dictionary<string, string>();
         var primaryDataOutputByNode     = new Dictionary<string, string>();
 
-        // V1 files don't serialize KnownParameterSets / DefaultParameterSet on
-        // nodes — those fields didn't exist. Without them the properties-panel
-        // set picker is hidden and every param renders at once (the gate is
-        // "node declares no sets"). Rehydrate from the template catalog by
-        // CmdletName so migrated nodes land with the same set picker a fresh
-        // drop would have.
-        var setsByCmdlet = BuildSetsLookup();
-
         foreach (var node in doc.Nodes)
         {
-            if (!string.IsNullOrEmpty(node.CmdletName)
-                && node.KnownParameterSets.Length == 0
-                && setsByCmdlet.TryGetValue(node.CmdletName, out var info))
-            {
-                node.KnownParameterSets = info.KnownSets;
-                if (string.IsNullOrEmpty(node.ActiveParameterSet))
-                    node.ActiveParameterSet = info.DefaultSet;
-            }
-
             // Preserve the original V1 port shape so we know whether the node had
             // an input/output pipeline port before we replace them with V2 shape.
             bool hadV1Input  = node.Inputs.Count  > 0;
@@ -207,25 +190,4 @@ internal static class V1Migrator
         => Enum.TryParse<ContainerType>(s, out var ct) ? ct : ContainerType.None;
 
     private static string NewId() => IdMint.ShortGuid();
-
-    /// <summary>
-    /// Build a CmdletName → (sets, default) lookup from the template catalog so
-    /// V1 migration can restore set metadata that wasn't serialized pre-V2.
-    /// Later entries win — matches <see cref="TemplateLoader.LoadAll"/>'s
-    /// builtin-then-custom load order, so user overrides take precedence.
-    /// </summary>
-    private static Dictionary<string, SetInfo> BuildSetsLookup()
-    {
-        var map = new Dictionary<string, SetInfo>(StringComparer.OrdinalIgnoreCase);
-        foreach (var t in TemplateLoader.LoadAll())
-        {
-            if (string.IsNullOrEmpty(t.CmdletName) || t.KnownParameterSets.Count == 0) continue;
-            map[t.CmdletName] = new SetInfo(
-                KnownSets:  t.KnownParameterSets.ToArray(),
-                DefaultSet: t.DefaultParameterSet ?? t.KnownParameterSets[0]);
-        }
-        return map;
-    }
-
-    private readonly record struct SetInfo(string[] KnownSets, string DefaultSet);
 }

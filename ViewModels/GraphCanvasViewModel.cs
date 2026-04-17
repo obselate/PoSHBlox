@@ -919,6 +919,11 @@ public partial class GraphCanvasViewModel : ObservableObject
         _suppressDirty = true;
         _projectCreatedUtc = doc.Metadata.CreatedUtc;
         ProjectSerializer.RebuildGraph(doc, this);
+        // Backfill KnownParameterSets / ActiveParameterSet on every loaded node
+        // from the template catalog. Covers V1 files (field didn't exist) and
+        // any V2 file saved before rehydration was added, so pin gating + the
+        // set picker come up correctly regardless of file provenance.
+        ParameterSetRehydrator.Rehydrate(Nodes);
         _suppressDirty = false;
         RefreshWiredState();
         RefreshParameterSetVisibility();
