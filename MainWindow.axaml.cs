@@ -658,6 +658,49 @@ public partial class MainWindow : AppWindow
         }
     }
 
+    private async void OnBrowsePathClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not NodeParameter param) return;
+
+        // Seed the picker at the current value's folder when it looks resolvable;
+        // otherwise Avalonia picks a platform default. Skips the "where does ./
+        // resolve to?" guessing game the user called out as the core UX gap.
+        IStorageFolder? suggestedStart = null;
+        var existing = param.EffectiveValue;
+        if (!string.IsNullOrWhiteSpace(existing))
+        {
+            try
+            {
+                var full = Path.GetFullPath(existing);
+                var dir = Path.GetDirectoryName(full);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    suggestedStart = await StorageProvider.TryGetFolderFromPathAsync(dir);
+            }
+            catch
+            {
+                // Path.GetFullPath throws on invalid chars; fall back to default.
+            }
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = $"Select {param.Name}",
+            AllowMultiple = param.AllowsMultiplePaths,
+            SuggestedStartLocation = suggestedStart,
+        });
+
+        if (files.Count == 0) return;
+
+        var paths = files
+            .Select(f => f.TryGetLocalPath())
+            .Where(p => !string.IsNullOrEmpty(p))
+            .Cast<string>()
+            .ToList();
+        if (paths.Count == 0) return;
+
+        param.Value = string.Join(", ", paths);
+    }
+
     private void OnQuickAddPanelPressed(object? sender, PointerPressedEventArgs e)
     {
         // Clicks inside the popup must not bubble to the backdrop's close handler.

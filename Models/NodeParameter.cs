@@ -163,6 +163,31 @@ public partial class NodeParameter : ObservableObject
     public bool IsTextInput => !IsBool && !IsEnum;
 
     /// <summary>
+    /// True when the properties-panel value editor should offer a Browse button
+    /// that launches a file picker. Matches catalog entries the user typically
+    /// fills with a filesystem path: <c>ParamType.Path</c> directly, or the
+    /// common path-named <c>string[]</c> params (<c>Import-Csv</c>'s <c>Path</c>
+    /// is <c>StringArray</c> because the cmdlet binds <c>string[]</c>). Registry
+    /// <c>Path</c> params share the same <c>ParamType.Path</c> classification
+    /// and also get the button — harmless false positive; user can cancel.
+    /// </summary>
+    public bool IsPathLike => Type == ParamType.Path
+        || (Type == ParamType.StringArray && IsPathLikeName(Name));
+
+    /// <summary>
+    /// Parameter accepts multiple paths at once (<c>string[]</c>). Tells the
+    /// picker to allow multi-select and the caller to join with commas, which
+    /// <see cref="ToPowerShellArg"/> already expands to a PS array literal.
+    /// </summary>
+    public bool AllowsMultiplePaths => IsPathLike && Type == ParamType.StringArray;
+
+    private static bool IsPathLikeName(string name) => name switch
+    {
+        "Path" or "LiteralPath" or "FilePath" or "OutFile" or "File" => true,
+        _ => false,
+    };
+
+    /// <summary>
     /// Bool-typed wrapper for CheckBox binding.
     /// Reads EffectiveValue; writes to Value as "true"/"false".
     /// </summary>

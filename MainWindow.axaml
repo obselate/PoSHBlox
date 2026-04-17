@@ -611,15 +611,28 @@
                                                                           HorizontalAlignment="Stretch"
                                                                           HorizontalContentAlignment="Left"
                                                                           VerticalContentAlignment="Center" />
-                                                                <!-- Everything else → TextBox -->
-                                                                <TextBox Text="{Binding Value, Mode=TwoWay}"
-                                                                         Watermark="{Binding DefaultValue}"
-                                                                         IsVisible="{Binding IsTextInput}"
-                                                                         Background="{DynamicResource BgPrimaryBrush}"
-                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                         Padding="8,5" CornerRadius="3"
-                                                                         FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                                <!-- Everything else → TextBox, with a Browse button for path-like params. -->
+                                                                <DockPanel IsVisible="{Binding IsTextInput}" LastChildFill="True">
+                                                                    <Button DockPanel.Dock="Right"
+                                                                            Content="..."
+                                                                            IsVisible="{Binding IsPathLike}"
+                                                                            Click="OnBrowsePathClicked"
+                                                                            ToolTip.Tip="Browse for a file"
+                                                                            Margin="4,0,0,0"
+                                                                            Padding="8,4" CornerRadius="3"
+                                                                            FontSize="12"
+                                                                            Background="{DynamicResource BgSecondaryBrush}"
+                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                            BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                            BorderThickness="1" />
+                                                                    <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                                             Watermark="{Binding DefaultValue}"
+                                                                             Background="{DynamicResource BgPrimaryBrush}"
+                                                                             Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                             BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                             Padding="8,5" CornerRadius="3"
+                                                                             FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                                </DockPanel>
                                                             </StackPanel>
                                                         </StackPanel>
                                                     </DataTemplate>
