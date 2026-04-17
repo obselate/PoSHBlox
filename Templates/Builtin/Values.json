@@ -94,17 +94,10 @@
     },
     {
       "name": "$PSVersionTable",
-      "description": "Hashtable describing the running PowerShell version / edition / build.",
+      "description": "Hashtable describing the running PowerShell version / edition / build. Pipe through an Enumerate node to filter row-by-row with Where-Object / Select-Object.",
       "kind": "Value",
       "valueExpression": "$PSVersionTable",
       "dataOutputs": [{ "name": "Out", "type": "HashTable", "isPrimary": true }]
-    },
-    {
-      "name": "$PSVersionTable entries",
-      "description": "PSVersionTable enumerated as DictionaryEntry rows (Name / Value). Use when you need to pipe through Where-Object / Select-Object — the raw hashtable goes through as a single object and can't be filtered row-by-row.",
-      "kind": "Value",
-      "valueExpression": "$PSVersionTable.GetEnumerator()",
-      "dataOutputs": [{ "name": "Out", "type": "Collection", "isPrimary": true }]
     },
     {
       "name": "$env:",
