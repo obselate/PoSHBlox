@@ -11,12 +11,14 @@ namespace PoSHBlox.Services;
 /// newer versions are preserved on round-trip (forward-compatibility).
 ///
 /// Version 2: pin IDs replace port indices, ports carry Kind/DataType/etc.
-/// Version 1 documents are migrated in-place on load by ProjectSerializer.
+/// Version 3: [switch] parameters split from typed [bool] — switches render
+///            as presence-only badges, no data-input pin, bare -Name codegen.
+/// Older documents are migrated in-place on load by ProjectSerializer.
 /// </summary>
 
 public class PblxDocument
 {
-    public int Version { get; set; } = 2;
+    public int Version { get; set; } = 3;
     public PblxMetadata Metadata { get; set; } = new();
     public PblxViewState View { get; set; } = new();
     public List<PblxNode> Nodes { get; set; } = [];
@@ -131,6 +133,12 @@ public class PblxParameter
     public string Value { get; set; } = "";
     public bool IsArgument { get; set; }
     public bool IsPipelineInput { get; set; }
+
+    /// <summary>
+    /// True = PowerShell <c>[switch]</c> parameter — checkbox badge on node,
+    /// no data-input pin, bare <c>-Name</c> in codegen.
+    /// </summary>
+    public bool IsSwitch { get; set; }
 
     /// <summary>Sets this param belongs to (empty = all sets).</summary>
     public string[] ParameterSets { get; set; } = [];

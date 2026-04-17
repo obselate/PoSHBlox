@@ -159,6 +159,9 @@ public partial class GraphCanvasViewModel : ObservableObject
                     ? p.MandatoryInSets.Contains(node.ActiveParameterSet, StringComparer.OrdinalIgnoreCase)
                     : p.IsMandatory;
             }
+            // HasAnySwitch depends on the per-param IsInActiveSet we just
+            // updated, so nudge the binding now that the child state is fresh.
+            node.NotifyHasAnySwitchChanged();
         }
     }
 
@@ -1197,8 +1200,8 @@ public partial class GraphCanvasViewModel : ObservableObject
                                    Description = "Upstream data via pipeline" },
                 new ParameterDef { Name = "Property", Type = ParamType.String, IsMandatory = true,
                                    DefaultValue = "CPU", Description = "Property to sort by" },
-                new ParameterDef { Name = "Descending", Type = ParamType.Bool, DefaultValue = "true",
-                                   Description = "Sort descending" },
+                new ParameterDef { Name = "Descending", Type = ParamType.Bool, IsSwitch = true,
+                                   DefaultValue = "true", Description = "Sort descending" },
             ],
         }, x: 400, y: 150);
 

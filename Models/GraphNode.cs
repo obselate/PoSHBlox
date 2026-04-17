@@ -101,6 +101,7 @@ public partial class GraphNode : ObservableObject
                 OnPropertyChanged(nameof(Height));
                 OnPropertyChanged(nameof(VisibleDataInputs));
                 OnPropertyChanged(nameof(HiddenDataInputCount));
+                OnPropertyChanged(nameof(HasAnySwitch));
             }
         }
     }
@@ -113,6 +114,21 @@ public partial class GraphNode : ObservableObject
     public ObservableCollection<NodePort> Inputs { get; } = new();
     public ObservableCollection<NodePort> Outputs { get; } = new();
     public ObservableCollection<NodeParameter> Parameters { get; } = new();
+
+    /// <summary>
+    /// True when any parameter in the active set is a switch — gates the
+    /// properties panel's dedicated Switches section so it stays hidden on
+    /// nodes that don't expose any.
+    /// </summary>
+    public bool HasAnySwitch => Parameters.Any(p => p.ShouldRenderAsSwitch);
+
+    /// <summary>
+    /// Raised by the VM after it flips per-param <see cref="NodeParameter.IsInActiveSet"/>
+    /// so the Switches-section visibility binding re-evaluates. The setter on
+    /// <see cref="ActiveParameterSet"/> can't fire this eagerly because the
+    /// child params haven't been refreshed yet at that point.
+    /// </summary>
+    public void NotifyHasAnySwitchChanged() => OnPropertyChanged(nameof(HasAnySwitch));
 
     /// <summary>
     /// Validation findings attached to this node. Populated by the VM from

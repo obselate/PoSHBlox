@@ -108,6 +108,7 @@ public static class IntrospectionMerger
         Description = src.Description,
         ValidValues = src.ValidValues ?? [],
         IsPipelineInput = src.IsPipelineInput,
+        IsSwitch = src.IsSwitch,
         ParameterSets = new List<string>(src.ParameterSets),
         MandatoryInSets = new List<string>(src.MandatoryInSets),
         SupportedEditions = [],

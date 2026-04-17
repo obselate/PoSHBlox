@@ -183,7 +183,8 @@ internal static class V1Migrator
         }
 
         doc.Connections = newConns;
-        doc.Version = ProjectSerializer.CurrentVersion;
+        // Set to V2 explicitly; the V2→V3 migrator runs next when needed.
+        doc.Version = 2;
     }
 
     private static ContainerType ParseContainer(string s)

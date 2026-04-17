@@ -29,6 +29,14 @@ public partial class NodeParameter : ObservableObject
     public bool IsConfigOnly { get; set; }
 
     /// <summary>
+    /// True = PowerShell <c>[switch]</c> parameter — presence-only, no value.
+    /// Switches skip data-input pin creation (they're checkboxes in the
+    /// properties panel, not wireable ports) and codegen emits bare <c>-Name</c>
+    /// when set vs omitting entirely when not, never <c>-Name $true</c>.
+    /// </summary>
+    public bool IsSwitch { get; set; }
+
+    /// <summary>
     /// Parameter sets this param belongs to. Empty = visible in every set
     /// (common params, legacy templates). Non-empty = visible only when
     /// the node's <see cref="GraphNode.ActiveParameterSet"/> is in this list.
@@ -101,10 +109,25 @@ public partial class NodeParameter : ObservableObject
     /// </summary>
     [ObservableProperty] private bool _isEffectivelyMandatory;
 
-    /// <summary>Composite visibility gate used by the properties-panel ItemTemplate.</summary>
-    public bool ShouldRenderInPanel => !IsArgument && IsInActiveSet;
+    /// <summary>
+    /// Composite visibility gate used by the properties-panel's main parameter
+    /// list. Switches are filtered out here so they only render in the dedicated
+    /// Switches section, not twice.
+    /// </summary>
+    public bool ShouldRenderInPanel => !IsArgument && !IsSwitch && IsInActiveSet;
 
-    partial void OnIsInActiveSetChanged(bool value) => OnPropertyChanged(nameof(ShouldRenderInPanel));
+    /// <summary>
+    /// Visibility gate for the dedicated Switches section. Mirrors
+    /// <see cref="ShouldRenderInPanel"/>'s argument/set filters but selects
+    /// exactly the switch params the other list excludes.
+    /// </summary>
+    public bool ShouldRenderAsSwitch => !IsArgument && IsSwitch && IsInActiveSet;
+
+    partial void OnIsInActiveSetChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShouldRenderInPanel));
+        OnPropertyChanged(nameof(ShouldRenderAsSwitch));
+    }
 
     /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
     public GraphNode? Owner { get; set; }
@@ -145,7 +168,7 @@ public partial class NodeParameter : ObservableObject
     {
         ParamType.String or ParamType.Path => "string",
         ParamType.Int => "int",
-        ParamType.Bool => "switch",
+        ParamType.Bool => IsSwitch ? "switch" : "bool",
         ParamType.StringArray => "string[]",
         ParamType.ScriptBlock => "scriptblock",
         ParamType.Credential => "PSCredential",
@@ -158,9 +181,13 @@ public partial class NodeParameter : ObservableObject
 
     // ── Type-based UI helpers ──────────────────────────────────
 
-    public bool IsBool => Type == ParamType.Bool;
+    /// <summary>
+    /// True for typed <c>[bool]</c> parameters only — switches (<see cref="IsSwitch"/>)
+    /// render as a separate checkbox group in the panel, not the inline Bool editor.
+    /// </summary>
+    public bool IsBool => Type == ParamType.Bool && !IsSwitch;
     public bool IsEnum => Type == ParamType.Enum && ValidValues.Length > 0;
-    public bool IsTextInput => !IsBool && !IsEnum;
+    public bool IsTextInput => !IsBool && !IsEnum && !IsSwitch;
 
     /// <summary>
     /// True when the properties-panel value editor should offer a Browse button
@@ -228,7 +255,9 @@ public partial class NodeParameter : ObservableObject
     partial void OnValueChanged(string value)
     {
         OnPropertyChanged(nameof(EffectiveValue));
-        if (IsBool) OnPropertyChanged(nameof(BoolValue));
+        // Switches share the BoolValue accessor with typed bools (true/false
+        // → checked/unchecked), so their checkbox also needs a nudge on change.
+        if (IsBool || IsSwitch) OnPropertyChanged(nameof(BoolValue));
         if (IsEnum) OnPropertyChanged(nameof(SelectedEnumValue));
     }
 
@@ -262,8 +291,14 @@ public partial class NodeParameter : ObservableObject
             ParamType.Int =>
                 $"-{Name} {val}",
 
-            ParamType.Bool =>
+            // Switch: presence-only. True → bare -Name; false → omit entirely.
+            // Typed [bool]: explicit $true/$false so cmdlets that distinguish
+            // (e.g. -Confirm:$false) get the literal they need.
+            ParamType.Bool when IsSwitch =>
                 val.Equals("true", StringComparison.OrdinalIgnoreCase) ? $"-{Name}" : "",
+
+            ParamType.Bool =>
+                $"-{Name} ${val.ToLowerInvariant()}",
 
             // Collection and StringArray both receive a comma-separated string
             // from the UI and expand to a PowerShell array. Without this, a value
@@ -301,11 +336,11 @@ public partial class NodeParameter : ObservableObject
             ParamType.Int =>
                 $"{Name} = {val}",
 
-            // Switches in splat form get explicit $true (no omit-when-false
-            // semantic like the inline form — if the value is 'false' we
-            // skipped above via the IsNullOrWhiteSpace guard catching empty,
-            // but an explicit "false" still emits; splat can legitimately
-            // carry false).
+            // Switches are presence-only: false → omit, true → $true. Typed
+            // [bool] parameters splat their explicit value so false survives.
+            ParamType.Bool when IsSwitch =>
+                val.Equals("true", StringComparison.OrdinalIgnoreCase) ? $"{Name} = $true" : "",
+
             ParamType.Bool =>
                 $"{Name} = ${val.ToLowerInvariant()}",
 

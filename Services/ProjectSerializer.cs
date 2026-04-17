@@ -19,7 +19,7 @@ namespace PoSHBlox.Services;
 /// </summary>
 public static class ProjectSerializer
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options)
     {
@@ -123,6 +123,7 @@ public static class ProjectSerializer
                 Value = p.Value,
                 IsArgument = p.IsArgument,
                 IsPipelineInput = p.IsPipelineInput,
+                IsSwitch = p.IsSwitch,
                 ParameterSets = p.ParameterSets,
                 MandatoryInSets = p.MandatoryInSets,
             });
@@ -153,7 +154,8 @@ public static class ProjectSerializer
         if (doc.Version < CurrentVersion)
         {
             Debug.WriteLine($"[ProjectSerializer] Migrating v{doc.Version} → v{CurrentVersion}.");
-            V1Migrator.Migrate(doc);
+            if (doc.Version < 2) V1Migrator.Migrate(doc);
+            if (doc.Version < 3) V2ToV3Migrator.Migrate(doc);
         }
         else if (doc.Version > CurrentVersion)
         {
@@ -232,6 +234,7 @@ public static class ProjectSerializer
                     Value = pDto.Value,
                     IsArgument = pDto.IsArgument,
                     IsPipelineInput = pDto.IsPipelineInput,
+                    IsSwitch = pDto.IsSwitch,
                     ParameterSets = pDto.ParameterSets,
                     MandatoryInSets = pDto.MandatoryInSets,
                     Owner = node,

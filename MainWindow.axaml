@@ -498,6 +498,36 @@
                                                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
                                             </StackPanel>
 
+                                            <!-- Switches: PowerShell [switch] params are presence-only (-Force etc.)
+                                                 — they render here as a compact checkbox group rather than as
+                                                 wireable data pins. ShouldRenderAsSwitch filters the shared
+                                                 Parameters list to just switches in the active set. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasAnySwitch}" Margin="0,0,0,8">
+                                                <TextBlock Text="SWITCHES" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                           Margin="0,2,0,4" />
+                                                <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox IsVisible="{Binding ShouldRenderAsSwitch}"
+                                                                      IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                      Content="{Binding Name}"
+                                                                      ToolTip.Tip="{Binding Description}"
+                                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                      FontSize="12"
+                                                                      Padding="6,2"
+                                                                      Margin="0,0,12,2"
+                                                                      VerticalContentAlignment="Center" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
                                             <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Margin="0,2,0,4" />

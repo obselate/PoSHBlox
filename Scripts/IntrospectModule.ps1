@@ -244,6 +244,11 @@ foreach ($cmd in $commands) {
         $isMandatory = $false
         $defaultValue = ""
         $isPipelineInput = $false
+        # Distinguish [switch] from typed [bool]. Both map to ParamType.Bool,
+        # but switches render as a presence-only checkbox badge (no pin) and
+        # codegen emits bare -Name. Typed bools stay as data inputs with
+        # explicit $true/$false values.
+        $isSwitch = $paramInfo.ParameterType -eq [System.Management.Automation.SwitchParameter]
         $paramSets = @()
         $mandatoryInSets = @()
 
@@ -305,6 +310,7 @@ foreach ($cmd in $commands) {
             description     = $helpMsg
             validValues     = @($validVals)
             isPipelineInput = $isPipelineInput
+            isSwitch        = $isSwitch
             parameterSets   = @($paramSets)
             mandatoryInSets = @($mandatoryInSets)
         }

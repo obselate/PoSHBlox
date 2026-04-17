@@ -366,7 +366,11 @@ public static class NodeFactory
     /// </summary>
     private static void AddDataInputPinsForParameters(GraphNode node, string? primaryPipelineParam = null)
     {
-        foreach (var p in node.Parameters.Where(p => !p.IsArgument && !p.IsConfigOnly))
+        // Switches are presence-only checkbox badges on the node, not wireable
+        // data inputs — adding a pin for them would let users wire a value into
+        // a parameter that doesn't take one, and codegen would emit bare -Name
+        // regardless of the wired expression. Skip pin generation entirely.
+        foreach (var p in node.Parameters.Where(p => !p.IsArgument && !p.IsConfigOnly && !p.IsSwitch))
         {
             bool isPrimary = (primaryPipelineParam != null
                               && string.Equals(p.Name, primaryPipelineParam, StringComparison.OrdinalIgnoreCase))
@@ -398,6 +402,7 @@ public static class NodeFactory
                 ValidValues = pdef.ValidValues,
                 Value = pdef.DefaultValue,
                 IsPipelineInput = pdef.IsPipelineInput,
+                IsSwitch = pdef.IsSwitch,
                 ParameterSets = pdef.ParameterSets.ToArray(),
                 MandatoryInSets = pdef.MandatoryInSets.ToArray(),
                 SupportedEditions = pdef.SupportedEditions.ToArray(),

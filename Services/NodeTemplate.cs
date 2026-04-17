@@ -91,6 +91,13 @@ public class ParameterDef
     public bool IsPipelineInput { get; set; }
 
     /// <summary>
+    /// V2: true = PowerShell <c>[switch]</c> parameter — presence-only, no value.
+    /// Rendered as a checkbox badge on the node, not a data-input pin, and
+    /// codegen emits bare <c>-Name</c> when set (vs <c>-Name $true</c> for a typed Bool).
+    /// </summary>
+    public bool IsSwitch { get; set; }
+
+    /// <summary>
     /// V2: parameter sets this param belongs to. Empty = "all sets" (common params
     /// appearing outside any set, or legacy templates without set info).
     /// </summary>

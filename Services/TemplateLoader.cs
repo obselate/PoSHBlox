@@ -78,6 +78,18 @@ public static class TemplateLoader
                     .Where(e => e is "pwsh" or "powershell")
                     .ToList();
 
+                // v≤2: IsSwitch didn't exist, so every Bool param is a switch
+                // (that's the only way they were serialized — typed [bool] cmdlet
+                // params are vanishingly rare in the shipping catalogs). Flip the
+                // flag in place so downstream consumers see the post-split shape.
+                if (catalog.Version < 3)
+                {
+                    foreach (var t in catalog.Templates)
+                        foreach (var p in t.Parameters)
+                            if (p.Type == PoSHBlox.Models.ParamType.Bool)
+                                p.IsSwitch = true;
+                }
+
                 foreach (var t in catalog.Templates)
                 {
                     t.Category = catalog.Category;
