@@ -1,0 +1,274 @@
+{
+  "version": 2,
+  "category": "Security",
+  "introspectedHosts": [
+    "pwsh-7.6.0",
+    "powershell-5.1.26100.8115"
+  ],
+  "templates": [
+    {
+      "name": "ConvertFrom-SecureString",
+      "category": "",
+      "description": "Converts a secure string to an encrypted standard string.",
+      "scriptBody": "",
+      "cmdletName": "ConvertFrom-SecureString",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "SecureString",
+      "dataOutputs": [
+        {
+          "name": "String",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Secure",
+        "AsPlainText",
+        "Open"
+      ],
+      "defaultParameterSet": "Secure",
+      "supportedEditions": [
+        "pwsh"
+      ],
+      "parameters": [
+        {
+          "name": "SecureString",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the secure string to convert to an encrypted standard string.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "AsPlainText",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "When set, \u0060ConvertFrom-SecureString\u0060 will convert secure strings to the decrypted plaintext string as output. This parameter was added in PowerShell 7.0.",
+          "validValues": [],
+          "parameterSets": [
+            "AsPlainText"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SecureKey",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the encryption key as a secure string. The secure string value is converted to a byte array before being used as the key.",
+          "validValues": [],
+          "parameterSets": [
+            "Secure"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Key",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies the encryption key as a byte array.",
+          "validValues": [],
+          "parameterSets": [
+            "Open"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConvertTo-SecureString",
+      "category": "",
+      "description": "Converts plain text or encrypted strings to secure strings.",
+      "scriptBody": "",
+      "cmdletName": "ConvertTo-SecureString",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "String",
+      "dataOutputs": [
+        {
+          "name": "SecureString",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Secure",
+        "PlainText",
+        "Open"
+      ],
+      "defaultParameterSet": "Secure",
+      "supportedEditions": [
+        "pwsh"
+      ],
+      "parameters": [
+        {
+          "name": "String",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the string to convert to a secure string.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "AsPlainText",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Specifies a plain text string to convert to a secure string. The secure string cmdlets help protect confidential text. The text is encrypted for privacy and is deleted from computer memory after it is used. If you use this parameter to provide plain text as input, the system cannot protect that input in this manner.",
+          "validValues": [],
+          "parameterSets": [
+            "PlainText"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Beginning in PowerShell 7, The **Force** parameter is no longer required when using the **AsPlainText** parameter. While the parameter is not used, it was not removed to provide compatibility with earlier versions of PowerShell.",
+          "validValues": [],
+          "parameterSets": [
+            "PlainText"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SecureKey",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the encryption key used to convert the original secure string into the encrypted standard string. The key must be provided in the format of a secure string. The secure string will be converted to a byte array to be used as the key. Valid secure key lengths are 8, 12 and 16 code points.",
+          "validValues": [],
+          "parameterSets": [
+            "Secure"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Key",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies the encryption key used to convert the original secure string into the encrypted standard string. Valid key lengths are 16, 24 and 32 bytes.",
+          "validValues": [],
+          "parameterSets": [
+            "Open"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get-Credential",
+      "category": "",
+      "description": "Gets a credential object based on a user name and password.",
+      "scriptBody": "",
+      "cmdletName": "Get-Credential",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "dataOutputs": [
+        {
+          "name": "PSCredential",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "CredentialSet",
+        "MessageSet"
+      ],
+      "defaultParameterSet": "CredentialSet",
+      "supportedEditions": [
+        "pwsh"
+      ],
+      "parameters": [
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user name for the credential, such as **User01** or **Domain01\\User01**. The parameter name, \u0060-Credential\u0060, is optional. When you submit the command and specify a user name, you\u0027re prompted for a password. If you omit this parameter, you\u0027re prompted for a user name and a password. Starting in PowerShell 3.0, if you enter a user name without a domain, \u0060Get-Credential\u0060 no longer inserts a backslash before the name. Credentials are stored in a [PSCredential](xref:System.Management.Automation.PSCredential) object and the password is stored as a [SecureString](xref:System.Security.SecureString). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](xref:System.Security.SecureString#how-secure-is-securestring).",
+          "validValues": [],
+          "parameterSets": [
+            "CredentialSet"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Message",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a message that appears in the authentication prompt. This parameter is designed for use in a function or script. You can use the message to explain to the user why you are requesting credentials and how they will be used. This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "MessageSet"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UserName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a user name. The authentication prompt requests a password for the user name. By default, the user name is blank and the authentication prompt requests both a user name and password. This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "MessageSet"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Title",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Sets the text of the title line for the authentication prompt in the console. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "MessageSet"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        }
+      ]
+    }
+  ]
+}

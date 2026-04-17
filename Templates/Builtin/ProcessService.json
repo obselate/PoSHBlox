@@ -1,0 +1,1388 @@
+{
+  "version": 2,
+  "category": "Process / Service",
+  "introspectedHosts": [
+    "pwsh-7.6.0",
+    "powershell-5.1.26100.8115"
+  ],
+  "templates": [
+    {
+      "name": "Get-Process",
+      "category": "",
+      "description": "Gets the processes that are running on the local computer.",
+      "scriptBody": "",
+      "cmdletName": "Get-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "ProcessModule",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Name",
+        "NameWithUserName",
+        "Id",
+        "IdWithUserName",
+        "InputObject",
+        "InputObjectWithUserName"
+      ],
+      "defaultParameterSet": "Name",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies one or more processes by process name. You can specify multiple process names separated by commas and use wildcard characters. Using the \u0060-Name\u0060 parameter is optional.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "NameWithUserName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Id",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies one or more processes by process ID (PID). You can specify multiple IDs separated by commas. To get the PID of a process, use \u0060Get-Process\u0060. To get the PID of the current PowerShell session, use \u0060$PID\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Id",
+            "IdWithUserName"
+          ],
+          "mandatoryInSets": [
+            "Id",
+            "IdWithUserName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies one or more **Process** objects. Use a variable that contains the objects, or a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject",
+            "InputObjectWithUserName"
+          ],
+          "mandatoryInSets": [
+            "InputObject",
+            "InputObjectWithUserName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "IncludeUserName",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this command adds a **UserName** property to each returned **Process** object.",
+          "validValues": [],
+          "parameterSets": [
+            "NameWithUserName",
+            "IdWithUserName",
+            "InputObjectWithUserName"
+          ],
+          "mandatoryInSets": [
+            "NameWithUserName",
+            "IdWithUserName",
+            "InputObjectWithUserName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Module",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets the modules that the process has loaded. On Windows Vista and later versions of Windows, you must run PowerShell with elevated user rights (**Run as administrator**) to use this parameter on processes that you don\u0027t own. Using this parameter is the same as accessing the **Modules** property of each **Process** object. When you use this parameter, \u0060Get-Process\u0060 returns a **ProcessModule** object, not a **Process** object. You can\u0027t pipe output produced using this parameter to a cmdlet that expects a **Process** object, such as \u0060Stop-Process\u0060. When you use both the **Module** and **FileVersionInfo** parameters together, this cmdlet returns a **FileVersionInfo** object with information about the file version of all modules.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "Id",
+            "InputObject"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "FileVersionInfo",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets the file version information for the program that runs in the process. On Windows Vista and later versions of Windows, you must run PowerShell with elevated user rights (**Run as administrator**) to use this parameter on processes that you don\u0027t own. Using this parameter is the same as accessing the **MainModule.FileVersionInfo** property of each **Process** object. When you use this parameter, \u0060Get-Process\u0060 returns a **FileVersionInfo** object, not a **Process** object. You can\u0027t pipe output produced using this parameter to a cmdlet that expects a **Process** object, such as \u0060Stop-Process\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "Id",
+            "InputObject"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the computers for which this cmdlet gets active processes. The default is the local computer. Type the NetBIOS name, an IP address, or a fully qualified domain name (FQDN) of one or more computers. To specify the local computer, type the computer name, a dot (\u0060.\u0060), or \u0060localhost\u0060. This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter of this cmdlet even if your computer is not configured to run remote commands.",
+          "validValues": [],
+          "parameterSets": [
+            "Name",
+            "Id",
+            "InputObject"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get-Service",
+      "category": "",
+      "description": "Gets the services on the computer.",
+      "scriptBody": "",
+      "cmdletName": "Get-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Default",
+        "DisplayName",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Default",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the service names of services to be retrieved. Wildcards are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DependentServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets only the services that depend upon the specified service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RequiredServices",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets only the services that this service requires. This parameter gets the value of the **ServicesDependedOn** property of the service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies, as a string array, the display names of services to be retrieved. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, a service or services that this cmdlet includes in the operation. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies, as a string array, a service or services that this cmdlet excludes from the operation. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcards are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects representing the services to be retrieved. Enter a variable that contains the objects, or type a command or expression that gets the objects. You can pipe a service object to this cmdlet.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Gets the services running on the specified computers. The default is the local computer. Type the NetBIOS name, an IP address, or a fully qualified domain name (FQDN) of a remote computer. To specify the local computer, type the computer name, a dot (\u0060.\u0060), or \u0060localhost\u0060. This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter of \u0060Get-Service\u0060 even if your computer is not configured to run remote commands.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Restart-Service",
+      "category": "",
+      "description": "Stops and then starts one or more services.",
+      "scriptBody": "",
+      "cmdletName": "Restart-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the command to run without asking for user confirmation.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names of the services to restart.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects that represent the services to restart. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to restarted. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet restarts. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Set-Service",
+      "category": "",
+      "description": "Starts, stops, and suspends a service, and changes its properties.",
+      "scriptBody": "",
+      "cmdletName": "Set-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Name",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Name",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service name of the service to be changed. Wildcard characters aren\u0027t permitted. You can use the pipeline to send a service name to \u0060Set-Service\u0060. \u003E [!NOTE] \u003E Typically, \u0060Set-Service\u0060 only operates on Windows services and not drivers. However, if you \u003E specify the name of a driver, \u0060Set-Service\u0060 can target the driver.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Name"
+          ],
+          "mandatoryInSets": [
+            "Name"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a **ServiceController** object that represents the service to change. Enter a variable that contains the object, or type a command or expression that gets the object, such as a \u0060Get-Service\u0060 command. You can use the pipeline to send a service object to \u0060Set-Service\u0060.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a new display name for the service. \u003E [!NOTE] \u003E Typically, \u0060Set-Service\u0060 only operates on Windows services and not drivers. However, if you \u003E specify the name of a driver, \u0060Set-Service\u0060 can target the driver.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies the account used by the service as the [Service Logon Account](/windows/desktop/ad/about-service-logon-accounts). Type a user name, such as **User01** or **Domain01\\User01**, or enter a **PSCredential** object, such as one generated by the \u0060Get-Credential\u0060 cmdlet. If you type a user name, this cmdlet prompts you for a password. Credentials are stored in a [PSCredential](xref:System.Management.Automation.PSCredential) object and the password is stored as a [SecureString](xref:System.Security.SecureString). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](xref:System.Security.SecureString#how-secure-is-securestring). This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Description",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a new description for the service. The service description appears in **Computer Management, Services**. The **Description** isn\u0027t a property of the \u0060Get-Service\u0060 **ServiceController** object. To see the service description, use \u0060Get-CimInstance\u0060 that returns a **Win32_Service** object that represents the service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "StartupType",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the start mode of the service. The acceptable values for this parameter are as follows: - **Automatic** - The service is started or was started by the operating system, at system start-up. If an automatically started service depends on a manually started service, the manually started service is also started automatically at system startup. - **AutomaticDelayedStart** - Starts shortly after the system boots. - **Disabled** - The service is disabled and cannot be started by a user or application. - **InvalidValue** - Has no effect. The cmdlet does not return an error but the StartupType of the service is not changed. - **Manual** - The service is started only manually, by a user, using the Service Control Manager, or by an application.",
+          "validValues": [
+            "Automatic",
+            "Manual",
+            "Disabled",
+            "AutomaticDelayedStart",
+            "InvalidValue"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SecurityDescriptorSddl",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the **SecurityDescriptor** for the service in **Sddl** format. The account calling \u0060Set-Service\u0060 with this parameter must have the WRITE_DAC and WRITE_OWNER permissions. For more information, see [Service security and access rights](/windows/win32/services/service-security-and-access-rights).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Status",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the status for the service. The acceptable values for this parameter are as follows: - **Paused**. Suspends the service. - **Running**. Starts the service. - **Stopped**. Stops the service.",
+          "validValues": [
+            "Running",
+            "Stopped",
+            "Paused"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Specifies the Stop mode of the service. This parameter only works when \u0060-Status Stopped\u0060 is used. If enabled, \u0060Set-Service\u0060 stops the dependent services before the target service is stopped. By default, exceptions are raised when other running services depend on the target service.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Returns a **ServiceController** object that represents the services that were changed. By default, \u0060Set-Service\u0060 doesn\u0027t generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies one or more computers. For remote computers, type the NetBIOS name, an IP address, or a fully qualified domain name. If the ComputerName parameter isn\u0027t specified, the command runs on the local computer. This parameter doesn\u0027t rely on PowerShell remoting. You can use the ComputerName parameter even if your computer isn\u0027t configured to run remote commands.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Start-Process",
+      "category": "",
+      "description": "Starts one or more processes on the local computer.",
+      "scriptBody": "",
+      "cmdletName": "Start-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "dataOutputs": [
+        {
+          "name": "Process",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Default",
+        "UseShellExecute"
+      ],
+      "defaultParameterSet": "Default",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "FilePath",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the optional path and filename of the program that runs in the process. Enter the name of an executable file or of a document, such as a \u0060.txt\u0060 or \u0060.doc\u0060 file, that\u0027s associated with a program on the computer. This parameter is required. If you specify only a filename that does not correspond to a system command, use the **WorkingDirectory** parameter to specify the path.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ArgumentList",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies parameters or parameter values to use when this cmdlet starts the process. Arguments can be accepted as a single string with the arguments separated by spaces, or as an array of strings separated by commas. The cmdlet joins the array into a single string with each element of the array separated by a single space. The outer quotes of the PowerShell strings aren\u0027t included when the **ArgumentList** values are passed to the new process. If parameters or parameter values contain a space or quotes, they need to be surrounded with escaped double quotes. For more information, see [about_Quoting_Rules](../Microsoft.PowerShell.Core/About/about_Quoting_Rules.md). For the best results, use a single **ArgumentList** value containing all the arguments and any needed quote characters.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to perform this action. By default, the cmdlet uses the credentials of the current user. Type a user name, such as **User01** or **Domain01\\User01**, or enter a **PSCredential** object generated by the \u0060Get-Credential\u0060 cmdlet. If you type a user name, you\u0027re prompted to enter the password. Credentials are stored in a [PSCredential](/dotnet/api/system.management.automation.pscredential) object and the password is stored as a [SecureString](/dotnet/api/system.security.securestring). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](/dotnet/api/system.security.securestring#how-secure-is-securestring).",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "WorkingDirectory",
+          "type": "Path",
+          "defaultValue": "",
+          "description": "Specifies the location that the new process should start in. When not specified, the cmdlet defaults to the fully-qualified location specified in the **FilePath** parameter. If the value of the **FilePath** parameter is not fully-qualified, it defaults to the current working directory of the calling process. Wildcards aren\u0027t supported. The path must not contain characters that would be interpreted as wildcards.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "LoadUserProfile",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet loads the Windows user profile stored in the \u0060HKEY_USERS\u0060 registry key for the current user. The parameter doesn\u0027t apply to non-Windows systems. This parameter doesn\u0027t affect the PowerShell profiles. For more information, see [about_Profiles](../Microsoft.PowerShell.Core/About/about_Profiles.md).",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoNewWindow",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Start the new process in the current console window. By default on Windows, PowerShell opens a new window. On non-Windows systems, you never get a new window. You can\u0027t use the **NoNewWindow** and **WindowStyle** parameters in the same command. The parameter doesn\u0027t apply to non-Windows systems.",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Returns a process object for each process that the cmdlet started. By default, this cmdlet doesn\u0027t generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RedirectStandardError",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a file. This cmdlet sends any errors generated by the process to a file that you specify. Enter the path and filename. By default, the errors are displayed in the console.",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RedirectStandardInput",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a file. This cmdlet reads input from the specified file. Enter the path and filename of the input file. By default, the process gets its input from the keyboard.",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RedirectStandardOutput",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a file. This cmdlet sends the output generated by the process to a file that you specify. Enter the path and filename. By default, the output is displayed in the console.",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Verb",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a verb to use when this cmdlet starts the process. The verbs that are available are determined by the filename extension of the file that runs in the process. The following table shows the verbs for some common process file types. | File type | Verbs | | --------- | --------------------------------------------- | | .cmd | \u0060Edit\u0060, \u0060Open\u0060, \u0060Print\u0060, \u0060RunAs\u0060, \u0060RunAsUser\u0060 | | .exe | \u0060Open\u0060, \u0060RunAs\u0060, \u0060RunAsUser\u0060 | | .txt | \u0060Open\u0060, \u0060Print\u0060, \u0060PrintTo\u0060 | | .wav | \u0060Open\u0060, \u0060Play\u0060 | To find the verbs that can be used with the file that runs in a process, use the \u0060New-Object\u0060 cmdlet to create a **System.Diagnostics.ProcessStartInfo** object for the file. The available verbs are in the **Verbs** property of the **ProcessStartInfo** object. For details, see the examples. The parameter doesn\u0027t apply to non-Windows systems.",
+          "validValues": [],
+          "parameterSets": [
+            "UseShellExecute"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "WindowStyle",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the state of the window that\u0027s used for the new process. The default value is \u0060Normal\u0060. The acceptable values for this parameter are: - \u0060Normal\u0060 - \u0060Hidden\u0060 - \u0060Minimized\u0060 - \u0060Maximized\u0060 You can\u0027t use the **WindowStyle** and **NoNewWindow** parameters in the same command. The parameter doesn\u0027t apply to non-Windows systems. When using on non-Windows systems, you never get a new window.",
+          "validValues": [
+            "Normal",
+            "Hidden",
+            "Minimized",
+            "Maximized"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Wait",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet waits for the specified process and its descendants to complete before accepting more input. This parameter suppresses the command prompt or retains the window until the processes finish.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "UseNewEnvironment",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet uses new environment variables specified for the process. By default, the started process runs with the environment variables inherited from the parent process. On Windows, when you use **UseNewEnvironment**, the new process starts only containing the default environment variables defined for the **Machine** scope. This has the side effect that the \u0060$Env:USERNAME\u0060 is set to **SYSTEM**. None of the variables from the **User** scope are included.",
+          "validValues": [],
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Environment",
+          "type": "HashTable",
+          "defaultValue": "",
+          "description": "Specifies one or more environment variables to override for the process as a hash table. Specify the name of an environment variable as a key in the hash table and the desired value. To unset an environment variable, specify its value as \u0060$null\u0060. The specified variables are replaced in the process. When you specify the \u0060PATH\u0060 environment variable it\u0027s replaced with the value of \u0060$PSHOME\u0060 followed by the specified value from this parameter. On Windows, the command appends the values for \u0060PATH\u0060 in the Machine and User scopes after the new value. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Start-Service",
+      "category": "",
+      "description": "Starts one or more stopped services.",
+      "scriptBody": "",
+      "cmdletName": "Start-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names for the service to be started. The parameter name is optional. You can use **Name** or its alias, **ServiceName**, or you can omit the parameter name.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects representing the services to be started. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to start. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet starts. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as \u0060s*\u0060. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stop-Process",
+      "category": "",
+      "description": "Stops one or more running processes.",
+      "scriptBody": "",
+      "cmdletName": "Stop-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Process",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Id",
+        "Name",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Id",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process names of the processes to stop. You can type multiple process names, separated by commas, or use wildcard characters.",
+          "validValues": [],
+          "parameterSets": [
+            "Name"
+          ],
+          "mandatoryInSets": [
+            "Name"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Id",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process IDs of the processes to stop. To specify multiple IDs, use commas to separate the IDs. To find the PID of a process, type \u0060Get-Process\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Id"
+          ],
+          "mandatoryInSets": [
+            "Id"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process objects to stop. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Returns an object that represents the process. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Stops the specified processes without prompting for confirmation. By default, \u0060Stop-Process\u0060 prompts for confirmation before stopping any process that is not owned by the current user. To find the owner of a process, use the \u0060Get-CimInstance\u0060 cmdlet to get a **Win32_Process** object that represents the process, and then use the **GetOwner** method of the object.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stop-Service",
+      "category": "",
+      "description": "Stops one or more running services.",
+      "scriptBody": "",
+      "cmdletName": "Stop-Service",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "ServiceController",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InputObject",
+        "Default",
+        "DisplayName"
+      ],
+      "defaultParameterSet": "InputObject",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to stop a service even if that service has dependent services.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoWait",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet uses the no wait option.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the service names of the services to stop. Wildcard characters are permitted.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": [
+            "Default"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies **ServiceController** objects that represent the services to stop. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "true",
+          "description": "Returns an object that represents the service. By default, this cmdlet does not generate any output.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the display names of the services to stop. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [
+            "DisplayName"
+          ],
+          "mandatoryInSets": [
+            "DisplayName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Include",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet stops. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Exclude",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies services that this cmdlet omits. The value of this parameter qualifies the **Name** parameter. Enter a name element or pattern, such as s*. Wildcard characters are permitted.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wait-Process",
+      "category": "",
+      "description": "Waits for the processes to be stopped before accepting more input.",
+      "scriptBody": "",
+      "cmdletName": "Wait-Process",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Process",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Name",
+        "Id",
+        "InputObject"
+      ],
+      "defaultParameterSet": "Name",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Id",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process IDs of the processes. To specify multiple IDs, use commas to separate the IDs. To find the PID of a process, type \u0060Get-Process\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "Id"
+          ],
+          "mandatoryInSets": [
+            "Id"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the process names of the processes. To specify multiple names, use commas to separate the names. Wildcard characters are not supported.",
+          "validValues": [],
+          "parameterSets": [
+            "Name"
+          ],
+          "mandatoryInSets": [
+            "Name"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Timeout",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum time, in seconds, that this cmdlet waits for the specified processes to stop. When this interval expires, the command displays a non-terminating error that lists the processes that are still running, and ends the wait. By default, there is no time-out.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Any",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "When multiple processes are passed into \u0060Wait-Process\u0060, the cmdlet waits for all processes to exit before returning. With this parameter, the cmdlet returns when any of the processes exits. The remaining processes continue to run. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "By default, this cmdlet doesn\u0027t output anything. With this parameter, the cmdlet returns objects representing the processes that were waited on. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the processes by submitting process objects. Enter a variable that contains the process objects, or type a command or expression that gets the process objects, such as the \u0060Get-Process\u0060 cmdlet.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "InputObject"
+          ],
+          "mandatoryInSets": [
+            "InputObject"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    }
+  ]
+}

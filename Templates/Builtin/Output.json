@@ -1,0 +1,993 @@
+{
+  "version": 2,
+  "category": "Output",
+  "introspectedHosts": [
+    "pwsh-7.6.0",
+    "powershell-5.1.26100.8115"
+  ],
+  "templates": [
+    {
+      "name": "Format-List",
+      "category": "",
+      "description": "Formats the output as a list of properties in which each property appears on a new line.",
+      "scriptBody": "",
+      "cmdletName": "Format-List",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "FormatStartData",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Property",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies the object properties that appear in the display and the order in which they appear. Wildcards are permitted. If you omit this parameter, the properties that appear in the display depend on the object being displayed. The parameter name **Property** is optional. You cannot use the **Property** and **View** parameters in the same command. The value of the **Property** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - \u0060Name\u0060 (or \u0060Label\u0060) - \u0060\u003Cstring\u003E\u0060 - \u0060Expression\u0060 - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - \u0060FormatString\u0060 - \u0060\u003Cstring\u003E\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "GroupBy",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the output in groups based on a shared property or value. Enter an expression or a property of the output. The **GroupBy** parameter expects that the objects are sorted. Use the \u0060Sort-Object\u0060 cmdlet before using \u0060Format-List\u0060 to group the objects. The value of the **GroupBy** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - \u0060Name\u0060 (or \u0060Label\u0060) - \u0060\u003Cstring\u003E\u0060 - \u0060Expression\u0060 - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - \u0060FormatString\u0060 - \u0060\u003Cstring\u003E\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "View",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the name of an alternate list format or view. You cannot use the **Property** and **View** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ShowError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet sends errors through the pipeline. This parameter is rarely used, but can be used as a debugging aid when you are formatting expressions in a \u0060Format-List\u0060 command, and the expressions do not appear to be working.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet displays errors at the command line. This parameter is rarely used, but can be used as a debugging aid when you are formatting expressions in a \u0060Format-List\u0060 command, and the expressions do not appear to be working.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet displays all the error information. Use with the **DisplayError** or **ShowError** parameter. By default, when an error object is written to the error or display streams, only some error information is displayed. Also required when formatting certain .NET types. For more information, see the [Notes](#notes) section.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Expand",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the formatted collection object, as well as the objects in the collection. This parameter is designed to format objects that support the **System.Collections.ICollection** interface. The default value is \u0060EnumOnly\u0060. The acceptable values for this parameter are: - \u0060EnumOnly\u0060. Displays the properties of the objects in the collection. - \u0060CoreOnly\u0060. Displays the properties of the collection object. - \u0060Both\u0060. Displays the properties of the collection object and the properties of objects in the collection.",
+          "validValues": [
+            "CoreOnly",
+            "EnumOnly",
+            "Both"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the objects to be formatted. Enter a variable that contains the objects or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Format-Table",
+      "category": "",
+      "description": "Formats the output as a table.",
+      "scriptBody": "",
+      "cmdletName": "Format-Table",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "FormatStartData",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "AutoSize",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet adjusts the column size and number of columns based on the width of the data. By default, the column size and number are determined by the view.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RepeatHeader",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Repeats displaying the header of a table after every screen full. The repeated header is useful when the output is piped to a pager such as \u0060less\u0060 or \u0060more\u0060 or paging with a screen reader.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "HideTableHeaders",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Omits the column headings from the table.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Wrap",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Displays text that exceeds the column width on the next line. By default, text that exceeds the column width is truncated.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Property",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies the object properties that appear in the display and the order in which they appear. Type one or more property names, separated by commas, or use a hash table to display a calculated property. Wildcards are permitted. If you omit this parameter, the properties that appear in the display depend on the first object\u0027s properties. For example, if the first object has **PropertyA** and **PropertyB** but subsequent objects have **PropertyA**, **PropertyB**, and **PropertyC**, then only the **PropertyA** and **PropertyB** headers are displayed. The **Property** parameter is optional. You can\u0027t use the **Property** and **View** parameters in the same command. The value of the **Property** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - Name (or Label) \u0060\u003Cstring\u003E\u0060 - Expression - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - FormatString - \u0060\u003Cstring\u003E\u0060 - Width - \u0060\u003Cint32\u003E\u0060 - must be greater than \u00600\u0060 - Alignment - value can be \u0060Left\u0060, \u0060Center\u0060, or \u0060Right\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "GroupBy",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies sorted output in separate tables based on a property value. For example, you can use **GroupBy** to list services in separate tables based on their status. Enter an expression or a property. The **GroupBy** parameter expects that the objects are sorted. Use the \u0060Sort-Object\u0060 cmdlet before using \u0060Format-Table\u0060 to group the objects. The value of the **GroupBy** parameter can be a new calculated property. The calculated property can be a script block or a hash table. Valid key-value pairs are: - Name (or Label) - \u0060\u003Cstring\u003E\u0060 - Expression - \u0060\u003Cstring\u003E\u0060 or \u0060\u003Cscript block\u003E\u0060 - FormatString - \u0060\u003Cstring\u003E\u0060 For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "View",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Beginning in PowerShell 6, the default views are defined in PowerShell \u0060C#\u0060 source code. The \u0060*.format.ps1xml\u0060 files from PowerShell 5.1 and earlier versions don\u0027t exist in PowerShell 6 and later versions. The **View** parameter lets you specify an alternate format or custom view for the table. You can use the default PowerShell views or create custom views. For more information about how to create a custom view, see [about_Format.ps1xml](../Microsoft.PowerShell.Core/About/about_Format.ps1xml.md). The alternate and custom views for the **View** parameter must use the table format, otherwise, \u0060Format-Table\u0060 fails. If the alternate view is a list, use the \u0060Format-List\u0060 cmdlet. If the alternate view isn\u0027t a list or a table, use the \u0060Format-Custom\u0060 cmdlet. You can\u0027t use the **Property** and **View** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ShowError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter sends errors through the pipeline. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisplayError",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet displays errors on the command line. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet directs the cmdlet to display all the error information. Use with the **DisplayError** or **ShowError** parameter. By default, when an error object is written to the error or display streams, only some error information is displayed. Also required when formatting certain .NET types. For more information, see the [Notes](#notes) section.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Expand",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the format of the collection object and the objects in the collection. This parameter is designed to format objects that support the [ICollection](xref:System.Collections.ICollection)([System.Collections](xref:System.Collections)) interface. The default value is **EnumOnly**. The acceptable values for this parameter are as follows: - **EnumOnly**: Displays the properties of the objects in the collection. - **CoreOnly**: Displays the properties of the collection object. - **Both**: Displays the properties of the collection object and the properties of objects in the collection.",
+          "validValues": [
+            "CoreOnly",
+            "EnumOnly",
+            "Both"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the objects to format. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Debug",
+      "category": "",
+      "description": "Writes a debug message to the console.",
+      "scriptBody": "",
+      "cmdletName": "Write-Debug",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Message",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the debug message to send to the console.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Error",
+      "category": "",
+      "description": "Writes an object to the error stream.",
+      "scriptBody": "",
+      "cmdletName": "Write-Error",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Message",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "NoException",
+        "WithException",
+        "ErrorRecord"
+      ],
+      "defaultParameterSet": "NoException",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Exception",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an exception object that represents the error. Use the properties of the object to describe the error. To create an exception object, use a hash table or use the \u0060New-Object\u0060 cmdlet.",
+          "validValues": [],
+          "parameterSets": [
+            "WithException"
+          ],
+          "mandatoryInSets": [
+            "WithException"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the message text of the error. If the text includes spaces or special characters, enclose it in quotation marks. You can also pipe a message string to \u0060Write-Error\u0060.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "NoException",
+            "WithException"
+          ],
+          "mandatoryInSets": [
+            "NoException"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ErrorRecord",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an error record object that represents the error. Use the properties of the object to describe the error. To create an error record object, use the \u0060New-Object\u0060 cmdlet or get an error record object from the array in the \u0060$Error\u0060 automatic variable.",
+          "validValues": [],
+          "parameterSets": [
+            "ErrorRecord"
+          ],
+          "mandatoryInSets": [
+            "ErrorRecord"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Category",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the category of the error. The default value is **NotSpecified**. The acceptable values for this parameter are: - NotSpecified - OpenError - CloseError - DeviceError - DeadlockDetected - InvalidArgument - InvalidData - InvalidOperation - InvalidResult - InvalidType - MetadataError - NotImplemented - NotInstalled - ObjectNotFound - OperationStopped - OperationTimeout - SyntaxError - ParserError - PermissionDenied - ResourceBusy - ResourceExists - ResourceUnavailable - ReadError - WriteError - FromStdErr - SecurityError - ProtocolError - ConnectionError - AuthenticationError - LimitsExceeded - QuotaExceeded - NotEnabled For information about the error categories, see [ErrorCategory Enumeration](https://go.microsoft.com/fwlink/?LinkId=143600).",
+          "validValues": [
+            "NotSpecified",
+            "OpenError",
+            "CloseError",
+            "DeviceError",
+            "DeadlockDetected",
+            "InvalidArgument",
+            "InvalidData",
+            "InvalidOperation",
+            "InvalidResult",
+            "InvalidType",
+            "MetadataError",
+            "NotImplemented",
+            "NotInstalled",
+            "ObjectNotFound",
+            "OperationStopped",
+            "OperationTimeout",
+            "SyntaxError",
+            "ParserError",
+            "PermissionDenied",
+            "ResourceBusy",
+            "ResourceExists",
+            "ResourceUnavailable",
+            "ReadError",
+            "WriteError",
+            "FromStdErr",
+            "SecurityError",
+            "ProtocolError",
+            "ConnectionError",
+            "AuthenticationError",
+            "LimitsExceeded",
+            "QuotaExceeded",
+            "NotEnabled"
+          ],
+          "parameterSets": [
+            "NoException",
+            "WithException"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ErrorId",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies an ID string to identify the error. The string should be unique to the error.",
+          "validValues": [],
+          "parameterSets": [
+            "NoException",
+            "WithException"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TargetObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the object that was being processed when the error occurred. Enter the object, a variable that contains the object, or a command that gets the object.",
+          "validValues": [],
+          "parameterSets": [
+            "NoException",
+            "WithException"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RecommendedAction",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the action that the user should take to resolve or prevent the error.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CategoryActivity",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the action that caused the error.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CategoryReason",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies how or why the activity caused the error.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CategoryTargetName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the name of the object that was being processed when the error occurred.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CategoryTargetType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the type of the object that was being processed when the error occurred.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Host",
+      "category": "",
+      "description": "Writes customized output to a host.",
+      "scriptBody": "",
+      "cmdletName": "Write-Host",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Object",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Object",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Objects to display in the host.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoNewline",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Separator",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a separator string to insert between objects displayed by the host.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ForegroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the text color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "BackgroundColor",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the background color. There is no default. The acceptable values for this parameter are: - \u0060Black\u0060 - \u0060DarkBlue\u0060 - \u0060DarkGreen\u0060 - \u0060DarkCyan\u0060 - \u0060DarkRed\u0060 - \u0060DarkMagenta\u0060 - \u0060DarkYellow\u0060 - \u0060Gray\u0060 - \u0060DarkGray\u0060 - \u0060Blue\u0060 - \u0060Green\u0060 - \u0060Cyan\u0060 - \u0060Red\u0060 - \u0060Magenta\u0060 - \u0060Yellow\u0060 - \u0060White\u0060",
+          "validValues": [
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Information",
+      "category": "",
+      "description": "Specifies how PowerShell handles information stream data for a command.",
+      "scriptBody": "",
+      "cmdletName": "Write-Information",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "MessageData",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "MessageData",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an informational message that you want to display to users as they run a script or command. For best results, enclose the informational message in quotation marks.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Tags",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "One or more strings that you can use to sort and filter messages that you have added to the information stream with \u0060Write-Information\u0060. This parameter works similarly to the **Tags** parameter in \u0060New-ModuleManifest\u0060.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Output",
+      "category": "",
+      "description": "Writes the specified objects to the pipeline.",
+      "scriptBody": "",
+      "cmdletName": "Write-Output",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the objects to send down the pipeline. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoEnumerate",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "By default, the \u0060Write-Output\u0060 cmdlet always enumerates its output. The **NoEnumerate** parameter suppresses the default behavior, and prevents \u0060Write-Output\u0060 from enumerating output. The **NoEnumerate** parameter has no effect if the command is wrapped in parentheses, because the parentheses force enumeration. For example, \u0060(Write-Output 1,2,3 -NoEnumerate)\u0060 still enumerates the array. The **NoEnumerate** parameter is only useful within a pipeline. Trying to see the effects of **NoEnumerate** in the console is problematic because PowerShell adds \u0060Out-Default\u0060 to the end of every command line, which results in enumeration. But if you pipe \u0060Write-Output -NoEnumerate\u0060 to another cmdlet, the downstream cmdlet receives the collection object, not the enumerated items of the collection.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Verbose",
+      "category": "",
+      "description": "Writes text to the verbose message stream.",
+      "scriptBody": "",
+      "cmdletName": "Write-Verbose",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Message",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the message to display. This parameter is required. You can also pipe a message string to \u0060Write-Verbose\u0060.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Write-Warning",
+      "category": "",
+      "description": "Writes a warning message.",
+      "scriptBody": "",
+      "cmdletName": "Write-Warning",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Message",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Message",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the warning message.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Out-Host",
+      "category": "",
+      "description": "Sends output to the command line.",
+      "scriptBody": "",
+      "cmdletName": "Out-Host",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Paging",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that \u0060Out-Host\u0060 displays one page of output at a time. The page size is determined by the characteristics of the host. After outputting the first page, the command waits for user input before the remaining pages are displayed. Press the \u003Ckbd\u003ESpacebar\u003C/kbd\u003E to display the next page of output or the \u003Ckbd\u003EEnter\u003C/kbd\u003E key to view the next line of output. Press \u003Ckbd\u003EQ\u003C/kbd\u003E to quit. Using **Paging** is similar to using the **more** command. \u003E [!NOTE] \u003E The **Paging** parameter isn\u0027t supported by the PowerShell ISE host.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the objects that are written to the console. Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Out-Null",
+      "category": "",
+      "description": "Hides the output instead of sending it down the pipeline or displaying it.",
+      "scriptBody": "",
+      "cmdletName": "Out-Null",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the object to be sent to NULL (removed from pipeline). Enter a variable that contains the objects, or type a command or expression that gets the objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    }
+  ]
+}

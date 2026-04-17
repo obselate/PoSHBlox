@@ -1,0 +1,3497 @@
+{
+  "version": 2,
+  "category": "Network / Remote",
+  "introspectedHosts": [
+    "pwsh-7.6.0",
+    "powershell-5.1.26100.8115"
+  ],
+  "templates": [
+    {
+      "name": "Test-Connection",
+      "category": "",
+      "description": "Sends ICMP echo request packets, or pings, to one or more computers.",
+      "scriptBody": "",
+      "cmdletName": "Test-Connection",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "TargetName",
+      "dataOutputs": [
+        {
+          "name": "PingStatus",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "DefaultPing",
+        "RepeatPing",
+        "TraceRoute",
+        "MtuSizeDetect",
+        "TcpPort"
+      ],
+      "defaultParameterSet": "DefaultPing",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Ping",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Causes the cmdlet to do a ping test. This is the default mode for the \u0060Test-Connection\u0060 cmdlet.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "IPv4",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to use the IPv4 protocol for the test.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TraceRoute",
+            "MtuSizeDetect",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "IPv6",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Forces the cmdlet to use the IPv6 protocol for the test.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TraceRoute",
+            "MtuSizeDetect",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "ResolveDestination",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Causes the cmdlet to attempt to resolve the DNS name of the target. When used in conjunction with the **Traceroute** parameter, the DNS names of all intermediate hosts will also be retrieved, if possible.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TraceRoute",
+            "MtuSizeDetect",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Source",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the names of the computers where the ping originates. Enter a comma-separated list of computer names. The default is the local computer. \u003E [!NOTE] \u003E This parameter is not supported in PowerShell versions 6 and up. Supplying this parameter \u003E causes an error.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TraceRoute",
+            "TcpPort",
+            "Source"
+          ],
+          "mandatoryInSets": [
+            "Source"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "MaxHops",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Sets the maximum number of hops that an ICMP request message can be sent. The default value is controlled by the operating system. The default value for Windows 10 and higher is 128 hops.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TraceRoute"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Count",
+          "type": "Int",
+          "defaultValue": "4",
+          "description": "Specifies the number of echo requests to send. The default value is 4.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Delay",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the interval between pings, in seconds.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "BufferSize",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the size, in bytes, of the buffer sent with this command. The default value is 32.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DontFragment",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter sets the **Don\u0027t Fragment** flag in the IP header. You can use this parameter with the **BufferSize** parameter to test the Path MTU size. For more information about Path MTU, see the [Path MTU Discovery](https://wikipedia.org/wiki/Path_MTU_Discovery) article in wikipedia.",
+          "validValues": [],
+          "parameterSets": [
+            "DefaultPing",
+            "RepeatPing"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Repeat",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Causes the cmdlet to send ping requests continuously. When the value of **TargetName** is an array of targets, the cmdlet repeats the ping requests for the first target only. It ignores the remaining targets. This parameter can\u0027t be used with the **Count** parameter.",
+          "validValues": [],
+          "parameterSets": [
+            "RepeatPing",
+            "TcpPort"
+          ],
+          "mandatoryInSets": [
+            "RepeatPing"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Quiet",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "The **Quiet** parameter returns a **Boolean** value. Using this parameter suppresses all errors. Each connection that\u0027s tested returns a **Boolean** value. If the **TargetName** parameter specifies multiple computers, an array of **Boolean** values is returned. If **any** ping to a given target succeeds, \u0060$true\u0060 is returned. If **all** pings to a given target fail, \u0060$false\u0060 is returned.",
+          "validValues": [],
+          "parameterSets": [
+            "Quiet"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TimeoutSeconds",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Sets the timeout value for the test. The test fails if a response isn\u0027t received before the timeout expires. The default is five seconds. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "TargetName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the computer(s) to test. Type the computer names or type IP addresses in IPv4 or IPv6 format.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "MtuSize",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "This parameter is used to discover the Path MTU size. The cmdlet returns a **PingReply#MTUSize** object that contains the Path MTU size to the target. For more information about Path MTU, see the [Path MTU Discovery](https://wikipedia.org/wiki/Path_MTU_Discovery) article in wikipedia.",
+          "validValues": [],
+          "parameterSets": [
+            "MtuSizeDetect"
+          ],
+          "mandatoryInSets": [
+            "MtuSizeDetect"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Traceroute",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Causes the cmdlet to do a traceroute test. When this parameter is used, the cmdlet returns a \u0060TestConnectionCommand\u002BTraceStatus\u0060 object.",
+          "validValues": [],
+          "parameterSets": [
+            "TraceRoute"
+          ],
+          "mandatoryInSets": [
+            "TraceRoute"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "TcpPort",
+          "type": "Int",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the TCP port number on the target to be used in the TCP connection test. The cmdlet attempts to make a TCP connection to the specified port on the target. - The cmdlet returns \u0060$true\u0060 if a connection is made. - The cmdlet returns \u0060$false\u0060 if a connection is not made.",
+          "validValues": [],
+          "parameterSets": [
+            "TcpPort"
+          ],
+          "mandatoryInSets": [
+            "TcpPort"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Detailed",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "When you use the **Detailed** parameter, this cmdlet returns a detailed information about the status of the TCP connection attempts. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [
+            "TcpPort"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "AsJob",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet runs as a background job. When you specify the AsJob parameter, the command immediately returns an object that represents the background job. You can continue to work in the session while the job finishes. To get the job results, use the \u0060Receive-Job\u0060 cmdlet. For more information about PowerShell background jobs, see about_Jobs (../Microsoft.PowerShell.Core/About/about_jobs.md)and about_Remote_Jobs (../Microsoft.PowerShell.Core/About/about_remote_jobs.md).",
+          "validValues": [],
+          "parameterSets": [
+            "Source",
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "DcomAuthentication",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the authentication level that this cmdlet uses with WMI. \u0060Test-Connection\u0060 uses WMI. The acceptable values for this parameter are: - Default . Windows Authentication - None . No COM authentication - Connect . Connect-level COM authentication - Call . Call-level COM authentication - Packet . Packet-level COM authentication - PacketIntegrity . Packet Integrity-level COM authentication - PacketPrivacy . Packet Privacy-level COM authentication - Unchanged . Same as the previous command The default value is Packet that has an enumerated value of 4 . For more information about the values of this parameter, see AuthenticationLevel (/dotnet/api/system.management.authenticationlevel)enumeration.",
+          "validValues": [
+            "Default",
+            "None",
+            "Connect",
+            "Call",
+            "Packet",
+            "PacketIntegrity",
+            "PacketPrivacy",
+            "Unchanged"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "WsmanAuthentication",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the mechanism that is used to authenticate the user credentials when this cmdlet uses the WSMan protocol. The acceptable values for this parameter are: - Basic - CredSSP - Default - Digest - Kerberos - Negotiate. The default value is Default. For more information about the values of this parameter, see AuthenticationMechanism Enumeration (/dotnet/api/system.management.automation.runspaces.authenticationmechanism?view=powershellsdk-1.1.0). Caution: Credential Security Service Provider (CredSSP) authentication, in which the user credentials are passed to a remote computer to be authenticated, is designed for commands that require authentication on more than one resource, such as accessing a remote network share. This mechanism increases the security risk of the remote operation. If the remote computer is compromised, the credentials that are passed to it can be used to control the network session. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [
+            "Default",
+            "Basic",
+            "Negotiate",
+            "CredSSP",
+            "Digest",
+            "Kerberos"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "Protocol",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies a protocol. The acceptable values for this parameter are DCOM and WSMan.",
+          "validValues": [
+            "DCOM",
+            "WSMan"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the computers to ping. Type the computer names or type IP addresses in IPv4 or IPv6 format. Wildcard characters are not permitted. This parameter is required. This parameter doesn\u0027t rely on PowerShell remoting. You can use the ComputerName parameter even if your computer isn\u0027t configured to run remote commands. \u003E [!NOTE] \u003E The ComputerName parameter is renamed to TargetName in PowerShell 6.0 and above.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to send a ping request from the source computer. Type a user name, such as User01 or Domain01\\User01, or enter a PSCredential object, such as one from the \u0060Get-Credential\u0060 cmdlet. The Credential parameter is valid only when the Source parameter is used in the command. The credentials don\u0027t affect the destination computer.",
+          "validValues": [],
+          "parameterSets": [
+            "Source"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "Impersonation",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the impersonation level to use when this cmdlet calls WMI. \u0060Test-Connection\u0060 uses WMI. The acceptable values for this parameter are as follows: - Default . Default impersonation. - Anonymous . Hides the identity of the caller. - Identify . Allows objects to query the credentials of the caller. - Impersonate . Allows objects to use the credentials of the caller. The default value is Impersonate .",
+          "validValues": [
+            "Default",
+            "Anonymous",
+            "Identify",
+            "Impersonate",
+            "Delegate"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "ThrottleLimit",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum number of concurrent connections that can be established to run this command. If you omit this parameter or enter a value of 0, the default value, 32, is used. The throttle limit applies only to the current command, not to the session or to the computer.",
+          "validValues": [],
+          "parameterSets": [
+            "Source",
+            "Default"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        },
+        {
+          "name": "TimeToLive",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum times a packet can be forwarded. For every hop in gateways, routers etc. the TimeToLive value is decreased by one. At zero the packet is discarded and an error is returned. In Windows , The default value is 128 . The alias of the TimeToLive parameter is TTL .",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoke-Command",
+      "category": "",
+      "description": "Runs commands on local and remote computers.",
+      "scriptBody": "",
+      "cmdletName": "Invoke-Command",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "InProcess",
+        "Session",
+        "FilePathRunspace",
+        "ComputerName",
+        "FilePathComputerName",
+        "Uri",
+        "FilePathUri",
+        "VMId",
+        "VMName",
+        "FilePathVMId",
+        "FilePathVMName",
+        "SSHHost",
+        "ContainerId",
+        "FilePathContainerId",
+        "SSHHostHashParam",
+        "FilePathSSHHost",
+        "FilePathSSHHostHash"
+      ],
+      "defaultParameterSet": "InProcess",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Session",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of sessions in which this cmdlet runs the command. Enter a variable that contains **PSSession** objects or a command that creates or gets the **PSSession** objects, such as a \u0060New-PSSession\u0060 or \u0060Get-PSSession\u0060 command. When you create a **PSSession**, PowerShell establishes a persistent connection to the remote computer. Use a **PSSession** to run a series of related commands that share data. To run a single command or a series of unrelated commands, use the **ComputerName** parameter. For more information, see [about_PSSessions](About/about_PSSessions.md).",
+          "validValues": [],
+          "parameterSets": [
+            "Session",
+            "FilePathRunspace"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ComputerName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the computers on which the command runs. The default is the local computer. When you use the **ComputerName** parameter, PowerShell creates a temporary connection that\u0027s used only to run the specified command and is then closed. If you need a persistent connection, use the **Session** parameter. Type the NETBIOS name, IP address, or fully qualified domain name of one or more computers in a comma-separated list. To specify the local computer, type the computer name, localhost, or a dot (\u0060.\u0060). To use an IP address in the value of **ComputerName**, the command must include the **Credential** parameter. The computer must be configured for the HTTPS transport or the IP address of the remote computer must be included in the local computer\u0027s WinRM **TrustedHosts** list. For instructions to add a computer name to the **TrustedHosts** list, see [How to Add a Computer to the Trusted Host List](./about/about_remote_troubleshooting.md#how-to-add-a-computer-to-the-trusted-hosts-list). On Windows Vista and later versions of the Windows operating system, to include the local computer in the value of **ComputerName**, you must run PowerShell using the **Run as administrator** option.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to perform this action. The default is the current user. Type a user name, such as **User01** or **Domain01\\User01**, or enter a **PSCredential** object generated by the \u0060Get-Credential\u0060 cmdlet. If you type a user name, you\u0027re prompted to enter the password. Credentials are stored in a [PSCredential](/dotnet/api/system.management.automation.pscredential) object and the password is stored as a [SecureString](/dotnet/api/system.security.securestring). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](/dotnet/api/system.security.securestring#how-secure-is-securestring).",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathUri",
+            "VMId",
+            "VMName",
+            "FilePathVMId",
+            "FilePathVMName"
+          ],
+          "mandatoryInSets": [
+            "VMId",
+            "VMName",
+            "FilePathVMId",
+            "FilePathVMName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Port",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the network port on the remote computer that is used for this command. To connect to a remote computer, the remote computer must be listening on the port that the connection uses. The default ports are 5985 (WinRM port for HTTP) and 5986 (WinRM port for HTTPS). Before using an alternate port, configure the WinRM listener on the remote computer to listen at that port. To configure the listener, type the following two commands at the PowerShell prompt: \u0060Remove-Item -Path WSMan:\\Localhost\\listener\\listener* -Recurse\u0060 \u0060New-Item -Path WSMan:\\Localhost\\listener -Transport http -Address * -Port \\\u003Cport-number\\\u003E\u0060 Don\u0027t use the **Port** parameter unless you must. The port that is set in the command applies to all computers or sessions on which the command runs. An alternate port setting might prevent the command from running on all computers.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName",
+            "SSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "UseSSL",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet uses the Secure Sockets Layer (SSL) protocol to establish a connection to the remote computer. By default, SSL isn\u0027t used. WS-Management encrypts all PowerShell content transmitted over the network. The **UseSSL** parameter is an additional protection that sends the data across an HTTPS, instead of HTTP. If you use this parameter, but SSL isn\u0027t available on the port that\u0027s used for the command, the command fails.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConfigurationName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the session configuration that is used for the new **PSSession**. Enter a configuration name or the fully qualified resource URI for a session configuration. If you specify only the configuration name, the following schema URI is prepended: \u0060http://schemas.microsoft.com/PowerShell\u0060. When used with SSH, this parameter specifies the subsystem to use on the target as defined in \u0060sshd_config\u0060. The default value for SSH is the \u0060powershell\u0060 subsystem. The session configuration for a session is located on the remote computer. If the specified session configuration doesn\u0027t exist on the remote computer, the command fails. The default value is the value of the \u0060$PSSessionConfigurationName\u0060 preference variable on the local computer. If this preference variable isn\u0027t set, the default is **Microsoft.PowerShell**. For more information, see [about_Preference_Variables](About/about_Preference_Variables.md).",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathUri",
+            "ContainerId",
+            "VMId",
+            "VMName",
+            "FilePathContainerId",
+            "FilePathVMId",
+            "FilePathVMName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ApplicationName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the application name segment of the connection URI. Use this parameter to specify the application name when you aren\u0027t using the **ConnectionURI** parameter in the command. The default value is the value of the \u0060$PSSessionApplicationName\u0060 preference variable on the local computer. If this preference variable isn\u0027t defined, the default value is WSMAN. This value is appropriate for most uses. For more information, see [about_Preference_Variables](About/about_Preference_Variables.md). The WinRM service uses the application name to select a listener to service the connection request. The value of this parameter should match the value of the **URLPrefix** property of a listener on the remote computer.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ThrottleLimit",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum number of concurrent connections that can be established to run this command. If you omit this parameter or enter a value of 0, the default value, 32, is used. The throttle limit applies only to the current command, not to the session or to the computer.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConnectionUri",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies a Uniform Resource Identifier (URI) that defines the connection endpoint of the session. The URI must be fully qualified. The format of this string is as follows: \u0060\u003CTransport\u003E://\u003CComputerName\u003E:\u003CPort\u003E/\u003CApplicationName\u003E\u0060 The default value is as follows: \u0060http://localhost:5985/WSMAN\u0060 If you don\u0027t specify a connection URI, you can use the **UseSSL** and **Port** parameters to specify the connection URI values. Valid values for the **Transport** segment of the URI are HTTP and HTTPS. If you specify a connection URI with a Transport segment, but don\u0027t specify a port, the session is created with the standards ports: 80 for HTTP and 443 for HTTPS. To use the default ports for PowerShell remoting, specify port 5985 for HTTP or 5986 for HTTPS. If the destination computer redirects the connection to a different URI, PowerShell prevents the redirection unless you use the **AllowRedirection** parameter in the command.",
+          "validValues": [],
+          "parameterSets": [
+            "Uri",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AsJob",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet runs the command as a background job on a remote computer. Use this parameter to run commands that take an extensive time to finish. When you use the **AsJob** parameter, the command returns an object that represents the job, and then displays the command prompt. You can continue to work in the session while the job finishes. To manage the job, use the \u0060*-Job\u0060 cmdlets. To get the job results, use the \u0060Receive-Job\u0060 cmdlet. The **AsJob** parameter resembles using the \u0060Invoke-Command\u0060 cmdlet to run a \u0060Start-Job\u0060 cmdlet remotely. However, with **AsJob**, the job is created on the local computer, even though the job runs on a remote computer. The results of the remote job are automatically returned to the local computer. For more information about PowerShell background jobs, see [about_Jobs](About/about_Jobs.md) and [about_Remote_Jobs](About/about_Remote_Jobs.md).",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId",
+            "SSHHost",
+            "SSHHostHashParam",
+            "FilePathSSHHost",
+            "FilePathSSHHostHash"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InDisconnectedSession",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet runs a command or script in a disconnected session. When you use the **InDisconnectedSession** parameter, \u0060Invoke-Command\u0060 creates a persistent session on each remote computer, starts the command specified by the **ScriptBlock** or **FilePath** parameter, and then disconnects from the session. The commands continue to run in the disconnected sessions. **InDisconnectedSession** enables you to run commands without maintaining a connection to the remote sessions. And, because the session is disconnected before any results are returned, **InDisconnectedSession** makes sure that all command results are returned to the reconnected session, instead of being split between sessions. You can\u0027t use **InDisconnectedSession** with the **Session** parameter or the **AsJob** parameter. Commands that use **InDisconnectedSession** return a **PSSession** object that represents the disconnected session. They don\u0027t return the command output. To connect to the disconnected session, use the \u0060Connect-PSSession\u0060 or \u0060Receive-PSSession\u0060 cmdlets. To get the results of commands that ran in the session, use the \u0060Receive-PSSession\u0060 cmdlet. To run commands that generate output in a disconnected session, set the value of the **OutputBufferingMode** session option to **Drop**. If you intend to connect to the disconnected session, set the idle time-out in the session so that it provides sufficient time for you to connect before deleting the session. You can set the output buffering mode and idle time-out in the **SessionOption** parameter or in the \u0060$PSSessionOption\u0060 preference variable. For more information about session options, see \u0060New-PSSessionOption\u0060 and [about_Preference_Variables](About/about_preference_variables.md). For more information about the Disconnected Sessions feature, see [about_Remote_Disconnected_Sessions](About/about_Remote_Disconnected_Sessions.md). This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName",
+            "Uri",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SessionName",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies a friendly name for a disconnected session. You can use the name to refer to the session in subsequent commands, such as a \u0060Get-PSSession\u0060 command. This parameter is valid only with the **InDisconnectedSession** parameter. This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "HideComputerName",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet omits the computer name of each object from the output display. By default, the name of the computer that generated the object appears in the display. This parameter affects only the output display. It doesn\u0027t change the object.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId",
+            "SSHHost",
+            "SSHHostHashParam",
+            "FilePathSSHHost",
+            "FilePathSSHHostHash"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "JobName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a friendly name for the background job. By default, jobs are named \u0060Job\u003Cn\u003E\u0060, where \u0060\u003Cn\u003E\u0060 is an ordinal number. If you use the **JobName** parameter in a command, the command is run as a job, and \u0060Invoke-Command\u0060 returns a job object, even if you don\u0027t include **AsJob** in the command. For more information about PowerShell background jobs, see [about_Jobs](About/about_Jobs.md).",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "ContainerId",
+            "FilePathContainerId",
+            "SSHHostHashParam",
+            "SSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ScriptBlock",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the commands to run. Enclose the commands in braces (\u0060{ }\u0060) to create a script block. When using \u0060Invoke-Command\u0060 to run a command remotely, any variables in the command are evaluated on the remote computer. \u003E [!NOTE] \u003E Parameters for the scriptblock can only be passed in from **ArgumentList** by position. Switch \u003E parameters cannot be passed by position. If you need a parameter that behaves like a \u003E **SwitchParameter** type, use a **Boolean** type instead.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "InProcess",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "SSHHost",
+            "SSHHostHashParam"
+          ],
+          "mandatoryInSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "InProcess",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "SSHHost",
+            "SSHHostHashParam"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoNewScope",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet runs the specified command in the current scope. By default, \u0060Invoke-Command\u0060 runs commands in their own scope. This parameter is valid only in commands that are run in the current session, that is, commands that omit both the **ComputerName** and **Session** parameters. This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "InProcess"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "FilePath",
+          "type": "Path",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a local script that this cmdlet runs on one or more remote computers. Enter the path and filename of the script, or pipe a script path to \u0060Invoke-Command\u0060. The script must exist on the local computer or in a directory that the local computer can access. Use **ArgumentList** to specify the values of parameters in the script. When you use this parameter, PowerShell converts the contents of the specified script file to a script block, transmits the script block to the remote computer, and runs it on the remote computer.",
+          "validValues": [],
+          "parameterSets": [
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId",
+            "FilePathSSHHost",
+            "FilePathSSHHostHash"
+          ],
+          "mandatoryInSets": [
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId",
+            "FilePathSSHHost",
+            "FilePathSSHHostHash"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AllowRedirection",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows redirection of this connection to an alternate Uniform Resource Identifier (URI). When you use the **ConnectionURI** parameter, the remote destination can return an instruction to redirect to a different URI. By default, PowerShell doesn\u0027t redirect connections, but you can use this parameter to allow it to redirect the connection. You can also limit the number of times the connection is redirected by changing the **MaximumConnectionRedirectionCount** session option value. Use the **MaximumRedirection** parameter of the \u0060New-PSSessionOption\u0060 cmdlet or set the **MaximumConnectionRedirectionCount** property of the \u0060$PSSessionOption\u0060 preference variable. The default value is 5.",
+          "validValues": [],
+          "parameterSets": [
+            "Uri",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SessionOption",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies advanced options for the session. Enter a **SessionOption** object, such as one that you create using the \u0060New-PSSessionOption\u0060 cmdlet, or a hash table in which the keys are session option names and the values are session option values. \u003E [!NOTE] \u003E If you specify a hashtable for **SessionOption**, PowerShell converts the hashtable into a \u003E **System.Management.Automation.Remoting.PSSessionOption** object. The values for keys specified \u003E in the hashtable are cast to the matching property of the object. This behaves differently from \u003E calling \u0060New-PSSessionOption\u0060. For example, the **System.TimeSpan** values for the timeout \u003E properties, like **IdleTimeout**, convert an integer value into ticks instead of milliseconds. \u003E For more information on the **PSSessionOption** object and its properties, see \u003E [PSSessionOption](/dotnet/api/system.management.automation.remoting.pssessionoption) The default values for the options are determined by the value of the \u0060$PSSessionOption\u0060 preference variable, if it\u0027s set. Otherwise, the default values are established by options set in the session configuration. The session option values take precedence over default values for sessions set in the \u0060$PSSessionOption\u0060 preference variable and in the session configuration. However, they don\u0027t take precedence over maximum values, quotas, or limits set in the session configuration. For a description of the session options that includes the default values, see \u0060New-PSSessionOption\u0060. For information about the \u0060$PSSessionOption\u0060 preference variable, see [about_Preference_Variables](About/about_Preference_Variables.md). For more information about session configurations, see [about_Session_Configurations](About/about_Session_Configurations.md).",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Authentication",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the mechanism that\u0027s used to authenticate the user\u0027s credentials. CredSSP authentication is available only in Windows Vista, Windows Server 2008, and later versions of the Windows operating system. The acceptable values for this parameter are as follows: - Default - Basic - Credssp - Digest - Kerberos - Negotiate - NegotiateWithImplicitCredential The default value is Default. For more information about the values of this parameter, see [AuthenticationMechanism Enumeration](/dotnet/api/system.management.automation.runspaces.authenticationmechanism). \u003E [!CAUTION] \u003E Credential Security Support Provider (CredSSP) authentication, in which the user\u0027s credentials are \u003E passed to a remote computer to be authenticated, is designed for commands that require \u003E authentication on more than one resource, such as accessing a remote network share. This mechanism \u003E increases the security risk of the remote operation. If the remote computer is compromised, the \u003E credentials that are passed to it can be used to control the network session. For more \u003E information, see \u003E [Credential Security Support Provider](/windows/win32/secauthn/credential-security-support-provider).",
+          "validValues": [
+            "Default",
+            "Basic",
+            "Negotiate",
+            "NegotiateWithImplicitCredential",
+            "Credssp",
+            "Digest",
+            "Kerberos"
+          ],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName",
+            "Uri",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "EnableNetworkAccess",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet adds an interactive security token to loopback sessions. The interactive token lets you run commands in the loopback session that get data from other computers. For example, you can run a command in the session that copies XML files from a remote computer to the local computer. A loopback session is a **PSSession** that originates and ends on the same computer. To create a loopback session, omit the **ComputerName** parameter or set its value to dot (\u0060.\u0060), localhost, or the name of the local computer. By default, loopback sessions are created using a network token, which might not provide sufficient permission to authenticate to remote computers. The **EnableNetworkAccess** parameter is effective only in loopback sessions. If you use **EnableNetworkAccess** when you create a session on a remote computer, the command succeeds, but the parameter is ignored. You can allow remote access in a loopback session using the **CredSSP** value of the **Authentication** parameter, which delegates the session credentials to other computers. To protect the computer from malicious access, disconnected loopback sessions that have interactive tokens, which are those created using **EnableNetworkAccess**, can be reconnected only from the computer on which the session was created. Disconnected sessions that use CredSSP authentication can be reconnected from other computers. For more information, see \u0060Disconnect-PSSession\u0060. This parameter was introduced in PowerShell 3.0.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "FilePathComputerName",
+            "Uri",
+            "FilePathUri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "RunAsAdministrator",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet invokes a command as an Administrator.",
+          "validValues": [],
+          "parameterSets": [
+            "ContainerId",
+            "FilePathContainerId"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "HostName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an array of computer names for a Secure Shell (SSH) based connection. This is similar to the **ComputerName** parameter except that the connection to the remote computer is made using SSH rather than Windows WinRM. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UserName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the username for the account used to run a command on the remote computer. The user authentication method depends on how Secure Shell (SSH) is configured on the remote computer. If SSH is configured for basic password authentication, then you\u0027ll be prompted for the user password. If SSH is configured for key-based user authentication then a key file path can be provided via the **KeyFilePath** parameter and no password prompt occurs. If the client user key file is located in an SSH known location, then the **KeyFilePath** parameter isn\u0027t needed for key-based authentication, and user authentication occurs automatically based on the username. For more information, see your platform\u0027s SSH documentation about key-based user authentication. This isn\u0027t a required parameter. If the **UserName** parameter isn\u0027t specified, then the current logged on username is used for the connection. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "KeyFilePath",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a key file path used by Secure Shell (SSH) to authenticate a user on a remote computer. SSH allows user authentication to be performed via private and public keys as an alternative to basic password authentication. If the remote computer is configured for key authentication, then this parameter can be used to provide the key that identifies the user. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Subsystem",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the SSH subsystem used for the new **PSSession**. This specifies the subsystem to use on the target as defined in sshd_config. The subsystem starts a specific version of PowerShell with predefined parameters. If the specified subsystem does not exist on the remote computer, the command fails. If this parameter is not used, the default is the \u0060powershell\u0060 subsystem.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "ConnectingTimeout",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the amount of time in milliseconds allowed for the initial SSH connection to complete. If the connection doesn\u0027t complete within the specified time, an error is returned. This parameter was introduced in PowerShell 7.2",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SSHTransport",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Indicates that the remote connection is established using Secure Shell (SSH). By default PowerShell uses Windows WinRM to connect to a remote computer. This switch forces PowerShell to use the **HostName** parameter for establishing an SSH based remote connection. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [
+            "true"
+          ],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SSHConnection",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "This parameter takes an array of hash tables where each hash table contains one or more connection parameters needed to establish a Secure Shell (SSH) connection. The **SSHConnection** parameter is useful for creating multiple sessions where each session requires different connection information. The hashtable has the following members: - **ComputerName** (or **HostName**) - **Port** - **UserName** - **KeyFilePath** (or **IdentityFilePath**) **ComputerName** (or **HostName**) is the only key-value pair that is required. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHostHashParam",
+            "FilePathSSHHostHash"
+          ],
+          "mandatoryInSets": [
+            "SSHHostHashParam",
+            "FilePathSSHHostHash"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Options",
+          "type": "HashTable",
+          "defaultValue": "",
+          "description": "Specifies a hashtable of SSH options used when connecting to a remote SSH-based session. The possible options are any values supported by the Unix-based version of the [ssh](https://man.openbsd.org/ssh#o) command. Any values explicitly passed by parameters take precedence over values passed in the **Options** hashtable. For example, using the **Port** parameter overrides any \u0060Port\u0060 key-value pair passed in the **Options** hashtable. This parameter was added in PowerShell 7.3.",
+          "validValues": [],
+          "parameterSets": [
+            "SSHHost",
+            "FilePathSSHHost"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "RemoteDebug",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Used to run the invoked command in debug mode in the remote PowerShell session.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Session",
+            "Uri",
+            "FilePathComputerName",
+            "FilePathRunspace",
+            "FilePathUri",
+            "VMId",
+            "VMName",
+            "ContainerId",
+            "FilePathVMId",
+            "FilePathVMName",
+            "FilePathContainerId",
+            "SSHHost",
+            "SSHHostHashParam",
+            "FilePathSSHHost",
+            "FilePathSSHHostHash"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies input to the command. Enter a variable that contains the objects or type a command or expression that gets the objects. When using the **InputObject** parameter, use the \u0060$input\u0060 automatic variable in the value of the **ScriptBlock** parameter to represent the input objects.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ArgumentList",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Supplies the values of parameters for the scriptblock. The parameters in the script block are passed by position from the array value supplied to **ArgumentList**. This is known as array splatting. For more information about the behavior of **ArgumentList**, see [about_Splatting](About/about_Splatting.md#splatting-with-arrays).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "VMId",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an array of IDs of virtual machines.",
+          "validValues": [],
+          "parameterSets": [
+            "VMId",
+            "FilePathVMId"
+          ],
+          "mandatoryInSets": [
+            "VMId",
+            "FilePathVMId"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "VMName",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an array of names of virtual machines.",
+          "validValues": [],
+          "parameterSets": [
+            "VMName",
+            "FilePathVMName"
+          ],
+          "mandatoryInSets": [
+            "VMName",
+            "FilePathVMName"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ContainerId",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an array of container IDs.",
+          "validValues": [],
+          "parameterSets": [
+            "ContainerId",
+            "FilePathContainerId"
+          ],
+          "mandatoryInSets": [
+            "ContainerId",
+            "FilePathContainerId"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CertificateThumbprint",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the digital public key certificate (X509) of a user account that has permission to connect to the disconnected session. Enter the certificate thumbprint of the certificate. Certificates are used in client certificate-based authentication. They can be mapped only to local user accounts and they don\u0027t work with domain accounts. To get a certificate thumbprint, use a \u0060Get-Item\u0060 or \u0060Get-ChildItem\u0060 command in the PowerShell Cert: drive.",
+          "validValues": [],
+          "parameterSets": [
+            "ComputerName",
+            "Uri"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoke-RestMethod",
+      "category": "",
+      "description": "Sends an HTTP or HTTPS request to a RESTful web service.",
+      "scriptBody": "",
+      "cmdletName": "Invoke-RestMethod",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Body",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "StandardMethod",
+        "StandardMethodNoProxy",
+        "CustomMethod",
+        "CustomMethodNoProxy"
+      ],
+      "defaultParameterSet": "StandardMethod",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "FollowRelLink",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should follow relation links. Some REST APIs support pagination via Relation Links per [RFC5988](https://tools.ietf.org/html/rfc5988#section-5). Instead of parsing the header to get the URL for the next page, you can have the cmdlet do this for you. To set how many times to follow relation links, use the **MaximumFollowRelLink** parameter. When using this switch, the cmdlet returns a collection of pages of results. Each page of results may contain multiple result items. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "MaximumFollowRelLink",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how many times to follow relation links if **FollowRelLink** is used. A smaller value may be needed if the REST api throttles due to too many requests. The default value is \u0060[int32]::MaxValue\u0060. A value of 0 (zero) prevents following relation links.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "ResponseHeadersVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Creates a variable containing a Response Headers Dictionary. Enter a variable name without the dollar sign (\u0060$\u0060) symbol. The keys of the dictionary contain the field names and values of the Response Header returned by the web server. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "StatusCodeVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Creates a variable containing a HTTP status code result of the request. Enter a variable name without the dollar sign (\u0060$\u0060) symbol. The parameter can identify success messages or failure messages when used with the **SkipHttpErrorCheck** parameter. Input the parameter\u0027s variable name as a string such as \u0060-StatusCodeVariable \u0022scv\u0022\u0060. This parameter was introduced in PowerShell 7.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UseBasicParsing",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter has been deprecated. Beginning with PowerShell 6.0.0, all Web requests use basic parsing only. This parameter is included for backwards compatibility only. When used, it has no effect on the operation of the cmdlet.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Uri",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the Uniform Resource Identifier (URI) of the internet resource to which the web request is sent. This parameter supports HTTP, HTTPS, FTP, and FILE values. This parameter is required. The parameter name (**Uri**) is optional.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "HttpVersion",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the HTTP version used for the request. The default is \u00601.1\u0060. Valid values are: - 1.0 - 1.1 - 2.0 - 3.0",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "WebSession",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a web request session. Enter the variable name, including the dollar sign (\u0060$\u0060). To override a value in the web request session, use a cmdlet parameter, such as **UserAgent** or **Credential**. Parameter values take precedence over values in the web request session. Content related headers, such as \u0060Content-Type\u0060, are overridden when a **MultipartFormDataContent** object is supplied for **Body**. Unlike a remote session, the web request session isn\u0027t a persistent connection. It\u0027s an object that contains information about the connection and the request, including cookies, credentials, the maximum redirection value, and the user agent string. You can use it to share state and data among web requests. To create a web request session, enter a variable name, without a dollar sign, in the value of the **SessionVariable** parameter of an \u0060Invoke-RestMethod\u0060 command. \u0060Invoke-RestMethod\u0060 creates the session and saves it in the variable. In subsequent commands, use the variable as the value of the **WebSession** parameter. You can\u0027t use the **SessionVariable** and **WebSession** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SessionVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Creates a variable containing the web request session. Enter a variable name without the dollar sign (\u0060$\u0060) symbol. When you specify a session variable, \u0060Invoke-RestMethod\u0060 creates a web request session object and assigns it to a variable with the specified name in your PowerShell session. You can use the variable in your session as soon as the command completes. Before PowerShell 7.4, the web request session isn\u0027t a persistent connection. It\u0027s an object that contains information about the connection and the request, including cookies, credentials, the maximum redirection value, and the user agent string. You can use it to share state and data among web requests. Starting in PowerShell 7.4, the web request session is persistent as long as the properties of the session aren\u0027t overridden in a subsequent request. When they are, the cmdlet recreates the session with the new values. The persistent sessions reduce the overhead for repeated requests, making them much faster. To use the web request session in subsequent web requests, specify the session variable in the value of the **WebSession** parameter. PowerShell uses the data in the web request session object when establishing the new connection. To override a value in the web request session, use a cmdlet parameter, such as **UserAgent** or **Credential**. Parameter values take precedence over values in the web request session. You can\u0027t use the **SessionVariable** and **WebSession** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AllowUnencryptedAuthentication",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows sending of credentials and secrets over unencrypted connections. By default, supplying **Credential** or any **Authentication** option with a **Uri** that doesn\u0027t begin with \u0060https://\u0060 results in an error and the request aborts to prevent unintentionally communicating secrets in plain text over unencrypted connections. To override this behavior at your own risk, supply the **AllowUnencryptedAuthentication** parameter. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. It\u0027s provided only for compatibility \u003E with legacy systems that can\u0027t provide encrypted connections. Use at your own risk. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Authentication",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the explicit authentication type to use for the request. The default is **None**. The **Authentication** parameter can\u0027t be used with the **UseDefaultCredentials** parameter. Available Authentication Options: - \u0060None\u0060: This is the default option when **Authentication** isn\u0027t supplied. No explicit authentication is used. - \u0060Basic\u0060: Requires **Credential**. The credentials are used to send an RFC 7617 Basic Authentication \u0060Authorization: Basic\u0060 header in the format of \u0060base64(user:password)\u0060. - \u0060Bearer\u0060: Requires the **Token** parameter. Sends an RFC 6750 \u0060Authorization: Bearer\u0060 header with the supplied token. - \u0060OAuth\u0060: Requires the **Token** parameter. Sends an RFC 6750 \u0060Authorization: Bearer\u0060 header with the supplied token. Supplying **Authentication** overrides any \u0060Authorization\u0060 headers supplied to **Headers** or included in **WebSession**. This feature was added in PowerShell 6.0.0.",
+          "validValues": [
+            "None",
+            "Basic",
+            "Bearer",
+            "OAuth"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to send the request. The default is the current user. Type a user name, such as **User01** or **Domain01\\User01**, or enter a **PSCredential** object generated by the \u0060Get-Credential\u0060 cmdlet. You can use **Credential** alone or in conjunction with certain **Authentication** parameter options. When used alone, it only supplies credentials to the remote server if the remote server sends an authentication challenge request. When used with **Authentication** options, the credentials is explicitly sent. Credentials are stored in a [PSCredential](/dotnet/api/system.management.automation.pscredential) object and the password is stored as a [SecureString](/dotnet/api/system.security.securestring). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](/dotnet/api/system.security.securestring#how-secure-is-securestring).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "UseDefaultCredentials",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet uses the credentials of the current user to send the web request. This can\u0027t be used with **Authentication** or **Credential** and may not be supported on all platforms.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CertificateThumbprint",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the digital public key certificate (X509) of a user account that has permission to send the request. Enter the certificate thumbprint of the certificate. Certificates are used in client certificate-based authentication. Certificates can only be mapped only to local user accounts, not domain accounts. To see the certificate thumbprint, use the \u0060Get-Item\u0060 or \u0060Get-ChildItem\u0060 command to find the certificate in \u0060Cert:\\CurrentUser\\My\u0060. \u003E [!NOTE] \u003E This feature is currently only supported on Windows OS platforms.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Certificate",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the client certificate that\u0027s used for a secure web request. Enter a variable that contains a certificate or a command or expression that gets the certificate. To find a certificate, use \u0060Get-PfxCertificate\u0060 or use the \u0060Get-ChildItem\u0060 cmdlet in the Certificate (\u0060Cert:\u0060) drive. If the certificate isn\u0027t valid or doesn\u0027t have sufficient authority, the command fails.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SkipCertificateCheck",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Skips certificate validation checks that include all validations such as expiration, revocation, trusted root authority, etc. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. This switch is only intended to be used \u003E against known hosts using a self-signed certificate for testing purposes. Use at your own risk. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SslProtocol",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Sets the SSL/TLS protocols that are permissible for the web request. By default all, SSL/TLS protocols supported by the system are allowed. **SslProtocol** allows for limiting to specific protocols for compliance purposes. These values are defined as a flag-based enumeration. You can combine multiple values together to set multiple flags using this parameter. The values can be passed to the **SslProtocol** parameter as an array of values or as a comma-separated string of those values. The cmdlet combines the values using a binary-OR operation. Passing values as an array is the simplest option and also allows you to use tab-completion on the values. You may not be able to supply multiple values on all platforms. This feature was added in PowerShell 6.0.0. Support for \u0060Tls13\u0060 was added in PowerShell 7.1.",
+          "validValues": [
+            "Default",
+            "Tls",
+            "Tls11",
+            "Tls12",
+            "Tls13"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Token",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "The OAuth or Bearer token to include in the request. **Token** is required by certain **Authentication** options. It can\u0027t be used independently. **Token** takes a \u0060SecureString\u0060 that contains the token. To supply the token, manually use the following: \u0060Invoke-RestMethod -Uri $uri -Authentication OAuth -Token (Read-Host -AsSecureString)\u0060 This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UserAgent",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a user agent string for the web request. The default user agent is similar to \u0060Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.15063; en-US) PowerShell/6.0.0\u0060 with slight variations for each operating system and platform. To test a website with the standard user agent string that\u0027s used by most internet browsers, use the properties of the [PSUserAgent](xref:Microsoft.PowerShell.Commands.PSUserAgent) class, such as Chrome, Firefox, InternetExplorer, Opera, and Safari.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisableKeepAlive",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sets the **KeepAlive** value in the HTTP header to False. By default, **KeepAlive** is True. **KeepAlive** establishes a persistent connection to the server to facilitate subsequent requests.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConnectionTimeoutSeconds",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how long the request can be pending before it times out. Enter a value in seconds. The default value, 0, specifies an indefinite time-out. A Domain Name System (DNS) query can take up to 15 seconds to return or time out. If your request contains a host name that requires resolution, and you set **ConnectionTimeoutSeconds** to a value greater than zero, but less than 15 seconds, it can take 15 seconds or more before a **WebException** is thrown, and your request times out. This parameter replaced the **TimeoutSec** parameter in PowerShell 7.4. You can use **TimeoutSec** as an alias for **ConnectionTimeoutSeconds**.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "OperationTimeoutSeconds",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "This timeout applies to data reads within a stream, not to the stream time as a whole. The default value, 0, specifies an indefinite timeout. Setting the value to 30 seconds means that any delay of longer than 30 seconds between data in the stream terminates the request. A large file that takes several minutes to download won\u0027t terminate unless the stream stalls for more than 30 seconds.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Headers",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the headers of the web request. Enter a hash table or dictionary. Content related headers, such as \u0060Content-Type\u0060 are overridden when a \u0060MultipartFormDataContent\u0060 object is supplied for **Body**. Starting in PowerShell 7.4, if you use this parameter to define the \u0060Content-Type\u0060 header and use **ContentType** parameter, the value specified in the **ContentType** parameter is used.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SkipHeaderValidation",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should add headers to the request without validation. This switch should be used for sites that require header values that don\u0027t conform to standards. Specifying this switch disables validation to allow the value to be passed unchecked. When specified, all headers are added without validation. This switch disables validation for values passed to the **ContentType**, **Headers**, and **UserAgent** parameters. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "AllowInsecureRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows redirecting from HTTPS to HTTP. By default, any request that\u0027s redirected from HTTPS to HTTP results in an error and the request is aborted to prevent unintentionally communicating in plain text over unencrypted connections. To override this behavior at your own risk, use the **AllowInsecureRedirect** parameter. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "MaximumRedirection",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how many times PowerShell redirects a connection to an alternate Uniform Resource Identifier (URI) before the connection fails. The default value is 5. A value of 0 (zero) prevents all redirection.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "MaximumRetryCount",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received. Also see **RetryIntervalSec** parameter for specifying the interval between retries.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PreserveAuthorizationOnRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should preserve the \u0060Authorization\u0060 header, when present, across redirections. By default, the cmdlet strips the \u0060Authorization\u0060 header before redirecting. Specifying this parameter disables this logic for cases where the header needs to be sent to the redirection location. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "RetryIntervalSec",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received. The value must be between \u00601\u0060 and \u0060[int]::MaxValue\u0060. When the failure code is 429 and the response includes the **Retry-After** property in its headers, the cmdlet uses that value for the retry interval, even if this parameter is specified. Also, see the **MaximumRetryCount** parameter for specifying number of retries.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Method",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the method used for the web request. The acceptable values for this parameter are: - \u0060Default\u0060 - \u0060Delete\u0060 - \u0060Get\u0060 - \u0060Head\u0060 - \u0060Merge\u0060 - \u0060Options\u0060 - \u0060Patch\u0060 - \u0060Post\u0060 - \u0060Put\u0060 - \u0060Trace\u0060 The **CustomMethod** parameter can be used for Request Methods not listed above.",
+          "validValues": [
+            "Default",
+            "Get",
+            "Head",
+            "Post",
+            "Put",
+            "Delete",
+            "Trace",
+            "Options",
+            "Merge",
+            "Patch"
+          ],
+          "parameterSets": [
+            "StandardMethod",
+            "StandardMethodNoProxy"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CustomMethod",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies custom method used for the web request. This can be used with the Request Method required by the endpoint isn\u0027t an available option on the **Method**. **Method** and **CustomMethod** can\u0027t be used together. Example: \u0060Invoke-RestMethod -Uri \u0027https://api.contoso.com/widget/\u0027 -CustomMethod \u0027TEST\u0027\u0060 This makes a \u0060TEST\u0060 HTTP request to the API. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [
+            "CustomMethod",
+            "CustomMethodNoProxy"
+          ],
+          "mandatoryInSets": [
+            "CustomMethod",
+            "CustomMethodNoProxy"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PreserveHttpMethodOnRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should preserve the method of the request across redirections. By default, the cmdlet changes the method to \u0060GET\u0060 when redirected. Specifying this parameter disables this logic to ensure that the intended method can be used with redirection. This feature was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UnixSocket",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the name of the Unix socket to connect to. This parameter is supported on Unix-based systems and Windows version 1803 and later. For more information about Windows support of Unix sockets, see the [Windows/WSL Interop with AF_UNIX](https://devblogs.microsoft.com/commandline/windowswsl-interop-with-af_unix/) blog post. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "NoProxy",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet won\u0027t use a proxy to reach the destination. Use this to bypass the proxy configured in your internet settings or specified in the environment. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [
+            "CustomMethodNoProxy",
+            "StandardMethodNoProxy"
+          ],
+          "mandatoryInSets": [
+            "CustomMethodNoProxy",
+            "StandardMethodNoProxy"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Proxy",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Uses a proxy server for the request, rather than connecting directly to the internet resource. Enter the Uniform Resource Identifier (URI) of a network proxy server. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ProxyCredential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to use the proxy server that\u0027s specified by the **Proxy** parameter. The default is the current user. Type a user name, such as \u0022User01\u0022 or \u0022Domain01\\User01\u0022, or enter a **PSCredential** object, such as one generated by the \u0060Get-Credential\u0060 cmdlet. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ProxyUseDefaultCredentials",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Uses the credentials of the current user to access the proxy server that is specified by the **Proxy** parameter. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Body",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the body of the request. The body is the content of the request that follows the headers. You can also pipe a body value to \u0060Invoke-RestMethod\u0060. The **Body** parameter can be used to specify a list of query parameters or specify the content of the request. For query parameters, the cmdlet uses the **System.Net.WebUtility.UrlEncode** method method to encode the key-value pairs. For more information about encoding strings for URLs, see [the UrlEncode() method reference](xref:System.Net.WebUtility.UrlEncode%2A). When the input is a POST request and the body is a **String**, the value to the left of the first equals sign (\u0060=\u0060) is set as a key in the form data and the remaining text is set as the value. To specify multiple keys, use an **IDictionary** object, such as a hash table, for the **Body**. When the input is a GET request and the body is an **IDictionary** (typically, a hash table), the body is added to the URI as query parameters. For other request types (such as PATCH), the body is set as the value of the request body in the standard \u0060name=value\u0060 format with the values URL-encoded. When the input is a **System.Xml.XmlNode** object and the XML declaration specifies an encoding, that encoding is used for the data in the request unless overridden by the **ContentType** parameter. When the body is a form, or it\u0027s the output of another \u0060Invoke-WebRequest\u0060 call, PowerShell sets the request content to the form fields. The **Body** parameter can also accept a **System.Net.Http.MultipartFormDataContent** object, which facilitates \u0060multipart/form-data\u0060 requests. When a **MultipartFormDataContent** object is supplied for **Body**, any content related headers supplied to the **ContentType**, **Headers**, or **WebSession** parameters are overridden by the content headers of the \u0060MultipartFormDataContent\u0060 object. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Form",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Converts a dictionary to a \u0060multipart/form-data\u0060 submission. **Form** may not be used with **Body**. The **ContentType** is ignored. The keys of the dictionary are used as the form field names. By default, form values are converted to string values. If the value is a **System.IO.FileInfo** object, then the binary file contents is submitted. The name of the file is submitted as the \u0060filename\u0060. The MIME type is set as \u0060application/octet-stream\u0060. \u0060Get-Item\u0060 can be used to simplify supplying the **System.IO.FileInfo** object. \u0060\u0060\u0060powershell $Form = @{ resume = Get-Item \u0027C:\\Users\\jdoe\\Documents\\John Doe.pdf\u0027 } \u0060\u0060\u0060 If the value is a collection type, such as an Array or List, the form field is submitted multiple times. The values of the list are treated as strings by default. If the value is a **System.IO.FileInfo** object, then the binary file contents are submitted. Nested collections aren\u0027t supported. \u0060\u0060\u0060powershell $Form = @{ tags = \u0027Vacation\u0027, \u0027Italy\u0027, \u00272017\u0027 pictures = Get-ChildItem \u0027C:\\Users\\jdoe\\Pictures\\2017-Italy\\\u0027 } \u0060\u0060\u0060 In the above example, the \u0060tags\u0060 field is supplied three times in the form, once for each of the values: \u0060Vacation\u0060, \u0060Italy\u0060, and \u00602017\u0060. The \u0060pictures\u0060 field is submitted once for each file in the \u00602017-Italy\u0060 folder. The binary contents of the files in that folder are submitted as the values. This feature was added in PowerShell 6.1.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "ContentType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the content type of the web request. If the value for **ContentType** contains the encoding format (as \u0060charset\u0060), the cmdlet uses that format to encode the body of the web request. If the **ContentType** doesn\u0027t specify an encoding format, the default encoding format is used instead. An example of a **ContentType** with an encoding format is \u0060text/plain; charset=iso-8859-5\u0060, which specifies the [Latin/Cyrillic](https://www.iso.org/standard/28249.html) alphabet. If you omit the parameter, the content type may be different based on the HTTP method you use: - For a POST method, the content type is \u0060application/x-www-form-urlencoded\u0060 - For a PUT method, the content type is \u0060application/json\u0060 - For other methods, the content type isn\u0027t specified in the request If you are using the **InFile** parameter to upload a file, you should set the content type. Usually, the type should be \u0060application/octet-stream\u0060. However, you need to set the content type based on the requirements of the endpoint. **ContentType** is overridden when the **Body** is a [MultipartFormDataContent](xref:System.Net.Http.MultipartFormDataContent) object. Starting in PowerShell 7.4, if you use this both this parameter and the **Headers** parameter to define the \u0060Content-Type\u0060 header, the value specified in the **ContentType** parameter is used.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TransferEncoding",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies a value for the transfer-encoding HTTP response header. The acceptable values for this parameter are: - Chunked - Compress - Deflate - GZip - Identity",
+          "validValues": [
+            "chunked",
+            "compress",
+            "deflate",
+            "gzip",
+            "identity"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InFile",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Gets the content of the web request body from a file. Enter a path and filename. If you omit the path, the default is the current location. You also need to set the content type of the request. For example, to upload a file you should set the content type. Usually, the type should be \u0060application/octet-stream\u0060. However, you need to set the content type based on the requirements of the endpoint.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "OutFile",
+          "type": "String",
+          "defaultValue": "",
+          "description": "By default, \u0060Invoke-RestMethod\u0060 returns the results to the pipeline. When you use the **OutFile** parameter, the results are saved to the specified file and not returned to the pipeline. Enter a path and filename. To send the results to a file and to the pipeline, add the **PassThru** parameter. If you omit the path, the default is the current location. The name is treated as a literal path. Names that contain brackets (\u0060[]\u0060) must be enclosed in single quotes (\u0060\u0027\u0060). Starting in PowerShell 7.4, you can specify a folder path without the filename. When you do, the command uses filename from the last segment of the resolved URI after any redirections. When you specify a folder path for **OutFile**, you can\u0027t use the **Resume** parameter.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter is valid only when the **OutFile** parameter is also used in the command. The intent is to have the results written to the file and to the pipeline.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Resume",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Performs a best effort attempt to resume downloading a partial file. The **Resume** parameter requires the **OutFile** parameter. **Resume** only operates on the size of the local file and remote file and performs no other validation that the local file and the remote file are the same. If the local file size is smaller than the remote file size, then the cmdlet attempts to resume downloading the file and append the remaining bytes to the end of the file. If the local file size is the same as the remote file size, then no action is taken and the cmdlet assumes the download already completed. If the local file size is larger than the remote file size, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the remote server doesn\u0027t support download resuming, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the local file doesn\u0027t exist, then the local file is created and the entire remote file is downloaded. This behavior is the same as using **OutFile** without **Resume**. This feature was added in PowerShell 6.1.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SkipHttpErrorCheck",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter causes the cmdlet to ignore HTTP error statuses and continue to process responses. The error responses are written to the pipeline just as if they were successful. This parameter was introduced in PowerShell 7.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "TimeoutSec",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how long the request can be pending before it times out. Enter a value in seconds. The default value, 0, specifies an indefinite time-out. A Domain Name System (DNS) query can take up to 15 seconds to return or time out. If your request contains a host name that requires resolution, and you set TimeoutSec to a value greater than zero, but less than 15 seconds, it can take 15 seconds or more before a WebException is thrown, and your request times out.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoke-WebRequest",
+      "category": "",
+      "description": "Gets content from a web page on the internet.",
+      "scriptBody": "",
+      "cmdletName": "Invoke-WebRequest",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Body",
+      "dataOutputs": [
+        {
+          "name": "BasicHtmlWebResponseObject",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "StandardMethod",
+        "StandardMethodNoProxy",
+        "CustomMethod",
+        "CustomMethodNoProxy"
+      ],
+      "defaultParameterSet": "StandardMethod",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "UseBasicParsing",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter has been deprecated. Beginning with PowerShell 6.0.0, all Web requests use basic parsing only. This parameter is included for backwards compatibility only and any use of it has no effect on the operation of the cmdlet.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Uri",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the Uniform Resource Identifier (URI) of the internet resource to which the web request is sent. Enter a URI. This parameter supports HTTP or HTTPS only. This parameter is required. The parameter name **Uri** is optional.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "HttpVersion",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the HTTP version used for the request. The default is \u00601.1\u0060. Valid values are: - 1.0 - 1.1 - 2.0 - 3.0",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "WebSession",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a web request session. Enter the variable name, including the dollar sign (\u0060$\u0060). To override a value in the web request session, use a cmdlet parameter, such as **UserAgent** or **Credential**. Parameter values take precedence over values in the web request session. Content related headers, such as \u0060Content-Type\u0060, are also be overridden when a **MultipartFormDataContent** object is supplied for **Body**. Unlike a remote session, the web request session isn\u0027t a persistent connection. It\u0027s an object that contains information about the connection and the request, including cookies, credentials, the maximum redirection value, and the user agent string. You can use it to share state and data among web requests. To create a web request session, enter a variable name, without a dollar sign, in the value of the **SessionVariable** parameter of an \u0060Invoke-WebRequest\u0060 command. \u0060Invoke-WebRequest\u0060 creates the session and saves it in the variable. In subsequent commands, use the variable as the value of the **WebSession** parameter. You can\u0027t use the **SessionVariable** and **WebSession** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SessionVariable",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a variable for which this cmdlet creates a web request session and saves it in the value. Enter a variable name without the dollar sign (\u0060$\u0060) symbol. When you specify a session variable, \u0060Invoke-WebRequest\u0060 creates a web request session object and assigns it to a variable with the specified name in your PowerShell session. You can use the variable in your session as soon as the command completes. Before PowerShell 7.4, the web request session isn\u0027t a persistent connection. It\u0027s an object that contains information about the connection and the request, including cookies, credentials, the maximum redirection value, and the user agent string. You can use it to share state and data among web requests. Starting in PowerShell 7.4, the web request session is persistent as long as the properties of the session aren\u0027t overridden in a subsequent request. When they are, the cmdlet recreates the session with the new values. The persistent sessions reduce the overhead for repeated requests, making them much faster. To use the web request session in subsequent web requests, specify the session variable in the value of the **WebSession** parameter. PowerShell uses the data in the web request session object when establishing the new connection. To override a value in the web request session, use a cmdlet parameter, such as **UserAgent** or **Credential**. Parameter values take precedence over values in the web request session. You can\u0027t use the **SessionVariable** and **WebSession** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AllowUnencryptedAuthentication",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows sending of credentials and secrets over unencrypted connections. By default, supplying **Credential** or any **Authentication** option with a **Uri** that doesn\u0027t begin with \u0060https://\u0060 results in an error and the request is aborted to prevent unintentionally communicating secrets in plain text over unencrypted connections. To override this behavior at your own risk, supply the **AllowUnencryptedAuthentication** parameter. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. It is provided only for compatibility \u003E with legacy systems that can\u0027t provide encrypted connections. Use at your own risk. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Authentication",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the explicit authentication type to use for the request. The default is **None**. The **Authentication** parameter can\u0027t be used with the **UseDefaultCredentials** parameter. Available Authentication Options: - \u0060None\u0060: This is the default option when **Authentication** isn\u0027t supplied. No explicit authentication is used. - \u0060Basic\u0060: Requires **Credential**. The credentials are sent as an RFC 7617 Basic Authentication \u0060Authorization: Basic\u0060 header in the format of \u0060base64(user:password)\u0060. - \u0060Bearer\u0060: Requires the **Token** parameter. Sends an RFC 6750 \u0060Authorization: Bearer\u0060 header with the supplied token. - \u0060OAuth\u0060: Requires the **Token** parameter. Sends an RFC 6750 \u0060Authorization: Bearer\u0060 header with the supplied token. Supplying **Authentication** overrides any \u0060Authorization\u0060 headers supplied to **Headers** or included in **WebSession**. This feature was added in PowerShell 6.0.0.",
+          "validValues": [
+            "None",
+            "Basic",
+            "Bearer",
+            "OAuth"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Credential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to send the request. The default is the current user. Type a user name, such as **User01** or **Domain01\\User01**, or enter a **PSCredential** object generated by the \u0060Get-Credential\u0060 cmdlet. **Credential** can be used alone or in conjunction with certain **Authentication** parameter options. When used alone, it only supplies credentials to the remote server if the remote server sends an authentication challenge request. When used with **Authentication** options, the credentials are explicitly sent. Credentials are stored in a [PSCredential](/dotnet/api/system.management.automation.pscredential) object and the password is stored as a [SecureString](/dotnet/api/system.security.securestring). \u003E [!NOTE] \u003E For more information about **SecureString** data protection, see \u003E [How secure is SecureString?](/dotnet/api/system.security.securestring#how-secure-is-securestring).",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "UseDefaultCredentials",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet uses the credentials of the current user to send the web request. This can\u0027t be used with **Authentication** or **Credential** and may not be supported on all platforms.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CertificateThumbprint",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the digital public key certificate (X509) of a user account that has permission to send the request. Enter the certificate thumbprint of the certificate. Certificates are used in client certificate-based authentication. Certificates can only be mapped only to local user accounts, not domain accounts. To see the certificate thumbprint, use the \u0060Get-Item\u0060 or \u0060Get-ChildItem\u0060 command to find the certificate in \u0060Cert:\\CurrentUser\\My\u0060. \u003E [!NOTE] \u003E This feature is only supported on Windows OS platforms.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Certificate",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the client certificate that\u0027s used for a secure web request. Enter a variable that contains a certificate or a command or expression that gets the certificate. To find a certificate, use \u0060Get-PfxCertificate\u0060 or use the \u0060Get-ChildItem\u0060 cmdlet in the Certificate (\u0060Cert:\u0060) drive. If the certificate isn\u0027t valid or doesn\u0027t have sufficient authority, the command fails.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SkipCertificateCheck",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Skips certificate validation checks. This includes all validations such as expiration, revocation, trusted root authority, etc. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. This switch is only intended to be used \u003E against known hosts using a self-signed certificate for testing purposes. Use at your own risk. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SslProtocol",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Sets the SSL/TLS protocols that are permissible for the web request. By default all, SSL/TLS protocols supported by the system are allowed. **SslProtocol** allows for limiting to specific protocols for compliance purposes. These values are defined as a flag-based enumeration. You can combine multiple values together to set multiple flags using this parameter. The values can be passed to the **SslProtocol** parameter as an array of values or as a comma-separated string of those values. The cmdlet combines the values using a binary-OR operation. Passing values as an array is the simplest option and also allows you to use tab-completion on the values. You may not be able to define multiple options on all platforms. \u003E [!NOTE] \u003E On non-Windows platforms it may not be possible to supply \u0060Tls\u0060 or \u0060Tls12\u0060 as an option. Support \u003E for \u0060Tls13\u0060 isn\u0027t available on all operating systems and will need to be verified on a per \u003E operating system basis. This feature was added in PowerShell 6.0.0 and support for \u0060Tls13\u0060 was added in PowerShell 7.1.",
+          "validValues": [
+            "Default",
+            "Tls",
+            "Tls11",
+            "Tls12",
+            "Tls13"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Token",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "The OAuth or Bearer token to include in the request. **Token** is required by certain **Authentication** options. It can\u0027t be used independently. **Token** takes a \u0060SecureString\u0060 containing the token. To supply the token manually use the following: \u0060Invoke-WebRequest -Uri $uri -Authentication OAuth -Token (Read-Host -AsSecureString)\u0060 This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UserAgent",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a user agent string for the web request. The default user agent is similar to \u0060Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.15063; en-US) PowerShell/6.0.0\u0060 with slight variations for each operating system and platform. To test a website with the standard user agent string that\u0027s used by most internet browsers, use the properties of the [PSUserAgent](/dotnet/api/microsoft.powershell.commands.psuseragent) class, such as Chrome, Firefox, InternetExplorer, Opera, and Safari. For example, the following command uses the user agent string for Internet Explorer: \u0060Invoke-WebRequest -Uri https://website.com/ -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer)\u0060",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DisableKeepAlive",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet sets the **KeepAlive** value in the HTTP header to **False**. By default, **KeepAlive** is **True**. **KeepAlive** establishes a persistent connection to the server to facilitate subsequent requests.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConnectionTimeoutSeconds",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how long the request can be pending before it times out. Enter a value in seconds. The default value, 0, specifies an indefinite time-out. A Domain Name System (DNS) query can take up to 15 seconds to return or time out. If your request contains a host name that requires resolution, and you set **ConnectionTimeoutSeconds** to a value greater than zero, but less than 15 seconds, it can take 15 seconds or more before a **WebException** is thrown, and your request times out. This parameter replaced the **TimeoutSec** parameter in PowerShell 7.4. You can use **TimeoutSec** as an alias for **ConnectionTimeoutSeconds**.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "OperationTimeoutSeconds",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "This timeout applies to data reads within a stream, not to the stream time as a whole. The default value, 0, specifies an indefinite timeout. Setting the value to 30 seconds means that any delay of longer than 30 seconds between data in the stream terminates the request. A large file that takes several minutes to download won\u0027t terminate unless the stream stalls for more than 30 seconds.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Headers",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the headers of the web request. Enter a hash table or dictionary. Content related headers, such as \u0060Content-Type\u0060 are overridden when a **MultipartFormDataContent** object is supplied for **Body**. Starting in PowerShell 7.4, if you use this parameter to define the \u0060Content-Type\u0060 header and use **ContentType** parameter, the value specified in the **ContentType** parameter is used.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SkipHeaderValidation",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should add headers to the request without validation. This switch should be used for sites that require header values that don\u0027t conform to standards. Specifying this switch disables validation to allow the value to be passed unchecked. When specified, all headers are added without validation. This switch disables validation for values passed to the **ContentType**, **Headers** and **UserAgent** parameters. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "AllowInsecureRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows redirecting from HTTPS to HTTP. By default, any request that is redirected from HTTPS to HTTP results in an error and the request is aborted to prevent unintentionally communicating in plain text over unencrypted connections. To override this behavior at your own risk, use the **AllowInsecureRedirect** parameter. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "MaximumRedirection",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how many times PowerShell redirects a connection to an alternate Uniform Resource Identifier (URI) before the connection fails. The default value is 5. A value of 0 (zero) prevents all redirection.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "MaximumRetryCount",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received. Also see **RetryIntervalSec** parameter for specifying the interval between retries.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PreserveAuthorizationOnRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should preserve the \u0060Authorization\u0060 header, when present, across redirections. By default, the cmdlet strips the \u0060Authorization\u0060 header before redirecting. Specifying this parameter disables this logic for cases where the header needs to be sent to the redirection location. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "RetryIntervalSec",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received. Also see **MaximumRetryCount** parameter for specifying number of retries. The value must be between \u00601\u0060 and \u0060[int]::MaxValue\u0060. When the failure code is 429 and the response includes the **Retry-After** property in its headers, the cmdlet uses that value for the retry interval, even if this parameter is specified.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Method",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the method used for the web request. The acceptable values for this parameter are: - \u0060Default\u0060 - \u0060Delete\u0060 - \u0060Get\u0060 - \u0060Head\u0060 - \u0060Merge\u0060 - \u0060Options\u0060 - \u0060Patch\u0060 - \u0060Post\u0060 - \u0060Put\u0060 - \u0060Trace\u0060 The **CustomMethod** parameter can be used for Request Methods not listed above.",
+          "validValues": [
+            "Default",
+            "Get",
+            "Head",
+            "Post",
+            "Put",
+            "Delete",
+            "Trace",
+            "Options",
+            "Merge",
+            "Patch"
+          ],
+          "parameterSets": [
+            "StandardMethod",
+            "StandardMethodNoProxy"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CustomMethod",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies a custom method used for the web request. This can be used if the Request Method required by the endpoint isn\u0027t an available option on the **Method**. **Method** and **CustomMethod** can\u0027t be used together. This example makes a \u0060TEST\u0060 HTTP request to the API: \u0060Invoke-WebRequest -Uri \u0027https://api.contoso.com/widget/\u0027 -CustomMethod \u0027TEST\u0027\u0060 This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [
+            "CustomMethod",
+            "CustomMethodNoProxy"
+          ],
+          "mandatoryInSets": [
+            "CustomMethod",
+            "CustomMethodNoProxy"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "PreserveHttpMethodOnRedirect",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates the cmdlet should preserve the method of the request across redirections. By default, the cmdlet changes the method to \u0060GET\u0060 when redirected. Specifying this parameter disables this logic to ensure that the intended method can be used with redirection. This feature was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "UnixSocket",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the name of the Unix socket to connect to. This parameter is supported on Unix-based systems and Windows version 1803 and later. For more information about Windows support of Unix sockets, see the [Windows/WSL Interop with AF_UNIX](https://devblogs.microsoft.com/commandline/windowswsl-interop-with-af_unix/) blog post. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "NoProxy",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet shouldn\u0027t use a proxy to reach the destination. When you need to bypass the proxy configured in the environment, use this switch. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "parameterSets": [
+            "CustomMethodNoProxy",
+            "StandardMethodNoProxy"
+          ],
+          "mandatoryInSets": [
+            "CustomMethodNoProxy",
+            "StandardMethodNoProxy"
+          ],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "Proxy",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies a proxy server for the request, rather than connecting directly to the internet resource. Enter the URI of a network proxy server.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ProxyCredential",
+          "type": "Credential",
+          "defaultValue": "",
+          "description": "Specifies a user account that has permission to use the proxy server specified by the **Proxy** parameter. The default is the current user. Type a user name, such as \u0060User01\u0060 or \u0060Domain01\\User01\u0060, or enter a **PSCredential** object, such as one generated by the \u0060Get-Credential\u0060 cmdlet. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ProxyUseDefaultCredentials",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet uses the credentials of the current user to access the proxy server that is specified by the **Proxy** parameter. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
+          "validValues": [],
+          "parameterSets": [
+            "StandardMethod",
+            "CustomMethod"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Body",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies the body of the request. The body is the content of the request that follows the headers. You can also pipe a body value to \u0060Invoke-WebRequest\u0060. The **Body** parameter can be used to specify a list of query parameters or specify the content of the response. For query parameters, the cmdlet uses the **System.Net.WebUtility.UrlEncode** method method to encode the key-value pairs. For more information about encoding strings for URLs, see [the UrlEncode() method reference](xref:System.Net.WebUtility.UrlEncode%2A). When the input is a POST request and the body is a **String**, the value to the left of the first equals sign (\u0060=\u0060) is set as a key in the form data and the remaining text is set as the value. To specify multiple keys, use an **IDictionary** object, such as a hash table, for the **Body**. When the input is a GET request and the body is an **IDictionary** (typically, a hash table), the body is added to the URI as query parameters. For other request types (such as PATCH), the body is set as the value of the request body in the standard \u0060name=value\u0060 format with the values URL-encoded. When the input is a **System.Xml.XmlNode** object and the XML declaration specifies an encoding, that encoding is used for the data in the request unless overridden by the **ContentType** parameter. The **Body** parameter also accepts a \u0060System.Net.Http.MultipartFormDataContent\u0060 object. This facilitates \u0060multipart/form-data\u0060 requests. When a **MultipartFormDataContent** object is supplied for **Body**, any Content related headers supplied to the **ContentType**, **Headers**, or **WebSession** parameters is overridden by the Content headers of the **MultipartFormDataContent** object. This feature was added in PowerShell 6.0.0.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Form",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Converts a dictionary to a \u0060multipart/form-data\u0060 submission. **Form** may not be used with **Body**. If **ContentType** is used, it\u0027s ignored. The keys of the dictionary are used as the form field names. By default, form values are converted to string values. If the value is a **System.IO.FileInfo** object, then the binary file contents are submitted. The name of the file is submitted as the **filename** property. The MIME type is set as \u0060application/octet-stream\u0060. \u0060Get-Item\u0060 can be used to simplify supplying the **System.IO.FileInfo** object. \u0060\u0060\u0060powershell $Form = @{ resume = Get-Item \u0027C:\\Users\\jdoe\\Documents\\John Doe.pdf\u0027 } \u0060\u0060\u0060 If the value is a collection type, such Arrays or Lists, the for field are submitted multiple times. The values of the list are treated as strings by default. If the value is a **System.IO.FileInfo** object, then the binary file contents are submitted. Nested collections aren\u0027t supported. \u0060\u0060\u0060powershell $Form = @{ tags = \u0027Vacation\u0027, \u0027Italy\u0027, \u00272017\u0027 pictures = Get-ChildItem \u0027C:\\Users\\jdoe\\Pictures\\2017-Italy\\\u0027 } \u0060\u0060\u0060 In the above example the \u0060tags\u0060 field are supplied three times in the form, once for each of \u0060Vacation\u0060, \u0060Italy\u0060, and \u00602017\u0060. The \u0060pictures\u0060 field is also submitted once for each file in the \u00602017-Italy\u0060 folder. The binary contents of the files in that folder are submitted as the values. This feature was added in PowerShell 6.1.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "ContentType",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies the content type of the web request. If the value for **ContentType** contains the encoding format (as \u0060charset\u0060), the cmdlet uses that format to encode the body of the web request. If the **ContentType** doesn\u0027t specify an encoding format, the default encoding format is used instead. An example of a **ContentType** with an encoding format is \u0060text/plain; charset=iso-8859-5\u0060, which specifies the [Latin/Cyrillic](https://www.iso.org/standard/28249.html) alphabet. If you omit the parameter, the content type may be different based on the HTTP method you use: - For a POST method, the content type is \u0060application/x-www-form-urlencoded\u0060 - For a PUT method, the content type is \u0060application/json\u0060 - For other methods, the content type isn\u0027t specified in the request If you are using the **InFile** parameter to upload a file, you should set the content type. Usually, the type should be \u0060application/octet-stream\u0060. However, you need to set the content type based on the requirements of the endpoint. **ContentType** is overridden when the **Body** is a [MultipartFormDataContent](xref:System.Net.Http.MultipartFormDataContent) object. Starting in PowerShell 7.4, if you use this both this parameter and the **Headers** parameter to define the \u0060Content-Type\u0060 header, the value specified in the **ContentType** parameter is used.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TransferEncoding",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies a value for the transfer-encoding HTTP response header. The acceptable values for this parameter are: - \u0060Chunked\u0060 - \u0060Compress\u0060 - \u0060Deflate\u0060 - \u0060GZip\u0060 - \u0060Identity\u0060",
+          "validValues": [
+            "chunked",
+            "compress",
+            "deflate",
+            "gzip",
+            "identity"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InFile",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Gets the content of the web request body from a file. Enter a path and filename. If you omit the path, the default is the current location. You also need to set the content type of the request. For example, to upload a file you should set the content type. Usually, the type should be \u0060application/octet-stream\u0060. However, you need to set the content type based on the requirements of the endpoint.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "OutFile",
+          "type": "String",
+          "defaultValue": "",
+          "description": "By default, \u0060Invoke-WebRequest\u0060 returns the results to the pipeline. When you use the **OutFile** parameter, the results are saved to the specified file and not returned to the pipeline. Enter a path and filename. To send the results to a file and to the pipeline, add the **PassThru** parameter. If you omit the path, the default is the current location. The name is treated as a literal path. Names that contain brackets (\u0060[]\u0060) must be enclosed in single quotes (\u0060\u0027\u0060). Starting in PowerShell 7.4, you can specify a folder path without the filename. When you do, the command uses the filename from the last segment of the resolved URI after any redirections. When you specify a folder path for **OutFile**, you can\u0027t use the **Resume** parameter.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PassThru",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet returns the results, in addition to writing them to a file. This parameter is valid only when the **OutFile** parameter is also used in the command.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Resume",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Performs a best effort attempt to resume downloading a partial file. **Resume** requires **OutFile**. **Resume** only operates on the size of the local file and remote file and performs no other validation that the local file and the remote file are the same. If the local file size is smaller than the remote file size, then the cmdlet attempts to resume downloading the file and append the remaining bytes to the end of the file. If the local file size is the same as the remote file size, then no action is taken and the cmdlet assumes the download already complete. If the local file size is larger than the remote file size, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the remote server doesn\u0027t support download resuming, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the local file doesn\u0027t exist, then the local file is created and the entire remote file is downloaded. This behavior is the same as using **OutFile** without **Resume**. This feature was added in PowerShell 6.1.0.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "SkipHttpErrorCheck",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "This parameter causes the cmdlet to ignore HTTP error statuses and continue to process responses. The error responses are written to the pipeline just as if they were successful. This parameter was introduced in PowerShell 7.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh"
+          ]
+        },
+        {
+          "name": "TimeoutSec",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies how long the request can be pending before it times out. Enter a value in seconds. The default value, 0, specifies an indefinite time-out. A Domain Name System (DNS) query can take up to 15 seconds to return or time out. If your request contains a host name that requires resolution, and you set TimeoutSec to a value greater than zero, but less than 15 seconds, it can take 15 seconds or more before a WebException is thrown, and your request times out.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get-NetIPAddress",
+      "category": "",
+      "description": "Gets the IP address configuration.",
+      "scriptBody": "",
+      "cmdletName": "Get-NetIPAddress",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "AssociatedIPInterface",
+      "dataOutputs": [
+        {
+          "name": "CimInstance",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "Query (cdxml)"
+      ],
+      "defaultParameterSet": "Query (cdxml)",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "IPAddress",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies an array of IPv4 or IPv6 addresses.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InterfaceIndex",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of indexes of network interfaces. The cmdlet gets IP addresses that match the indexes.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InterfaceAlias",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies an array of aliases of network interfaces. The cmdlet gets IP addresses that match the aliases.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AddressFamily",
+          "type": "Collection",
+          "defaultValue": "IPv4",
+          "description": "Specifies an array of IP address families. The cmdlet gets the IP address configuration that matches the address families. The acceptable values for this parameter are: -- IPv4 -- IPv6",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Type",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of IP address types. The acceptable values for this parameter are: -- Unicast -- Anycast The default value is Unicast.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PrefixLength",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of prefix lengths. This parameter defines the local subnet size, and is also known as a subnet mask.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PrefixOrigin",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of origins for address prefixes. IP addresses are divided into two parts, the prefix and the suffix. The address prefix identifies the network portion of an IP address, and the address suffix identifies the host portion. The acceptable values for this parameter are: -- Manual. The IP address prefix was manually specified. -- WellKnown. The IP address prefix is from a well-known source. -- DHCP. The IP address prefix was provided by DHCP settings. -- RouterAdvertisement. The IP address prefix was obtained through a router advertisement (RA). -- Other. The IP address prefix was obtained from another source, such as a VPN.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SuffixOrigin",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of origins for address suffixes. IP addresses are divided into two parts, the prefix and the suffix. The address prefix identifies the network portion of an IP address, and the address suffix identifies the host portion. The acceptable values for this parameter are: -- Manual. The IP address suffix was manually specified. -- WellKnown. The IP address suffix is from a well-known source. -- DHCP. The IP address suffix was provided by DHCP settings. -- Link. The IP address suffix was obtained from the link-layer address. -- Random. The IP address suffix was obtained from a random source. -- Other. The IP address suffix was obtained from another source, such as a VPN.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AddressState",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of duplicate address detection (DAD) state values for the IP address. Use this parameter to filter the output based on addresses that are valid and available for use. The acceptable values for this parameter are: -- Invalid. IP address configuration information for addresses that are not valid and will not be used. -- Tentative. IP address configuration information for addresses that are not used for communication, as the uniqueness of those IP addresses is being verified. -- Duplicate. IP address configuration information for addresses for which a duplicate IP address has been detected and the current IP address will not be used. -- Deprecated. IP address configuration information for addresses that will no longer be used to establish new connections, but will continue to be used with existing connections. -- Preferred. IP address configuration information for addresses that are valid and available for use.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ValidLifetime",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of values for valid lifetimes, as TimeSpan objects, for an IP address. To obtain a TimeSpan object, use the New-TimeSpan cmdlet.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PreferredLifetime",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Specifies an array of values of preferred lifetimes, as TimeSpan objects, for an IP address. To obtain a TimeSpan object, use the New-TimeSpan cmdlet.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "SkipAsSource",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Indicates whether an address is a primary IP address. This parameter identifies the primary IP address for outgoing traffic in a multiple IP address scenario. If this parameter is set to True, the addresses are not used for outgoing traffic and are not registered in DNS.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AssociatedIPInterface",
+          "type": "Object",
+          "defaultValue": "",
+          "description": "Specifies an IP interface as a CIM object. To obtain an IP interface, use the Get-NetIPInterface cmdlet.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "PolicyStore",
+          "type": "String",
+          "defaultValue": "",
+          "description": "Specifies a PolicyStore value. The acceptable values for this parameter are: -- ActiveStore. The IP address information is valid. -- PersistentStore. The computer saves IP address information across restarts. When the computer restarts, it copies the saved settings to the ActiveStore. The default value is ActiveStore.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "IncludeAllCompartments",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet includes addresses from all configured network compartments. If you do not specify this parameter, the cmdlet gets only addresses in the default network compartment.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CimSession",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Runs the cmdlet in a remote session or on a remote computer. Enter a computer name or a session object, such as the output of a New-CimSession (https://go.microsoft.com/fwlink/p/?LinkId=227967) or [Get-CimSession](https://go.microsoft.com/fwlink/p/?LinkId=227966)cmdlet. The default is the current session on the local computer.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ThrottleLimit",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum number of concurrent operations that can be established to run the cmdlet. If this parameter is omitted or a value of \u00600\u0060 is entered, then Windows PowerShell\u0026reg; calculates an optimum throttle limit for the cmdlet based on the number of CIM cmdlets that are running on the computer. The throttle limit applies only to the current cmdlet, not to the session or to the computer.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AsJob",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Runs the cmdlet as a background job. Use this parameter to run commands that take a long time to complete.",
+          "validValues": [],
+          "parameterSets": [
+            "Query (cdxml)"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test-NetConnection",
+      "category": "",
+      "description": "Test-NetConnection [[-ComputerName] \u003Cstring\u003E] [-TraceRoute] [-Hops \u003Cint\u003E] [-InformationLevel \u003Cstring\u003E] [\u003CCommonParame...",
+      "scriptBody": "",
+      "cmdletName": "Test-NetConnection",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "ComputerName",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "ICMP",
+        "CommonTCPPort",
+        "RemotePort",
+        "NetRouteDiagnostics"
+      ],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "ComputerName",
+          "type": "String",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TraceRoute",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "ICMP"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Hops",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "ICMP"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CommonTCPPort",
+          "type": "Enum",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "",
+          "validValues": [
+            "HTTP",
+            "RDP",
+            "SMB",
+            "WINRM"
+          ],
+          "parameterSets": [
+            "CommonTCPPort"
+          ],
+          "mandatoryInSets": [
+            "CommonTCPPort"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Port",
+          "type": "Int",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "RemotePort"
+          ],
+          "mandatoryInSets": [
+            "RemotePort"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DiagnoseRouting",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "NetRouteDiagnostics"
+          ],
+          "mandatoryInSets": [
+            "NetRouteDiagnostics"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConstrainSourceAddress",
+          "type": "String",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "NetRouteDiagnostics"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ConstrainInterface",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [
+            "NetRouteDiagnostics"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InformationLevel",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [
+            "Quiet",
+            "Detailed"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get-NetAdapter",
+      "category": "",
+      "description": "Gets the basic network adapter properties.",
+      "scriptBody": "",
+      "cmdletName": "Get-NetAdapter",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "dataOutputs": [
+        {
+          "name": "CimInstance",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [
+        "ByName",
+        "ByInstanceID",
+        "ByIfIndex"
+      ],
+      "defaultParameterSet": "ByName",
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies an array of network adapter names.",
+          "validValues": [],
+          "parameterSets": [
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InterfaceDescription",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies an array of network adapter interface descriptions. For a physical network adapter this is typically the name of the vendor of the network adapter followed by a part number and description, such as \u0060Contoso 12345 Gigabit Network Device\u0060.",
+          "validValues": [],
+          "parameterSets": [
+            "ByInstanceID"
+          ],
+          "mandatoryInSets": [
+            "ByInstanceID"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "InterfaceIndex",
+          "type": "Collection",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the network adapter interface index number as an array.",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex"
+          ],
+          "mandatoryInSets": [
+            "ByIfIndex"
+          ],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "IncludeHidden",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet includes both visible and hidden network adapters in the operation. By default only visible network adapters are included. If a wildcard character is used in identifying a network adapter and this parameter has been specified, then the wildcard string is matched against both hidden and visible network adapters.",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex",
+            "ByInstanceID",
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Physical",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet gets all physical network adapters.",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex",
+            "ByInstanceID",
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CimSession",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "Runs the cmdlet in a remote session or on a remote computer. Enter a computer name or a session object, such as the output of a New-CimSession (/powershell/module/cimcmdlets/new-cimsession) or [Get-CimSession](https://go.microsoft.com/fwlink/p/?LinkId=227966)cmdlet. The default is the current session on the local computer.",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex",
+            "ByInstanceID",
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "ThrottleLimit",
+          "type": "Int",
+          "defaultValue": "",
+          "description": "Specifies the maximum number of concurrent operations that can be established to run the cmdlet. If this parameter is omitted or a value of \u00600\u0060 is entered, then Windows PowerShellr calculates an optimum throttle limit for the cmdlet based on the number of CIM cmdlets that are running on the computer. The throttle limit applies only to the current cmdlet, not to the session or to the computer.",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex",
+            "ByInstanceID",
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "AsJob",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Runs the cmdlet as a background job. Use this parameter to run commands that take a long time to complete. The cmdlet immediately returns an object that represents the job and then displays the command prompt. You can continue to work in the session while the job completes. To manage the job, use the \u0060*-Job\u0060 cmdlets. To get the job results, use the Receive-Job (https://go.microsoft.com/fwlink/?LinkID=113372)cmdlet. For more information about Windows PowerShellr background jobs, see about_Jobs (https://go.microsoft.com/fwlink/?LinkID=113251).",
+          "validValues": [],
+          "parameterSets": [
+            "ByIfIndex",
+            "ByInstanceID",
+            "ByName"
+          ],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resolve-DnsName",
+      "category": "",
+      "description": "Performs a DNS name query resolution for the specified name.",
+      "scriptBody": "",
+      "cmdletName": "Resolve-DnsName",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "Name",
+      "dataOutputs": [
+        {
+          "name": "Out",
+          "isPrimary": true
+        }
+      ],
+      "tags": [],
+      "knownParameterSets": [],
+      "supportedEditions": [
+        "pwsh",
+        "powershell"
+      ],
+      "parameters": [
+        {
+          "name": "Name",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the name to be resolved.",
+          "validValues": [],
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Type",
+          "type": "Enum",
+          "defaultValue": "",
+          "description": "Specifies the DNS query type that is to be issued. By default the type is A_AAAA, the A and AAAA types will both be queried. The acceptable values for this parameter are: -- UNKNOWN = 0, -- A_AAAA = 0, the DNS query type is A_AAAA. -- A = 1, the DNS query type is IPv4 server Address. -- AAAA = 28, the DNS query type is IPv6 server address. -- NS = 2, the DNS query type is name server. -- MX = 15, the DNS query type is mail routing information. -- MD = 3, the DNS query type is mail destination. -- MF = 4, the DNS query type is mail forwarder. -- CNAME = 5, the DNS query type is canonical name. -- SOA = 6, the DNS query type is start of authority zone. -- MB = 7, the DNS query type is mailbox domain name. -- MG = 8, the DNS query type is mail group member. -- MR = 9, the DNS query type is mail rename name. -- NULL = 10, the DNS query type is null resource record. -- WKS = 11, the DNS query type is well known service. -- PTR = 12, the DNS query type is domain name pointer. -- HINFO = 13, the DNS query type is host information. -- MINFO = 14, the DNS query type is mailbox information. -- TXT = 16, the DNS query type is text strings. -- RP = 17, the DNS query type is responsible person. -- AFSDB = 18, the DNS query type is AFS database servers. -- X25 = 19, the DNS query type is packet switched wide area network. -- ISDN = 20, the DNS query type is Integrated Services Digital Network. -- RT = 21, the DNS query type is DNS route through. -- SRV = 33, the DNS query type is server selection. -- DNAME = 39, the DNS query type is domain aliases. -- OPT = 41, the DNS query type is DNS option. -- DS = 43, the DNS query type is delegation signer. -- RRSIG = 46, the DNS query type is DNSSEC signature. -- NSEC = 47, the DNS query type is next-secure record. -- DNSKEY = 48, the DNS query type is DNS key record. -- DHCID = 49, the DNS query type is Dynamic Host Configuration Protocol information. -- NSEC3 = 50, the DNS query type is NSEC record version 3. -- NSEC3PARAM = 51, the DNS query type is NSEC3 parameters. -- ANY = 255, the DNS query type is wildcard match. -- ALL = 255, the DNS query type is wildcard match.",
+          "validValues": [
+            "UNKNOWN",
+            "A_AAAA",
+            "A",
+            "NS",
+            "MD",
+            "MF",
+            "CNAME",
+            "SOA",
+            "MB",
+            "MG",
+            "MR",
+            "NULL",
+            "WKS",
+            "PTR",
+            "HINFO",
+            "MINFO",
+            "MX",
+            "TXT",
+            "RP",
+            "AFSDB",
+            "X25",
+            "ISDN",
+            "RT",
+            "AAAA",
+            "SRV",
+            "DNAME",
+            "OPT",
+            "DS",
+            "RRSIG",
+            "NSEC",
+            "DNSKEY",
+            "DHCID",
+            "NSEC3",
+            "NSEC3PARAM",
+            "ANY",
+            "ALL",
+            "WINS"
+          ],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "Server",
+          "type": "StringArray",
+          "defaultValue": "",
+          "description": "Specifies the IP addresses or host names of the DNS servers to be queried. By default the interface DNS servers are queried if this parameter is not supplied.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DohServer",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DotServer",
+          "type": "Collection",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DnsOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Resolves this query using only the DNS protocol.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CacheOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Resolves this query using only the local cache.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DnssecOk",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sets the DNSSEC OK bit for this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "DnssecCd",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Sets the DNSSEC checking-disabled bit for this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoHostsFile",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Skips the hosts file when resolving this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "LlmnrNetbiosOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Resolves this query using only the LLMNR or NetBIOS protocols.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "LlmnrFallback",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows falling back to the LLMNR protocol when resolving this query with DNS fails.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "LlmnrOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Resolves this query using only the LLMNR protocol.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NetbiosFallback",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Allows fallback to the NetBIOS protocol when resolving this query with DNS fails.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoIdn",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Specifies not to use IDN encoding logic for the query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "NoRecursion",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Instructs the server not to use recursion when resolving this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "QuickTimeout",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Uses shorter timeouts for this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "TcpOnly",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "Uses only TCP for this query.",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        },
+        {
+          "name": "CheckCache",
+          "type": "Bool",
+          "defaultValue": "",
+          "description": "",
+          "validValues": [],
+          "parameterSets": [],
+          "mandatoryInSets": [],
+          "supportedEditions": [
+            "pwsh",
+            "powershell"
+          ]
+        }
+      ]
+    }
+  ]
+}

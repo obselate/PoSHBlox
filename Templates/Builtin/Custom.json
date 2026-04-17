@@ -1,0 +1,19 @@
+{
+  "category": "Custom",
+  "templates": [
+    {
+      "name": "Custom Script",
+      "description": "Free-form PowerShell block. Takes pipeline input via $input and emits whatever the script outputs.",
+      "scriptBody": "# Your PowerShell code here\n$input | ForEach-Object {\n    $_\n}"
+    },
+    {
+      "name": "Variable Source",
+      "description": "Standalone producer — emit a variable or literal data source. No execution predecessor needed.",
+      "scriptBody": "@(\n    \"Server01\",\n    \"Server02\",\n    \"Server03\"\n)",
+      "hasExecIn": false,
+      "dataOutputs": [
+        { "name": "Data", "type": "Collection", "isPrimary": true }
+      ]
+    }
+  ]
+}

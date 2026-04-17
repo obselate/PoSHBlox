@@ -1,0 +1,30 @@
+{
+  "category": "Control Flow",
+  "templates": [
+    {
+      "name": "If / Else",
+      "description": "Conditional branch — drop nodes into Then / Else zones.",
+      "containerType": "IfElse"
+    },
+    {
+      "name": "ForEach Loop",
+      "description": "Iterate a collection — drop nodes into the Body zone. Wire a collection into Source.",
+      "containerType": "ForEach"
+    },
+    {
+      "name": "Try / Catch",
+      "description": "Error handling — drop nodes into Try / Catch / Finally zones.",
+      "containerType": "TryCatch"
+    },
+    {
+      "name": "While Loop",
+      "description": "Repeat while a condition is true — drop nodes into the Body zone.",
+      "containerType": "While"
+    },
+    {
+      "name": "Function",
+      "description": "Define a callable function — Parameters declare the signature, Body runs each call.",
+      "containerType": "Function"
+    }
+  ]
+}
