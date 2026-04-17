@@ -30,7 +30,6 @@ PoSHBlox lets you visually compose PowerShell scripts by wiring together nodes o
 - **Live script preview** and one-click Run in a PowerShell window — prefers pwsh 7+ when installed, falls back to Windows PowerShell 5.1
 - **Pipeline-aware code generation** -- chains piped cmdlets, assigns variables at branch points, and detects cycles
 - **Module import** -- import cmdlets from installed PowerShell modules to extend the palette
-- **10 sample projects** included to demonstrate common patterns
 - **Keyboard shortcuts** -- P (palette), F5 (run), Ctrl+S (save), Ctrl+E (export), Del (delete node), / (search), and more
 - **Dark theme** with a custom node-graph renderer (pan, zoom, Bezier wires)
 
