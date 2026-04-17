@@ -115,12 +115,13 @@ if (-not (Get-Module -Name $actualName) -and $declaredExports.Count -gt 0) {
 # If auto-load didn't pull the module in, fall back to explicit Import-Module
 # with all streams suppressed. Most modules that fail auto-load succeed here
 # (custom user modules, modules that aren't in the auto-load path).
+$importErrors = @()
 if (-not (Get-Module -Name $actualName) -and
     -not (Get-Command -Module $actualName -ErrorAction SilentlyContinue))
 {
     try {
-        Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
-    } catch { }
+        Import-Module $actualName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -ErrorVariable +importErrors *>$null
+    } catch { $importErrors += $_.ToString() }
 }
 
 # Last-resort import: -Force -Global bypasses stuck "already tried" state
@@ -132,8 +133,8 @@ if (-not (Get-Module -Name $actualName) -and
 {
     try {
         Import-Module $actualName -Force -Global -DisableNameChecking `
-            -ErrorAction SilentlyContinue -WarningAction SilentlyContinue *>$null
-    } catch { }
+            -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -ErrorVariable +importErrors *>$null
+    } catch { $importErrors += $_.ToString() }
 }
 
 # Collect the commands we will introspect. Preferred: Get-Command -Module,
@@ -160,11 +161,25 @@ if ($commands.Count -eq 0 -and $declaredExports.Count -gt 0) {
     $commands = @($collected | Sort-Object Name -Unique)
 }
 
+# Absolute last-resort: enumerate every command in the session and match on
+# the ModuleName / Source property. Slower than -Module filtering but works
+# when the module filter is broken (seen on some Windows 11 / PS 5.1 builds
+# for Microsoft.PowerShell.Security).
+if ($commands.Count -eq 0) {
+    $commands = @(Get-Command -CommandType Cmdlet,Function -ErrorAction SilentlyContinue |
+                  Where-Object { $_.ModuleName -eq $actualName -or $_.Source -eq $actualName } |
+                  Sort-Object Name -Unique)
+}
+
 if ($commands.Count -eq 0) {
     $gmCount = (Get-Module -Name $actualName | Measure-Object).Count
     $gcmCount = (Get-Command -Module $actualName -ErrorAction SilentlyContinue | Measure-Object).Count
     $manifestState = if ($manifest) { 'yes' } else { 'no' }
     $diag = "Get-Module=$gmCount, Get-Command -Module=$gcmCount, declaredExports=$($declaredExports.Count), manifest=$manifestState"
+    if ($importErrors.Count -gt 0) {
+        $errSummary = ($importErrors | ForEach-Object { $_.ToString() } | Select-Object -First 3) -join ' || '
+        [Console]::Error.WriteLine("[introspect]   import-errors: $errSummary")
+    }
     Write-Error "Failed to introspect module '$actualName' - no commands reachable. [$diag]"
     exit 1
 }
