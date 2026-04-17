@@ -76,7 +76,12 @@ public static class GraphValidator
             // Source nodes (HasExecIn=false) are considered naturally rooted — not orphans.
             bool isSource = node.ExecInPort == null;
 
-            if (!isSource && !hasExecIncoming && !hasExecOutgoing && !hasDataConsumer)
+            // Nodes inside a container zone are rooted by the zone itself — the
+            // codegen walks each zone as its own exec scope and emits even
+            // unwired children as standalone statements, so they always run.
+            bool inZone = node.ParentZone != null;
+
+            if (!isSource && !inZone && !hasExecIncoming && !hasExecOutgoing && !hasDataConsumer)
             {
                 Add(result, node.Id, new GraphIssue
                 {
