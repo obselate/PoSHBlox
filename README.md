@@ -23,7 +23,7 @@ script fragment; connections define the pipeline. Preview the generated
 script, run it, or export a clean `.ps1`.
 
 <p align="center">
-  <img src="Assets/poshblox-demo-optimized.gif" alt="PoSHBlox UI" width="900" />
+  <img src="Assets/poshblox-gif.gif" alt="PoSHBlox UI" width="900" />
 </p>
 
 ### Features
