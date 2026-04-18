@@ -32,19 +32,41 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$repoRoot = Join-Path $PSScriptRoot '..'
+
 if (-not $Path -or $Path.Count -eq 0) {
+    # Default search list: source catalogs plus any runtime Custom folder
+    # the app has written under bin/ (Debug or Release). The runtime path
+    # is where SaveCustomCatalogAsync writes newly-imported modules.
     $defaults = @(
-        (Join-Path $PSScriptRoot '..' 'Templates' 'Builtin'),
-        (Join-Path $PSScriptRoot '..' 'Templates' 'Custom')
+        (Join-Path $repoRoot 'Templates' 'Builtin'),
+        (Join-Path $repoRoot 'Templates' 'Custom')
     )
+    foreach ($cfg in 'Debug', 'Release') {
+        $runtime = Join-Path $repoRoot "bin/$cfg/net10.0/Templates/Custom"
+        if (Test-Path $runtime) { $defaults += $runtime }
+    }
     $Path = $defaults | Where-Object { Test-Path $_ }
     if (-not $Path) {
-        Write-Error "No default catalog folders found under Templates/. Pass -Path explicitly."
+        Write-Error "No default catalog folders found. Pass -Path explicitly."
         exit 1
     }
 }
 
-$Path = @($Path | ForEach-Object { (Resolve-Path $_).Path })
+# Filter user-supplied paths: warn on missing, skip instead of hard-erroring.
+$resolved = @()
+foreach ($p in $Path) {
+    if (-not (Test-Path $p)) {
+        Write-Warning "skipping (not found): $p"
+        continue
+    }
+    $resolved += (Resolve-Path $p).Path
+}
+$Path = $resolved
+if (-not $Path) {
+    Write-Error "No catalog folders resolved. Check the -Path argument."
+    exit 1
+}
 
 $ValidParamTypes = @(
     'Any','String','Int','Bool','Path','StringArray','Object',
