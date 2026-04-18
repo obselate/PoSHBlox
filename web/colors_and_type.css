@@ -1,0 +1,295 @@
+/* ──────────────────────────────────────────────────────────────
+   PoSHBlox — Lonely Planet theme
+   Tokens mirrored from Themes/LonelyPlanetTokens.axaml + GraphTheme.cs.
+   Dark-first. Monospace-first. Built for a dense technical UI.
+   ────────────────────────────────────────────────────────────── */
+
+/* JetBrains Mono is the sole typeface — the exact TTFs the Avalonia app
+   ships (Assets/Fonts/JetBrainsMono-*.ttf). We load 3 weights: 400, 600, 700.
+   Falls back to Cascadia Code / Consolas on Windows, ui-monospace elsewhere.
+   The font path below is relative to this stylesheet; HTML files that
+   @import or <link> this file from a subfolder still resolve correctly. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../Assets/Fonts/JetBrainsMono-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;          /* no 500 shipped — fall back to 600 */
+  font-display: swap;
+  src: url("../Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 800;          /* no 800 shipped — synthesised from 700 */
+  font-display: swap;
+  src: url("../Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
+}
+
+:root {
+  /* ── Tier 1A: raw color atoms ───────────────────────────── */
+  --core-blue-deep:   #0B1929;  /* darkest backdrop, window border */
+  --core-blue-mid:    #1A3A5C;  /* tertiary surface */
+  --core-blue-sky:    #7FBFEF;  /* wire, String pin */
+  --core-blue-ice:    #B8D9F2;  /* tertiary text / wire hi-light */
+  --core-teal-light:  #72BFB0;  /* hover on teal */
+  --core-teal-subtle: rgba(91, 168, 154, 0.12);
+  --core-cream:       #E0EAF2;  /* primary text */
+  --core-white:       #F0F5FA;  /* brightest text (on action) */
+
+  /* Canvas is DEEPER than primary (–5%); gives the node graph its mood. */
+  --core-canvas:      #060D16;
+
+  /* Surfaces used by the live app (see Themes/LonelyPlanetTokens.axaml) */
+  --bg-primary:       #0B1929;  /* window / toolbar */
+  --bg-secondary:     #0F2236;  /* raised panel / node body */
+  --bg-tertiary:      #1A3A5C;
+  --bg-surface:       #0D1E30;  /* properties / palette pane */
+  --bg-canvas:        #060D16;  /* node-graph canvas */
+
+  /* Grid dots on the canvas */
+  --canvas-grid-minor: rgba(28, 52, 80, 0.5);
+  --canvas-grid-major: #1C3450;
+
+  /* ── Tier 1B: weighted scales (50 lightest → 950 darkest) ──
+     Each base (500) is the "brand" color; tints lift by (255-c)*w/100,
+     shades cut by c*(w/100). Use 700/800 for tinted buttons on dark,
+     200/300 for text-on-tint states. */
+
+  /* BlueSteel — brand, file operations */
+  --steel-50:  #F4F7F9;  --steel-100: #DFE6ED;  --steel-200: #C0CEDC;
+  --steel-300: #96ACC4;  --steel-400: #6183A7;  --steel-500: #2C5A8A;
+  --steel-600: #254C75;  --steel-700: #1F3F61;  --steel-800: #162D45;
+  --steel-900: #0D1B29;  --steel-950: #070E15;
+
+  /* Teal — action, Run, selection */
+  --teal-50:   #F7FBFA;  --teal-100:  #E6F2F0;  --teal-200:  #CEE5E1;
+  --teal-300:  #ADD4CC;  --teal-400:  #84BEB3;  --teal-500:  #5BA89A;
+  --teal-600:  #4D8F83;  --teal-700:  #40766C;  --teal-800:  #2E544D;
+  --teal-900:  #1B322E;  --teal-950:  #0E1917;
+
+  /* Amber — pending wires, Output category */
+  --amber-50:  #FDFAF5;  --amber-100: #F9EFE1;  --amber-200: #F2DFC4;
+  --amber-300: #EACA9C;  --amber-400: #DFAF6B;  --amber-500: #D4943A;
+  --amber-600: #B47E31;  --amber-700: #946829;  --amber-800: #6A4A1D;
+  --amber-900: #402C11;  --amber-950: #201609;
+
+  /* Red — Delete, Security, error */
+  --red-50:    #FDF6F6;  --red-100:   #F8E5E5;  --red-200:   #F1CACA;
+  --red-300:   #E8A8A8;  --red-400:   #DC7C7C;  --red-500:   #D05050;
+  --red-600:   #B14444;  --red-700:   #923838;  --red-800:   #682828;
+  --red-900:   #3E1818;  --red-950:   #1F0C0C;
+
+  /* GreenMoss — Process / Service category */
+  --moss-50:   #F6FAF8;  --moss-100:  #E4F0EA;  --moss-200:  #C9E2D5;
+  --moss-300:  #A6CEBA;  --moss-400:  #79B697;  --moss-500:  #4C9E74;
+  --moss-600:  #418663;  --moss-700:  #356F51;  --moss-800:  #264F3A;
+  --moss-900:  #172F23;  --moss-950:  #0B1811;
+
+  /* BlueBright — Network, accent text */
+  --bright-50:  #F6F9FD;  --bright-100: #E4EEF9;  --bright-200: #C9DDF2;
+  --bright-300: #A5C7EA;  --bright-400: #78ABDF;  --bright-500: #4B8FD4;
+  --bright-600: #407AB4;  --bright-700: #346494;  --bright-800: #26486A;
+  --bright-900: #172B40;  --bright-950: #0B1520;
+
+  /* Slate — muted body, String/Data category */
+  --slate-50:   #F8F9FA;  --slate-100:  #EAEEF1;  --slate-200:  #D4DDE3;
+  --slate-300:  #B8C6D1;  --slate-400:  #94AABA;  --slate-500:  #708DA3;
+  --slate-600:  #5F788B;  --slate-700:  #4E6372;  --slate-800:  #384652;
+  --slate-900:  #222A31;  --slate-950:  #111518;
+
+  /* Purple — Control Flow */
+  --purple-50:  #F8F7FB;  --purple-100: #EAE7F2;  --purple-200: #D4CFE5;
+  --purple-300: #B8B0D4;  --purple-400: #9488BE;  --purple-500: #7060A8;
+  --purple-600: #5F528F;  --purple-700: #4E4376;  --purple-800: #383054;
+  --purple-900: #221D32;  --purple-950: #110E19;
+
+  /* ── Tier 2: semantic text + border tokens ─────────────── */
+  --fg:          var(--core-cream);     /* TextPrimaryBrush */
+  --fg-muted:    var(--slate-500);      /* TextSecondaryBrush / TextMutedBrush */
+  --fg-tertiary: var(--core-blue-ice);  /* TextTertiaryBrush — editable fields */
+  --fg-hud:      #708DA3;               /* HUD, overlay labels */
+  --fg-invert:   var(--core-white);     /* on tinted buttons */
+
+  /* Toolbar button text: intentionally lighter than base category color */
+  --fg-file:    var(--bright-300);
+  --fg-run:     var(--teal-300);
+  --fg-delete:  var(--red-300);
+
+  --border:          #1C3450;           /* BorderPrimaryBrush — everywhere */
+  --border-strong:   #264A6E;           /* BorderSecondaryBrush */
+  --border-accent:   var(--teal-500);   /* selection, focus */
+  --border-error:    #D15454;
+  --border-warning:  #D4943A;
+
+  /* Tinted button backgrounds (rest / hover / pressed) — always the
+     800/700/900 weight respectively. Never use 500 as a fill on dark. */
+  --btn-save-bg:         var(--steel-800);
+  --btn-save-hover:      var(--steel-700);
+  --btn-save-pressed:    var(--steel-900);
+  --btn-run-bg:          var(--teal-800);
+  --btn-run-hover:       var(--teal-700);
+  --btn-run-pressed:     var(--teal-900);
+  --btn-delete-bg:       var(--red-800);
+  --btn-delete-hover:    var(--red-700);
+  --btn-delete-pressed:  var(--red-900);
+
+  /* Data-pin colors — GraphTheme.DataTypeColors verbatim.
+     One hue per ParamType; nodes render these as dots on each pin. */
+  --pin-any:         #A8BAC9;  /* slate — untyped */
+  --pin-string:      #7FBFEF;  /* blue-sky */
+  --pin-int:         #6FBFDE;  /* cyan */
+  --pin-bool:        #D4943A;  /* amber */
+  --pin-path:        #76C9A2;  /* mint */
+  --pin-stringarray: #A8D488;  /* lime */
+  --pin-object:      #C09BDC;  /* lavender */
+  --pin-collection:  #DCBC8A;  /* sand */
+  --pin-scriptblock: #D17C8A;  /* rose */
+  --pin-credential:  #D47F5B;  /* salmon */
+  --pin-hashtable:   #7F9FDC;  /* slate-blue */
+  --pin-enum:        #B897D7;  /* violet */
+
+  /* Category header bars — GraphTheme.CategoryColors verbatim.
+     Used on node header fills + 3px accent strips in the palette. */
+  --cat-file:         #2C5A8A;  /* File / Folder */
+  --cat-process:      #4C9E74;  /* Process / Service */
+  --cat-registry:     #A064B4;
+  --cat-network:      #4B8FD4;  /* Network / Remote */
+  --cat-stringdata:   #708DA3;  /* String / Data */
+  --cat-custom:       #5A5A6E;
+  --cat-controlflow:  #7060A8;  /* Control Flow */
+  --cat-output:       #D4943A;  /* Output */
+  --cat-annotation:   #646E78;
+  --cat-utility:      #5BA89A;  /* Utility / Date */
+  --cat-variable:     #78A0C8;  /* Variable / Module */
+  --cat-security:     #D05050;
+
+  /* Wire colors — Bezier curves between ports */
+  --wire:          #7FBFEF;
+  --wire-pending:  #D4943A;
+
+  /* ── Radii ── mirrors GraphTheme + ui Padding="4"/CornerRadius="3|4" */
+  --radius-xs:  3px;   /* search fields, small chips, palette items */
+  --radius-sm:  4px;   /* toolbar buttons */
+  --radius-md:  8px;   /* nodes (NodeCornerRadius) */
+  --radius-lg:  10px;  /* containers (ContainerCornerRadius) */
+  --radius-pill: 9999px;
+
+  /* ── Spacing — Avalonia Padding="8,4", "10,6", "12,8" pairs ── */
+  --space-0: 0;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 16px;
+  --space-8: 20px;
+  --space-9: 24px;
+
+  /* ── Shadows — only one real shadow in the app: the node drop shadow.
+        GraphTheme.NodeShadow = ~40% black, offset 4px, no blur in renderer. */
+  --shadow-node:      0 4px 0 rgba(0, 0, 0, 0.40);
+  --shadow-container: 0 5px 0 rgba(0, 0, 0, 0.20);
+  --shadow-flyout:    0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-inset-pit: inset 0 1px 0 rgba(0, 0, 0, 0.35);
+
+  /* ── Grid (canvas dot pattern) ── */
+  --grid-size: 30px;
+  --grid-major-every: 5;
+
+  /* ── Typography ──
+     One family for everything. JetBrains Mono carries both UI and code.
+     Weights map to Avalonia Normal/SemiBold/Bold that the app uses. */
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+  --font-sans: var(--font-mono);  /* deliberate — no secondary family */
+
+  /* Type scale — every size in the live UI rounded to the nearest 1px.
+     10–16px covers 95% of text; the app is dense.                    */
+  --fs-9:   9px;   /* chevrons, micro hints */
+  --fs-10: 10px;   /* parameter descriptions, chips */
+  --fs-11: 11px;   /* palette category, body meta */
+  --fs-12: 12px;   /* body / inputs / buttons — DEFAULT */
+  --fs-13: 13px;   /* node title in-canvas */
+  --fs-14: 14px;   /* icon buttons */
+  --fs-15: 15px;   /* palette heading */
+  --fs-16: 16px;   /* property panel title */
+  --fs-20: 20px;   /* section display */
+  --fs-28: 28px;   /* page display */
+  --fs-40: 40px;   /* hero display */
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  --lh-tight:   1.15;
+  --lh-normal:  1.4;
+  --lh-loose:   1.6;
+
+  --ls-tight: -0.02em;  /* display */
+  --ls-loose: 0.08em;   /* ALL-CAPS labels (PARAMETERS / SWITCHES) */
+}
+
+/* ── Base — dark by default, no light-mode toggle ─────────── */
+html, body {
+  background: var(--bg-primary);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-feature-settings: "ss02", "ss03", "cv05";  /* JBM stylistic: slashed 0, alt g, alt a */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Semantic type classes (match live app patterns) ── */
+
+.t-display-hero    { font-size: var(--fs-40); font-weight: var(--fw-bold);
+                     letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.t-display-page    { font-size: var(--fs-28); font-weight: var(--fw-bold);
+                     letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.t-display-section { font-size: var(--fs-20); font-weight: var(--fw-bold); line-height: var(--lh-tight); }
+
+.t-panel-title     { font-size: var(--fs-16); font-weight: var(--fw-bold); color: var(--fg); }
+.t-palette-heading { font-size: var(--fs-15); font-weight: var(--fw-bold); color: var(--fg); }
+.t-node-title      { font-size: var(--fs-13); font-weight: var(--fw-bold); color: var(--fg); }
+.t-body            { font-size: var(--fs-12); font-weight: var(--fw-regular); color: var(--fg); }
+.t-body-semibold   { font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--fg); }
+.t-meta            { font-size: var(--fs-11); color: var(--fg-muted); }
+.t-caption         { font-size: var(--fs-10); color: var(--fg-muted); line-height: var(--lh-normal); }
+.t-microhint       { font-size: var(--fs-9);  color: var(--fg-muted); }
+
+/* Section label — ALL-CAPS, tracked, muted. "PARAMETERS" / "SWITCHES" / "ISSUES" */
+.t-label {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-loose);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/* Inline code — same family as body, but explicitly boxed */
+.t-code, code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  color: var(--fg-tertiary);   /* BlueIce, like editable field foreground */
+}
