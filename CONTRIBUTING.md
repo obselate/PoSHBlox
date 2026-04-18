@@ -36,7 +36,6 @@ PoSHBlox/
 ├── Templates/
 │   ├── Builtin/     # Shipped cmdlet catalogs (regenerate via CLI, don't hand-edit)
 │   └── Custom/      # User/community catalogs — drop JSON here
-├── Samples/         # Example .pblx files
 ├── Scripts/         # PowerShell helpers shipped with the app (module introspection)
 ├── scripts/         # Dev-only: Builtin regen manifest
 ├── Tools/           # Dev-only: audit / parse-check / integrity scripts
@@ -171,7 +170,10 @@ If you're comfortable with C# and want to work on the core:
   `Item` data pin compiles to `$_`.
 - **Template loading** — `Services/TemplateLoader.cs`. Reads `Templates/Builtin/`
   and `Templates/Custom/`; malformed files are skipped with a debug trace.
-  `V1Migrator` and `V2ToV3Migrator` upgrade older catalogs on read.
+  Catalogs at `version < 3` are migrated inline (every `Bool` param gets
+  `IsSwitch = true`). Project-document migration (the `.pblx` format) is a
+  separate pipeline — see `Services/V1Migrator.cs` / `V2ToV3Migrator.cs`,
+  invoked from `ProjectSerializer`.
 - **Module introspection** — `Services/PowerShellIntrospector.cs` +
   `Scripts/IntrospectModule.ps1`. Host resolution lives in
   `Services/PowerShellHost.cs`, shared with Run. `IntrospectionMerger`
@@ -195,24 +197,36 @@ If you're comfortable with C# and want to work on the core:
 .\bin\Debug\net10.0\PoSHBlox.exe --regen-manifest scripts\builtin-catalog.json --dry-run 2>&1 | Out-Host
 ```
 
-Curated per-parameter defaults and descriptions are preserved across runs.
+Curated per-parameter `defaultValue`s in the existing output file are
+preserved across runs (matched by cmdlet + parameter name). Descriptions
+are refreshed from live introspection, so hand-edits to descriptions
+will be overwritten — edit `scripts/builtin-catalog.json` or the
+introspection source instead.
 
 ### Dev-only tooling (`Tools/`)
 
-- `Audit-Templates.ps1` — schema sanity over Builtin + Custom (flags missing
-  fields, type drift, empty categories).
-- `Parse-Check-Samples.ps1` — runs `--emit` over every `Samples/*.pblx` and
-  verifies the output parses as valid PowerShell.
-- `Check-Samples.ps1` — graph-integrity sweep (dangling port IDs, orphan
-  `ParentNodeId`, duplicate IDs, active-set consistency).
+- `Audit-Templates.ps1` — schema sanity over Builtin + Custom (invalid
+  `type` / `containerType` / `kind` values, duplicate parameter names,
+  multiple `isPrimary` outputs, `primaryPipelineParameter` that doesn't
+  resolve, `defaultParameterSet` not in `knownParameterSets`, Bool
+  defaults that aren't bool-like).
+- `Parse-Check-Samples.ps1` — point it at a folder of `.pblx` files
+  (`-Path <dir>`); shells out to `--emit` for each and runs
+  `[Parser]::ParseInput` on the generated PowerShell.
+- `Check-Samples.ps1` — graph-integrity sweep over a folder of `.pblx`
+  files: dangling port IDs, source/target node-ID vs port-owner
+  mismatches, orphan `ParentNodeId`, `ParentZoneName` not on the
+  parent's zones, duplicate node/port IDs, `ActiveParameterSet` not in
+  `KnownParameterSets`.
 
 ## Pull Request Process
 
 1. Fork and branch from `main`
 2. Name your branch descriptively: `add-sqlserver-templates`, `fix-cycle-detection-edge-case`
 3. Make changes
-4. Test — at minimum, build successfully, and for codegen changes run
-   `Tools/Parse-Check-Samples.ps1` to confirm samples still parse
+4. Test — at minimum, build successfully. For codegen changes, run
+   `Tools/Parse-Check-Samples.ps1 -Path <folder>` on a few `.pblx`
+   graphs to confirm the emitted PowerShell still parses
 5. Open a PR with a clear description of what changed and why
 
 One feature or fix per PR.

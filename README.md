@@ -63,7 +63,6 @@ dotnet run
 3. **Configure** parameters in the right-side properties panel
 4. **Preview** (`Alt+S`), **Run** (`F5`), or **Export** (`Ctrl+E`) as `.ps1`
 
-Open one of the `Samples/*.pblx` files (`Ctrl+O`) to see a working graph.
 Press `?` any time for the full keyboard cheatsheet.
 
 ## Regenerating the built-in catalogs
