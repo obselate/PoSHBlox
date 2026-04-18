@@ -1,0 +1,1398 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "CSV Cleanup Pipeline",
+    "createdUtc": "2026-04-17T00:00:00.0000000Z",
+    "modifiedUtc": "2026-04-17T00:00:00.0000000Z"
+  },
+  "view": {
+    "panX": 0,
+    "panY": 0,
+    "zoom": 1.0
+  },
+  "nodes": [
+    {
+      "id": "a1000001",
+      "title": "Import-Csv",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Import-Csv",
+      "outputVariable": "",
+      "x": 80,
+      "y": 220,
+      "width": 220,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Delimiter",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the delimiter that separates the property values in the CSV file. The default is a comma (`,`). Enter a character, such as a colon (`:`). To specify a semicolon (`;`) enclose it in single quotation marks. To specify escaped special characters such as tab (`` `t ``), enclose it in double quotation marks. If you specify a character other than the actual string delimiter in the file, `Import-Csv` can't create the objects from the CSV strings and returns the full CSV strings.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DelimiterPath",
+            "DelimiterLiteralPath",
+            "Delimiter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Path",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the path to the CSV file to import. You can also pipe a path to `Import-Csv`.",
+          "validValues": [],
+          "value": ".\\Samples\\data\\01-servers.csv",
+          "isPipelineInput": true,
+          "parameterSets": [
+            "DelimiterPath",
+            "CulturePath"
+          ],
+          "mandatoryInSets": [
+            "DelimiterPath",
+            "CulturePath"
+          ]
+        },
+        {
+          "name": "LiteralPath",
+          "type": "StringArray",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the path to the CSV file to import. Unlike **Path**, the value of the **LiteralPath** parameter is used exactly as it's typed. No characters are interpreted as wildcards. If the path includes escape characters, enclose it in single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DelimiterLiteralPath",
+            "CultureLiteralPath"
+          ],
+          "mandatoryInSets": [
+            "DelimiterLiteralPath",
+            "CultureLiteralPath"
+          ]
+        },
+        {
+          "name": "UseCulture",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: `(Get-Culture).TextInfo.ListSeparator`.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CulturePath",
+            "CultureLiteralPath",
+            "UseCulture"
+          ],
+          "mandatoryInSets": [
+            "CulturePath",
+            "CultureLiteralPath",
+            "UseCulture"
+          ]
+        },
+        {
+          "name": "Header",
+          "type": "StringArray",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies an alternate column header row for the imported file. The column header determines the property names of the objects created by `Import-Csv`. Enter column headers as a character-separated list. Don't enclose the header string in quotation marks. Enclose each column header in single quotation marks. If you enter fewer column headers than there are data columns, the remaining data columns are discarded. If you enter more column headers than there are data columns, the additional column headers are created with empty data columns. When using the **Header** parameter, delete the original header row from the CSV file. Otherwise, `Import-Csv` creates an extra object from the items in the header row.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Encoding",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the encoding for the imported CSV file. The default value is `utf8NoBOM`. The acceptable values for this parameter are as follows: - `ascii`: Uses the encoding for the ASCII (7-bit) character set. - `ansi`: Uses the encoding for the for the current culture's ANSI code page. This option was added in PowerShell 7.4. - `bigendianunicode`: Encodes in UTF-16 format using the big-endian byte order. - `bigendianutf32`: Encodes in UTF-32 format using the big-endian byte order. - `oem`: Uses the default encoding for MS-DOS and console programs. - `unicode`: Encodes in UTF-16 format using the little-endian byte order. - `utf7`: Encodes in UTF-7 format. - `utf8`: Encodes in UTF-8 format. - `utf8BOM`: Encodes in UTF-8 format with Byte Order Mark (BOM) - `utf8NoBOM`: Encodes in UTF-8 format without Byte Order Mark (BOM) - `utf32`: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like `-Encoding 1251`) or string names of registered code pages (like `-Encoding \"windows-1251\"`). For more information, see the .NET documentation for [Encoding.CodePage](/dotnet/api/system.text.encoding.codepage?view=netcore-2.2). Starting with PowerShell 7.4, you can use the `Ansi` value for the **Encoding** parameter to pass the numeric ID for the current culture's ANSI code page without having to specify it manually. > [!NOTE] > **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you > specify `utf7` for the **Encoding** parameter.",
+          "validValues": [
+            "Unicode",
+            "UTF7",
+            "UTF8",
+            "ASCII",
+            "UTF32",
+            "BigEndianUnicode",
+            "Default",
+            "OEM"
+          ],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "a1000002",
+      "title": "Where-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Where-Object",
+      "outputVariable": "",
+      "x": 360,
+      "y": 220,
+      "width": 220,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the objects to filter. You can also pipe the objects to `Where-Object`. When you use the **InputObject** parameter with `Where-Object`, instead of piping command results to `Where-Object`, the cmdlet treats the **InputObject** as a single object. This is true even if the value is a collection that's the result of a command, such as `-InputObject (Get-Process)`. Because **InputObject** can't return individual properties from an array or collection of objects, we recommend that, if you use `Where-Object` to filter a collection of objects for those objects that have specific values in defined properties, you use `Where-Object` in the pipeline, as shown in the examples in this topic.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "FilterScript",
+          "type": "ScriptBlock",
+          "isMandatory": true,
+          "defaultValue": "$_.Name -like \"*pattern*\"",
+          "description": "Specifies the script block that's used to filter the objects. Enclose the script block in braces (`{}`). The parameter name, **FilterScript**, is optional.",
+          "validValues": [],
+          "value": "$_.Status -ne 'Decommissioned'",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "ScriptBlockSet"
+          ],
+          "mandatoryInSets": [
+            "ScriptBlockSet"
+          ]
+        },
+        {
+          "name": "Property",
+          "type": "String",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the name of a property of the input object. The property must be an instance property, not a static property. This is a positional parameter, so the name, **Property**, is optional. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet",
+            "Not"
+          ],
+          "mandatoryInSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet",
+            "Not"
+          ]
+        },
+        {
+          "name": "Value",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies a property value. The parameter name, **Value**, is optional. This parameter accepts wildcard characters when used with the following comparison parameters: - **CLike** - **CNotLike** - **Like** - **NotLike** This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "EqualSet",
+            "CaseSensitiveEqualSet",
+            "NotEqualSet",
+            "CaseSensitiveNotEqualSet",
+            "GreaterThanSet",
+            "CaseSensitiveGreaterThanSet",
+            "LessThanSet",
+            "CaseSensitiveLessThanSet",
+            "GreaterOrEqualSet",
+            "CaseSensitiveGreaterOrEqualSet",
+            "LessOrEqualSet",
+            "CaseSensitiveLessOrEqualSet",
+            "LikeSet",
+            "CaseSensitiveLikeSet",
+            "NotLikeSet",
+            "CaseSensitiveNotLikeSet",
+            "MatchSet",
+            "CaseSensitiveMatchSet",
+            "NotMatchSet",
+            "CaseSensitiveNotMatchSet",
+            "ContainsSet",
+            "CaseSensitiveContainsSet",
+            "NotContainsSet",
+            "CaseSensitiveNotContainsSet",
+            "InSet",
+            "CaseSensitiveInSet",
+            "NotInSet",
+            "CaseSensitiveNotInSet",
+            "IsSet",
+            "IsNotSet"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "EQ",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "EqualSet"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "CEQ",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveEqualSet"
+          ]
+        },
+        {
+          "name": "NE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "NotEqualSet"
+          ],
+          "mandatoryInSets": [
+            "NotEqualSet"
+          ]
+        },
+        {
+          "name": "CNE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveNotEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotEqualSet"
+          ]
+        },
+        {
+          "name": "GT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "GreaterThanSet"
+          ],
+          "mandatoryInSets": [
+            "GreaterThanSet"
+          ]
+        },
+        {
+          "name": "CGT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveGreaterThanSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveGreaterThanSet"
+          ]
+        },
+        {
+          "name": "LT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "LessThanSet"
+          ],
+          "mandatoryInSets": [
+            "LessThanSet"
+          ]
+        },
+        {
+          "name": "CLT",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less-than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveLessThanSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLessThanSet"
+          ]
+        },
+        {
+          "name": "GE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "GreaterOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "GreaterOrEqualSet"
+          ]
+        },
+        {
+          "name": "CGE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveGreaterOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveGreaterOrEqualSet"
+          ]
+        },
+        {
+          "name": "LE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "LessOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "LessOrEqualSet"
+          ]
+        },
+        {
+          "name": "CLE",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is less-than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveLessOrEqualSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLessOrEqualSet"
+          ]
+        },
+        {
+          "name": "Like",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (`*`). For example: `Get-Process | Where-Object ProcessName -Like \"*host\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "LikeSet"
+          ],
+          "mandatoryInSets": [
+            "LikeSet"
+          ]
+        },
+        {
+          "name": "CLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (`*`). This operation is case-sensitive. For example: `Get-Process | Where-Object ProcessName -CLike \"*host\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveLikeSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveLikeSet"
+          ]
+        },
+        {
+          "name": "NotLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn't match a value that includes wildcard characters (`*`). For example: `Get-Process | Where-Object ProcessName -NotLike \"*host\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "NotLikeSet"
+          ],
+          "mandatoryInSets": [
+            "NotLikeSet"
+          ]
+        },
+        {
+          "name": "CNotLike",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn't match a value that includes wildcard characters. This operation is case-sensitive. For example: `Get-Process | Where-Object ProcessName -CNotLike \"*host\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveNotLikeSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotLikeSet"
+          ]
+        },
+        {
+          "name": "Match",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. When the input is a single object, the matched value is saved in the `$Matches` automatic variable. For example: `Get-Process | Where-Object ProcessName -Match \"shell\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "MatchSet"
+          ],
+          "mandatoryInSets": [
+            "MatchSet"
+          ]
+        },
+        {
+          "name": "CMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the `$Matches` automatic variable. For example: `Get-Process | Where-Object ProcessName -CMatch \"Shell\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveMatchSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveMatchSet"
+          ]
+        },
+        {
+          "name": "NotMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects when the property value doesn't match the specified regular expression. When the input is a single object, the matched value is saved in the `$Matches` automatic variable. For example: `Get-Process | Where-Object ProcessName -NotMatch \"powershell\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "NotMatchSet"
+          ],
+          "mandatoryInSets": [
+            "NotMatchSet"
+          ]
+        },
+        {
+          "name": "CNotMatch",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value doesn't match the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the `$Matches` automatic variable. For example: `Get-Process | Where-Object ProcessName -CNotMatch \"Shell\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveNotMatchSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotMatchSet"
+          ]
+        },
+        {
+          "name": "Contains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if any item in the property value of the object is an exact match for the specified value. For example: `Get-Process | Where-Object ProcessName -Contains \"Svchost\"` If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "ContainsSet"
+          ],
+          "mandatoryInSets": [
+            "ContainsSet"
+          ]
+        },
+        {
+          "name": "CContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects from a collection if the property value of the object is an exact match for the specified value. This operation is case-sensitive. For example: `Get-Process | Where-Object ProcessName -CContains \"svchost\"` **CContains** refers to a collection of values and is true if the collection contains an item that is an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveContainsSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveContainsSet"
+          ]
+        },
+        {
+          "name": "NotContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if none of the items in the property value is an exact match for the specified value. For example: `Get-Process | Where-Object ProcessName -NotContains \"Svchost\"` **NotContains** refers to a collection of values and is true if the collection doesn't contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "NotContainsSet"
+          ],
+          "mandatoryInSets": [
+            "NotContainsSet"
+          ]
+        },
+        {
+          "name": "CNotContains",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value of the object isn't an exact match for the specified value. This operation is case-sensitive. For example: `Get-Process | Where-Object ProcessName -CNotContains \"svchost\"` **NotContains** and **CNotContains** refer to a collection of values and are true when the collection doesn't contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveNotContainsSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotContainsSet"
+          ]
+        },
+        {
+          "name": "In",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value matches any of the specified values. For example: `Get-Process | Where-Object -Property ProcessName -In -Value \"Svchost\", \"TaskHost\", \"WsmProvHost\"` If the input is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. `Where-Object` returns the object only if the value of the **Property** parameter and any value of **Value** are the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "InSet"
+          ],
+          "mandatoryInSets": [
+            "InSet"
+          ]
+        },
+        {
+          "name": "CIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value includes the specified value. This operation is case-sensitive. For example: `Get-Process | Where-Object -Value \"svchost\" -CIn ProcessName` **CIn** resembles **CContains**, except that the property and value positions are reversed. For example, the following statements are both true. `\"abc\", \"def\" -CContains \"abc\"` `\"abc\" -CIn \"abc\", \"def\"` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveInSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveInSet"
+          ]
+        },
+        {
+          "name": "NotIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn't an exact match for any of the specified values. For example: `Get-Process | Where-Object -Value \"svchost\" -NotIn -Property ProcessName` If the value of **Value** is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. `Where-Object` returns the object only if the value of **Property** and any value of **Value** aren't the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "NotInSet"
+          ],
+          "mandatoryInSets": [
+            "NotInSet"
+          ]
+        },
+        {
+          "name": "CNotIn",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn't an exact match for the specified value. This operation is case-sensitive. For example: `Get-Process | Where-Object -Value \"svchost\" -CNotIn -Property ProcessName` **NotIn** and **CNotIn** operators resemble **NotContains** and **CNotContains**, except that the property and value positions are reversed. For example, the following statements are true. `\"abc\", \"def\" -CNotContains \"Abc\"` `\"abc\" -CNotIn \"Abc\", \"def\"`",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "CaseSensitiveNotInSet"
+          ],
+          "mandatoryInSets": [
+            "CaseSensitiveNotInSet"
+          ]
+        },
+        {
+          "name": "Is",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value is an instance of the specified .NET type. Enclose the type name in square brackets. For example, `Get-Process | Where-Object StartTime -Is [datetime]` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "IsSet"
+          ],
+          "mandatoryInSets": [
+            "IsSet"
+          ]
+        },
+        {
+          "name": "IsNot",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property value isn't an instance of the specified .NET type. For example, `Get-Process | where StartTime -IsNot [datetime]` This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "IsNotSet"
+          ],
+          "mandatoryInSets": [
+            "IsNotSet"
+          ]
+        },
+        {
+          "name": "Not",
+          "type": "Bool",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Indicates that this cmdlet gets objects if the property doesn't exist or has a value of `$null` or `$false`. For example: `Get-Service | Where-Object -Not \"DependentServices\"` This parameter was introduced in Windows PowerShell 6.1.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "Not"
+          ],
+          "mandatoryInSets": [
+            "Not"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a1000003",
+      "title": "Sort-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Sort-Object",
+      "outputVariable": "",
+      "x": 640,
+      "y": 220,
+      "width": 220,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Stable",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "The sorted objects are delivered in the order they were received when the sort criteria are equal. This parameter was added in PowerShell v6.2.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "Default"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Descending",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Indicates that `Sort-Object` sorts the objects in descending order. The default is ascending order. To sort multiple properties with different sort orders, use a hash table. For example, with a hash table you can sort one property in ascending order and another property in descending order.",
+          "validValues": [],
+          "value": "true",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Indicates that `Sort-Object` eliminates duplicates and returns only the unique members of the collection. The first instance of a unique value is included in the sorted output. **Unique** is case-insensitive. Strings that only differ by character case are considered the same. For example, character and CHARACTER.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Top",
+          "type": "Int",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the number of objects to get from the start of a sorted object array. This results in a stable sort. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "Top"
+          ],
+          "mandatoryInSets": [
+            "Top"
+          ]
+        },
+        {
+          "name": "Bottom",
+          "type": "Int",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the number of objects to get from the end of a sorted object array. This results in a stable sort. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "Bottom"
+          ],
+          "mandatoryInSets": [
+            "Bottom"
+          ]
+        },
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "To sort objects, send them down the pipeline to `Sort-Object`. If you use the **InputObject** parameter to submit a collection of items, `Sort-Object` receives one object that represents the collection. Because one object can't be sorted, `Sort-Object` returns the entire collection unchanged.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Property",
+          "type": "Collection",
+          "isMandatory": false,
+          "defaultValue": "Name",
+          "description": "Specifies the property names that `Sort-Object` uses to sort the objects. Wildcards are permitted. Objects are sorted based on the property values. If you don't specify a property, `Sort-Object` sorts based on default properties for the object type or the objects themselves. Use commas to separate multiple properties. Multiple properties can be sorted in ascending order, descending order, or a combination of sort orders. When you specify multiple properties, the objects are sorted by the first property. If multiple objects have the same value for the first property, those objects are sorted by the second property. This process continues until there are no more specified properties or no groups of objects. The **Property** parameter's value can be a calculated property. To create a calculated property, use a scriptblock or a hashtable. Valid keys for a hash table are as follows: - `Expression` - `<string>` or `<script block>` - `Ascending` or `Descending` - `<boolean>` For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "value": "LastCheckin",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Culture",
+          "type": "String",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the cultural configuration to use for sorts. Use `Get-Culture` to display the system's culture configuration.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "CaseSensitive",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Indicates that the sort is case-sensitive. By default, sorts aren't case-sensitive.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "a1000004",
+      "title": "Select-Object",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Select-Object",
+      "outputVariable": "",
+      "x": 920,
+      "y": 220,
+      "width": 220,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Out",
+          "type": "Pipeline"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies objects to send to the cmdlet through the pipeline. This parameter enables you to pipe objects to `Select-Object`. When you pass objects to the **InputObject** parameter, instead of using the pipeline, `Select-Object` treats the **InputObject** as a single object, even if the value is a collection. It is recommended that you use the pipeline when passing collections to `Select-Object`.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Property",
+          "type": "Collection",
+          "isMandatory": false,
+          "defaultValue": "Name, Status",
+          "description": "Specifies the properties to select. These properties are added as **NoteProperty** members to the output objects. Wildcards are permitted. If the input object doesn't have the property named, the value of the new **NoteProperty** is set to `$null`. The value of the **Property** parameter can be a new calculated property. To create a calculated, property, use a hash table. Valid keys are: - Name (or Label) - `<string>` - Expression - `<string>` or `<script block>` For more information, see [about_Calculated_Properties](../Microsoft.PowerShell.Core/About/about_Calculated_Properties.md).",
+          "validValues": [],
+          "value": "Hostname,IP,Role,Owner,LastCheckin",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ExcludeProperty",
+          "type": "StringArray",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the properties that this cmdlet excludes from the operation. Wildcards are permitted. Beginning in PowerShell 6, it's no longer required to include the **Property** parameter for **ExcludeProperty** to work.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "ExpandProperty",
+          "type": "String",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies a property to select, and indicates that an attempt should be made to expand that property. If the input object pipeline doesn't have the property named, `Select-Object` returns an error. This parameter supports wildcards. However, the wildcard character must resolve to a single property name. If the wildcard character resolves to more than one property name, `Select-Object` returns an error. When you use **ExpandProperty**, `Select-Object` attempts to expand the specified property for every - If the specified property is an array, each value of the array is included in the output. - If the specified property is an object, the objects properties are expanded for every **InputObject** In either case, the output objects' **Type** matches the expanded property's **Type**. There is a side-effect when using **ExpandProperty**. The `Select-Object` adds the selected properties to the original object as **NoteProperty** members. If the **Property** parameter is specified, `Select-Object` attempts to add each selected property as a **NoteProperty** to every outputted object. > [!WARNING] > If you receive an error that a property can't be processed because a property with that name > already exists, consider the following. Note that when using **ExpandProperty**, `Select-Object` > can't replace an existing property. This means: > > - If the expanded object has a property of the same name, the command returns an error. > - If the _Selected_ object has a property of the same name as an _Expanded_ object's property, the > command returns an error.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Unique",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies that if a subset of the input objects has identical properties and values, only a single member of the subset should be selected. **Unique** selects values _after_ other filtering parameters are applied. This parameter is case-sensitive. As a result, strings that differ only in character casing are considered to be unique. Add the **CaseInsensitive** parameter to perform case-insensitive comparisons.",
+          "validValues": [],
+          "value": "true",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "CaseInsensitive",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "By default, when you use the **Unique** parameter the cmdlet uses case-sensitive comparisons. When you use this parameter, the cmdlet uses case-insensitive comparisons. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Last",
+          "type": "Int",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the number of objects to select from the end of an array of input objects.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "First",
+          "type": "Int",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the number of objects to select from the beginning of an array of input objects.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Skip",
+          "type": "Int",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Skips (doesn't select) the specified number of items. By default, the **Skip** parameter counts from the beginning of the collection of objects. If the command uses the **Last** parameter, it counts from the end of the collection. Unlike the **Index** parameter, which starts counting at 0, the **Skip** parameter begins at 1. Beginning in PowerShell 7.4, you can use the **Skip** parameter with the **SkipLast** parameter to skip items from both the beginning and end of the collection.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter",
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "SkipLast",
+          "type": "Int",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Skips (doesn't select) the specified number of items from the end of the list or array. Works in the same way as using **Skip** together with **Last** parameter. Unlike the **Index** parameter, which starts counting at 0, the **SkipLast** parameter begins at 1. Beginning in PowerShell 7.4, you can use the **Skip** parameter with the **SkipLast** parameter to skip items from both the beginning and end of the collection.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "SkipLastParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Wait",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Indicates that the cmdlet turns off optimization. PowerShell runs commands in the order that they appear in the command pipeline and lets them generate all objects. By default, if you include a `Select-Object` command with the **First** or **Index** parameters in a command pipeline, PowerShell stops the command that generates the objects as soon as the selected number of objects is generated. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "DefaultParameter",
+            "IndexParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Index",
+          "type": "Collection",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Selects objects from an array based on their index values. Enter the indexes in a comma-separated list. Indexes in an array begin with 0, where 0 represents the first value and (n-1) represents the last value.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "IndexParameter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "SkipIndex",
+          "type": "Collection",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Skips (doesn't select) the objects from an array based on their index values. Enter the indexes in a comma-separated list. Indexes in an array begin with 0, where 0 represents the first value and (n-1) represents the last value. This parameter was introduced in Windows PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "SkipIndexParameter"
+          ],
+          "mandatoryInSets": []
+        }
+      ]
+    },
+    {
+      "id": "a1000005",
+      "title": "Export-Csv",
+      "category": "String / Data",
+      "scriptBody": "",
+      "cmdletName": "Export-Csv",
+      "outputVariable": "",
+      "x": 1200,
+      "y": 220,
+      "width": 220,
+      "containerType": "None",
+      "containerWidth": 500,
+      "containerHeight": 300,
+      "zones": [],
+      "inputs": [
+        {
+          "name": "In",
+          "type": "Pipeline"
+        }
+      ],
+      "outputs": [],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Object",
+          "isMandatory": true,
+          "defaultValue": "",
+          "description": "Specifies the objects to export as CSV strings. Enter a variable that contains the objects or type a command or expression that gets the objects. You can also pipe objects to `Export-Csv`.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": true,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Path",
+          "type": "Path",
+          "isMandatory": false,
+          "defaultValue": ".\\output.csv",
+          "description": "A required parameter that specifies the location to save the CSV output file.",
+          "validValues": [],
+          "value": ".\\Samples\\data\\01-servers-clean.csv",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "LiteralPath",
+          "type": "Path",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the path to the CSV output file. Unlike **Path**, the value of the **LiteralPath** parameter is used exactly as it is typed. No characters are interpreted as wildcards. If the path includes escape characters, use single quotation marks. Single quotation marks tell PowerShell not to interpret any characters as escape sequences.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Force",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "This parameter allows `Export-Csv` to overwrite files with the **Read Only** attribute. When **Force** and **Append** parameters are combined, objects that contain mismatched properties can be written to a CSV file. Only the properties that match are written to the file. The mismatched properties are discarded.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoClobber",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Use this parameter so that `Export-Csv` does not overwrite an existing file. By default, if the file exists in the specified path, `Export-Csv` overwrites the file without warning.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Encoding",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the encoding for the exported CSV file. The default value is `utf8NoBOM`. The acceptable values for this parameter are as follows: - `ascii`: Uses the encoding for the ASCII (7-bit) character set. - `ansi`: Uses the encoding for the for the current culture's ANSI code page. This option was added - `bigendianunicode`: Encodes in UTF-16 format using the big-endian byte order. - `bigendianutf32`: Encodes in UTF-32 format using the big-endian byte order. - `oem`: Uses the default encoding for MS-DOS and console programs. - `unicode`: Encodes in UTF-16 format using the little-endian byte order. - `utf7`: Encodes in UTF-7 format. - `utf8`: Encodes in UTF-8 format. - `utf8BOM`: Encodes in UTF-8 format with Byte Order Mark (BOM) - `utf8NoBOM`: Encodes in UTF-8 format without Byte Order Mark (BOM) - `utf32`: Encodes in UTF-32 format. Beginning with PowerShell 6.2, the **Encoding** parameter also allows numeric IDs of registered code pages (like `-Encoding 1251`) or string names of registered code pages (like `-Encoding \"windows-1251\"`). For more information, see the .NET documentation for [Encoding.CodePage](xref:System.Text.Encoding.CodePage%2A). Starting with PowerShell 7.4, you can use the `Ansi` value for the **Encoding** parameter to pass the numeric ID for the current culture's ANSI code page without having to specify it manually. > [!NOTE] > **UTF-7*** is no longer recommended to use. As of PowerShell 7.1, a warning is written if you > specify `utf7` for the **Encoding** parameter.",
+          "validValues": [
+            "Unicode",
+            "UTF7",
+            "UTF8",
+            "ASCII",
+            "UTF32",
+            "BigEndianUnicode",
+            "Default",
+            "OEM"
+          ],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Append",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Use this parameter so that `Export-Csv` adds CSV output to the end of the specified file. Without this parameter, `Export-Csv` replaces the file contents without warning. This parameter was introduced in Windows PowerShell 3.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "Delimiter",
+          "type": "Object",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies a delimiter to separate the property values. The default is a comma (`,`). Enter a character, such as a colon (`:`). To specify a semicolon (`;`), enclose it in quotation marks.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "Delimiter"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "UseCulture",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: `(Get-Culture).TextInfo.ListSeparator`.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [
+            "UseCulture"
+          ],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "IncludeTypeInformation",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "When this parameter is used the first line of the CSV output contains `#TYPE` followed by the fully qualified name of the object type. For example, `#TYPE System.Diagnostics.Process`. This parameter was introduced in PowerShell 6.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoTypeInformation",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "true",
+          "description": "Removes the `#TYPE` information header from the output. This parameter became the default in PowerShell 6.0 and is included for backwards compatibility.",
+          "validValues": [],
+          "value": "true",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "QuoteFields",
+          "type": "StringArray",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies the names of the columns that should be quoted. When this parameter is used, only the specified columns are quoted. This parameter was added in PowerShell 7.0.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "UseQuotes",
+          "type": "Enum",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "Specifies when quotes are used in the CSV files. Possible values are: - Never - don't quote anything - Always - quote everything (default behavior) - AsNeeded - only quote fields that contain a delimiter character, double-quote, or newline character This parameter was added in PowerShell 7.0.",
+          "validValues": [
+            "Never",
+            "Always",
+            "AsNeeded"
+          ],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        },
+        {
+          "name": "NoHeader",
+          "type": "Bool",
+          "isMandatory": false,
+          "defaultValue": "",
+          "description": "When this parameter is used, the cmdlet doesn't write a header row containing the column names to the output. This parameter was added in PowerShell 7.4.",
+          "validValues": [],
+          "value": "",
+          "isPipelineInput": false,
+          "parameterSets": [],
+          "mandatoryInSets": []
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "sourceNodeId": "a1000001",
+      "targetNodeId": "a1000002"
+    },
+    {
+      "sourceNodeId": "a1000002",
+      "targetNodeId": "a1000003"
+    },
+    {
+      "sourceNodeId": "a1000003",
+      "targetNodeId": "a1000004"
+    },
+    {
+      "sourceNodeId": "a1000004",
+      "targetNodeId": "a1000005"
+    }
+  ]
+}
