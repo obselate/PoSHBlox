@@ -233,7 +233,7 @@ function HeroCanvasGraph({ wireFlow, onRunEvent }) {
   }, [running]);
 
   return (
-    <div style={{ position: 'absolute', inset: '30px 0 0 0', overflow: 'hidden', zIndex: 1 }}>
+    <div className="hero-graph" style={{ position: 'absolute', inset: '30px 0 0 0', overflow: 'hidden', zIndex: 1 }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
         {flowWires.map((fw, i) => (
           <Wire key={'f'+i} from={fw.from} to={fw.to} kind="flow"
