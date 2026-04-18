@@ -1,0 +1,44 @@
+{
+  "category": "Custom",
+  "templates": [
+    {
+      "name": "Custom Script",
+      "description": "Free-form PowerShell block. Takes pipeline input via $input and emits whatever the script outputs.",
+      "scriptBody": "# Your PowerShell code here\n$input | ForEach-Object {\n    $_\n}"
+    },
+    {
+      "name": "Variable Source",
+      "description": "Standalone producer — emit a variable or literal data source. No execution predecessor needed.",
+      "scriptBody": "@(\n    \"Server01\",\n    \"Server02\",\n    \"Server03\"\n)",
+      "hasExecIn": false,
+      "dataOutputs": [
+        { "name": "Data", "type": "Collection", "isPrimary": true }
+      ]
+    },
+    {
+      "name": "Enumerate",
+      "description": "Expand a hashtable, dictionary, or enumerable into its rows so Where-Object / Select-Object / Sort-Object can filter them individually. PowerShell pipes a hashtable as one object by default; this node calls .GetEnumerator() on each piped item to unroll it. Emits `ForEach-Object { $_.GetEnumerator() }` — override the Process scriptblock if you want a different per-item transform.",
+      "cmdletName": "ForEach-Object",
+      "hasExecIn": true,
+      "hasExecOut": true,
+      "primaryPipelineParameter": "InputObject",
+      "dataOutputs": [
+        { "name": "Out", "type": "Collection", "isPrimary": true }
+      ],
+      "parameters": [
+        {
+          "name": "InputObject",
+          "type": "Any",
+          "isPipelineInput": true,
+          "description": "The hashtable/dictionary/enumerable to expand. Wired from upstream via the pipe."
+        },
+        {
+          "name": "Process",
+          "type": "ScriptBlock",
+          "defaultValue": "$_.GetEnumerator()",
+          "description": "Per-item scriptblock. Default unrolls hashtables into DictionaryEntry rows (Name / Value). Replace if you need a different transform."
+        }
+      ]
+    }
+  ]
+}
