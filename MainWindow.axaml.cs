@@ -439,6 +439,12 @@ public partial class MainWindow : AppWindow
             var json = await reader.ReadToEndAsync();
             ProjectSerializer.Deserialize(json, vm);
             vm.CurrentFilePath = file.TryGetLocalPath();
+
+            // Frame the loaded graph. Posted via the dispatcher so the canvas
+            // has finished its layout pass (Bounds would be 0 synchronously
+            // when the empty-state overlay was just dismissed).
+            Dispatcher.UIThread.Post(() => GraphCanvas.ZoomToFit(selectionOnly: false),
+                DispatcherPriority.Loaded);
         }
         catch (Exception ex)
         {
