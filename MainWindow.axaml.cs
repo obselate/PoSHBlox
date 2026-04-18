@@ -327,6 +327,7 @@ public partial class MainWindow : AppWindow
     private async void OnRunClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
+        if (!vm.HasProject) return;
 
         var script = GenerateScript(vm);
         if (string.IsNullOrWhiteSpace(script)) return;
@@ -447,6 +448,7 @@ public partial class MainWindow : AppWindow
 
     private async void OnSavePblxClicked(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is GraphCanvasViewModel vm && !vm.HasProject) return;
         await SaveProjectAsync();
     }
 
@@ -493,6 +495,7 @@ public partial class MainWindow : AppWindow
     private async void OnExportPs1Clicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
+        if (!vm.HasProject) return;
 
         var script = GenerateScript(vm);
         if (string.IsNullOrWhiteSpace(script)) return;

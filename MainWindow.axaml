@@ -191,6 +191,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnSavePblxClicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Save as .pblx project (Ctrl+S)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
@@ -206,6 +207,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnExportPs1Clicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Export as .ps1 script (Ctrl+E)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
@@ -221,6 +223,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnRunClicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Run generated script in a new PowerShell window (F5)"
                         Background="{DynamicResource BgRunTintBrush}"
                         Foreground="{DynamicResource TextRunBrush}">
