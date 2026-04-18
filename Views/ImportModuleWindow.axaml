@@ -71,27 +71,39 @@
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
                 BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1"
                 Height="220">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding DiscoveredCmdlets}" Margin="4">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Padding="6,4" Margin="0,1" CornerRadius="3"
-                                    Background="Transparent">
-                                <DockPanel>
-                                    <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                              VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <StackPanel Spacing="1">
-                                        <TextBlock Text="{Binding Name}" FontSize="12"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Text="{Binding Description}" FontSize="10"
-                                                   Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </DockPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding DiscoveredCmdlets}" Margin="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="6,4" Margin="0,1" CornerRadius="3"
+                                        Background="Transparent">
+                                    <DockPanel>
+                                        <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <StackPanel Spacing="1">
+                                            <TextBlock Text="{Binding Name}" FontSize="12"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBlock Text="{Binding Description}" FontSize="10"
+                                                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"
+                            IsVisible="{Binding IsScanning}">
+                    <ProgressBar IsIndeterminate="True" Width="180" Height="3" />
+                    <TextBlock Text="Scanning cmdlets…" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextMutedBrush}" />
+                </StackPanel>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           Text="Select a module above to scan its cmdlets."
+                           IsVisible="{Binding ShowCmdletEmptyHint}" />
+            </Grid>
         </Border>
 
         <!-- Available modules label -->
@@ -101,53 +113,65 @@
         <!-- Module picker (fills remaining space) -->
         <Border Background="{DynamicResource BgSecondaryBrush}" CornerRadius="4"
                 BorderBrush="{DynamicResource BorderPrimaryBrush}" BorderThickness="1">
-            <ListBox ItemsSource="{Binding FilteredModules}"
-                     SelectedItem="{Binding SelectedModule, Mode=TwoWay}"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel LastChildFill="True">
-                            <!-- Right-aligned rectangular badge, visible only when edition-exclusive -->
-                            <Border DockPanel.Dock="Right" CornerRadius="3"
-                                    Padding="6,2" Margin="8,0,0,0"
-                                    VerticalAlignment="Center"
-                                    IsVisible="{Binding HasBadge}"
-                                    BorderThickness="1">
-                                <Border.Background>
-                                    <SolidColorBrush Color="{StaticResource CoreAmberAction900}" />
-                                </Border.Background>
-                                <Border.BorderBrush>
-                                    <SolidColorBrush Color="{StaticResource CoreAmberAction700}" />
-                                </Border.BorderBrush>
-                                <TextBlock Text="{Binding BadgeText}" FontSize="10">
-                                    <TextBlock.Foreground>
-                                        <SolidColorBrush Color="{StaticResource CoreAmberAction300}" />
-                                    </TextBlock.Foreground>
-                                </TextBlock>
-                            </Border>
-                            <StackPanel Spacing="1">
-                                <DockPanel>
-                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <TextBlock Text="{Binding Version}" FontSize="10" Margin="8,0,0,0"
-                                               VerticalAlignment="Center"
-                                               Foreground="{DynamicResource TextMutedBrush}" />
-                                </DockPanel>
-                                <TextBlock Text="{Binding Description}" FontSize="10"
-                                           Foreground="{DynamicResource TextMutedBrush}" TextWrapping="NoWrap"
-                                           TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <Grid>
+                <ListBox ItemsSource="{Binding FilteredModules}"
+                         SelectedItem="{Binding SelectedModule, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel LastChildFill="True">
+                                <!-- Right-aligned rectangular badge, visible only when edition-exclusive -->
+                                <Border DockPanel.Dock="Right" CornerRadius="3"
+                                        Padding="6,2" Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding HasBadge}"
+                                        BorderThickness="1">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{StaticResource CoreAmberAction900}" />
+                                    </Border.Background>
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{StaticResource CoreAmberAction700}" />
+                                    </Border.BorderBrush>
+                                    <TextBlock Text="{Binding BadgeText}" FontSize="10">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush Color="{StaticResource CoreAmberAction300}" />
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </Border>
+                                <StackPanel Spacing="1">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="{Binding Version}" FontSize="10" Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextMutedBrush}" />
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Description}" FontSize="10"
+                                               Foreground="{DynamicResource TextMutedBrush}" TextWrapping="NoWrap"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"
+                            IsVisible="{Binding IsLoadingModules}">
+                    <ProgressBar IsIndeterminate="True" Width="180" Height="3" />
+                    <TextBlock Text="Discovering modules…" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextMutedBrush}" />
+                </StackPanel>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           Text="No modules found."
+                           IsVisible="{Binding ShowModuleEmptyHint}" />
+            </Grid>
         </Border>
 
     </DockPanel>

@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "String / Data",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Performs an operation against each item in a collection of input objects.",
       "scriptBody": "",
       "cmdletName": "ForEach-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -198,6 +199,7 @@
           "defaultValue": "",
           "description": "Causes the parallel invocation to run as a PowerShell job. A single job object is returned instead of output from the running script blocks. The job object contains child jobs for each parallel script block that runs. You can use the job object with any of the PowerShell job cmdlets to see the running state and retrieve data. This parameter was introduced in PowerShell 7.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ParallelParameterSet"
           ],
@@ -212,6 +214,7 @@
           "defaultValue": "",
           "description": "Causes the parallel invocation to create a new runspace for every loop iteration instead of reusing runspaces from the runspace pool. This parameter was introduced in PowerShell 7.1",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ParallelParameterSet"
           ],
@@ -228,6 +231,7 @@
       "description": "Selects objects from a collection based on their property values.",
       "scriptBody": "",
       "cmdletName": "Where-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -438,6 +442,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "EqualSet"
           ],
@@ -454,6 +459,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is the same as the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveEqualSet"
           ],
@@ -472,6 +478,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NotEqualSet"
           ],
@@ -490,6 +497,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is different than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveNotEqualSet"
           ],
@@ -508,6 +516,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GreaterThanSet"
           ],
@@ -526,6 +535,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is greater than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveGreaterThanSet"
           ],
@@ -544,6 +554,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is less than the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "LessThanSet"
           ],
@@ -562,6 +573,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is less-than the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveLessThanSet"
           ],
@@ -580,6 +592,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GreaterOrEqualSet"
           ],
@@ -598,6 +611,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is greater than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveGreaterOrEqualSet"
           ],
@@ -616,6 +630,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is less than or equal to the specified value. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "LessOrEqualSet"
           ],
@@ -634,6 +649,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is less-than or equal to the specified value. This operation is case-sensitive. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveLessOrEqualSet"
           ],
@@ -652,6 +668,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (\u0060*\u0060). For example: \u0060Get-Process | Where-Object ProcessName -Like \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "LikeSet"
           ],
@@ -670,6 +687,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value matches a value that includes wildcard characters (\u0060*\u0060). This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveLikeSet"
           ],
@@ -688,6 +706,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match a value that includes wildcard characters (\u0060*\u0060). For example: \u0060Get-Process | Where-Object ProcessName -NotLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NotLikeSet"
           ],
@@ -706,6 +725,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match a value that includes wildcard characters. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CNotLike \u0022*host\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveNotLikeSet"
           ],
@@ -724,6 +744,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -Match \u0022shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "MatchSet"
           ],
@@ -742,6 +763,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value matches the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -CMatch \u0022Shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveMatchSet"
           ],
@@ -760,6 +782,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects when the property value doesn\u0027t match the specified regular expression. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -NotMatch \u0022powershell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NotMatchSet"
           ],
@@ -778,6 +801,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value doesn\u0027t match the specified regular expression. This operation is case-sensitive. When the input is a single object, the matched value is saved in the \u0060$Matches\u0060 automatic variable. For example: \u0060Get-Process | Where-Object ProcessName -CNotMatch \u0022Shell\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveNotMatchSet"
           ],
@@ -796,6 +820,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if any item in the property value of the object is an exact match for the specified value. For example: \u0060Get-Process | Where-Object ProcessName -Contains \u0022Svchost\u0022\u0060 If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ContainsSet"
           ],
@@ -814,6 +839,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects from a collection if the property value of the object is an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CContains \u0022svchost\u0022\u0060 **CContains** refers to a collection of values and is true if the collection contains an item that is an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveContainsSet"
           ],
@@ -832,6 +858,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if none of the items in the property value is an exact match for the specified value. For example: \u0060Get-Process | Where-Object ProcessName -NotContains \u0022Svchost\u0022\u0060 **NotContains** refers to a collection of values and is true if the collection doesn\u0027t contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NotContainsSet"
           ],
@@ -850,6 +877,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value of the object isn\u0027t an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object ProcessName -CNotContains \u0022svchost\u0022\u0060 **NotContains** and **CNotContains** refer to a collection of values and are true when the collection doesn\u0027t contain any items that are an exact match for the specified value. If the input is a single object, PowerShell converts it to a collection of one object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveNotContainsSet"
           ],
@@ -868,6 +896,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value matches any of the specified values. For example: \u0060Get-Process | Where-Object -Property ProcessName -In -Value \u0022Svchost\u0022, \u0022TaskHost\u0022, \u0022WsmProvHost\u0022\u0060 If the input is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. \u0060Where-Object\u0060 returns the object only if the value of the **Property** parameter and any value of **Value** are the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "InSet"
           ],
@@ -886,6 +915,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value includes the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -CIn ProcessName\u0060 **CIn** resembles **CContains**, except that the property and value positions are reversed. For example, the following statements are both true. \u0060\u0022abc\u0022, \u0022def\u0022 -CContains \u0022abc\u0022\u0060 \u0060\u0022abc\u0022 -CIn \u0022abc\u0022, \u0022def\u0022\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveInSet"
           ],
@@ -904,6 +934,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an exact match for any of the specified values. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -NotIn -Property ProcessName\u0060 If the value of **Value** is a single object, PowerShell converts it to a collection of one object. If the property value of an object is an array, PowerShell uses reference equality to determine a match. \u0060Where-Object\u0060 returns the object only if the value of **Property** and any value of **Value** aren\u0027t the same instance of an object. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NotInSet"
           ],
@@ -922,6 +953,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an exact match for the specified value. This operation is case-sensitive. For example: \u0060Get-Process | Where-Object -Value \u0022svchost\u0022 -CNotIn -Property ProcessName\u0060 **NotIn** and **CNotIn** operators resemble **NotContains** and **CNotContains**, except that the property and value positions are reversed. For example, the following statements are true. \u0060\u0022abc\u0022, \u0022def\u0022 -CNotContains \u0022Abc\u0022\u0060 \u0060\u0022abc\u0022 -CNotIn \u0022Abc\u0022, \u0022def\u0022\u0060",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CaseSensitiveNotInSet"
           ],
@@ -940,6 +972,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value is an instance of the specified .NET type. Enclose the type name in square brackets. For example, \u0060Get-Process | Where-Object StartTime -Is [datetime]\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "IsSet"
           ],
@@ -958,6 +991,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property value isn\u0027t an instance of the specified .NET type. For example, \u0060Get-Process | where StartTime -IsNot [datetime]\u0060 This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "IsNotSet"
           ],
@@ -976,6 +1010,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets objects if the property doesn\u0027t exist or has a value of \u0060$null\u0060 or \u0060$false\u0060. For example: \u0060Get-Service | Where-Object -Not \u0022DependentServices\u0022\u0060 This parameter was introduced in Windows PowerShell 6.1.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Not"
           ],
@@ -994,6 +1029,7 @@
       "description": "Compares two sets of objects.",
       "scriptBody": "",
       "cmdletName": "Compare-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "DifferenceObject",
@@ -1071,6 +1107,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet displays only the characteristics of compared objects that are equal. The differences between the objects are discarded. Use **ExcludeDifferent** with **IncludeEqual** to display only the lines that match between the **reference** and **difference** objects. If **ExcludeDifferent** is specified without **IncludeEqual**, there\u0027s no output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1084,6 +1121,7 @@
           "defaultValue": "",
           "description": "**IncludeEqual** displays the matches between the **reference** and **difference** objects. By default, the output also includes the differences between the **reference** and **difference** objects.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1097,6 +1135,7 @@
           "defaultValue": "",
           "description": "When you use the **PassThru** parameter, \u0060Compare-Object\u0060 omits the **PSCustomObject** wrapper around the compared objects and returns the differing objects, unchanged.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1123,6 +1162,7 @@
           "defaultValue": "",
           "description": "Indicates that comparisons should be case-sensitive.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1138,6 +1178,7 @@
       "description": "Converts object properties in character-separated value (CSV) format into CSV versions of the original objects.",
       "scriptBody": "",
       "cmdletName": "ConvertFrom-Csv",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1180,6 +1221,7 @@
           "defaultValue": "",
           "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: \u0060(Get-Culture).TextInfo.ListSeparator\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "UseCulture"
           ],
@@ -1227,6 +1269,7 @@
       "description": "Converts a JSON-formatted string to a custom object or a hash table.",
       "scriptBody": "",
       "cmdletName": "ConvertFrom-Json",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1264,6 +1307,7 @@
           "defaultValue": "",
           "description": "Converts the JSON to a hash table object. This switch was introduced in PowerShell 6.0. Starting with PowerShell 7.3, the object is an **OrderedHashtable** and preserves the ordering of the keys from the JSON. In prior versions, the object is a **Hashtable**. There are several scenarios where it can overcome some limitations of the \u0060ConvertFrom-Json\u0060 cmdlet. - Without this switch, when two or more keys in a JSON object are case-insensitively identical, they are treated as identical keys. In that case, only the last of those case-insensitively identical keys is included in the converted object. - Without this switch, the cmdlet throws an error whenever the JSON contains a key that\u0027s an empty string. **PSCustomObject** can\u0027t have property names that are empty strings. For example, this can occur in \u0060project.lock.json\u0060 files. - Hash tables can be processed faster for certain data structures.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1288,6 +1332,7 @@
           "defaultValue": "",
           "description": "Specifies that output isn\u0027t enumerated. Setting this parameter causes arrays to be sent as a single object instead of sending every element separately. This guarantees that JSON can be round-tripped via \u0060ConvertTo-Json\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1320,6 +1365,7 @@
       "description": "Converts .NET objects into a series of character-separated value (CSV) strings.",
       "scriptBody": "",
       "cmdletName": "ConvertTo-Csv",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1376,6 +1422,7 @@
           "defaultValue": "",
           "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: \u0060(Get-Culture).TextInfo.ListSeparator\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "UseCulture"
           ],
@@ -1391,6 +1438,7 @@
           "defaultValue": "",
           "description": "When this parameter is used the first line of the output contains \u0060#TYPE\u0060 followed by the fully qualified name of the object type. For example, \u0060#TYPE System.Diagnostics.Process\u0060. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1403,6 +1451,7 @@
           "defaultValue": "",
           "description": "Removes the \u0060#TYPE\u0060 information header from the output. This parameter became the default in PowerShell 6.0 and is included for backwards compatibility.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1444,6 +1493,7 @@
           "defaultValue": "",
           "description": "When this parameter is used, the cmdlet doesn\u0027t write a header row containing the column names to the output. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1458,6 +1508,7 @@
       "description": "Converts an object to a JSON-formatted string.",
       "scriptBody": "",
       "cmdletName": "ConvertTo-Json",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1508,6 +1559,7 @@
           "defaultValue": "",
           "description": "Omits white space and indented formatting in the output string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1521,6 +1573,7 @@
           "defaultValue": "",
           "description": "Provides an alternative serialization option that converts all enumerations to their string representation.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1533,6 +1586,7 @@
           "defaultValue": "",
           "description": "Outputs the object in array brackets, even if the input is a single object.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1563,6 +1617,7 @@
       "description": "Converts objects into a series of character-separated value (CSV) strings and saves the strings to a file.",
       "scriptBody": "",
       "cmdletName": "Export-Csv",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1630,6 +1685,7 @@
           "defaultValue": "",
           "description": "This parameter allows \u0060Export-Csv\u0060 to overwrite files with the **Read Only** attribute. When **Force** and **Append** parameters are combined, objects that contain mismatched properties can be written to a CSV file. Only the properties that match are written to the file. The mismatched properties are discarded.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1643,6 +1699,7 @@
           "defaultValue": "",
           "description": "Use this parameter so that \u0060Export-Csv\u0060 does not overwrite an existing file. By default, if the file exists in the specified path, \u0060Export-Csv\u0060 overwrites the file without warning.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1678,6 +1735,7 @@
           "defaultValue": "",
           "description": "Use this parameter so that \u0060Export-Csv\u0060 adds CSV output to the end of the specified file. Without this parameter, \u0060Export-Csv\u0060 replaces the file contents without warning. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1706,6 +1764,7 @@
           "defaultValue": "",
           "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: \u0060(Get-Culture).TextInfo.ListSeparator\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "UseCulture"
           ],
@@ -1721,6 +1780,7 @@
           "defaultValue": "",
           "description": "When this parameter is used the first line of the CSV output contains \u0060#TYPE\u0060 followed by the fully qualified name of the object type. For example, \u0060#TYPE System.Diagnostics.Process\u0060. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1733,6 +1793,7 @@
           "defaultValue": "true",
           "description": "Removes the \u0060#TYPE\u0060 information header from the output. This parameter became the default in PowerShell 6.0 and is included for backwards compatibility.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1774,6 +1835,7 @@
           "defaultValue": "",
           "description": "When this parameter is used, the cmdlet doesn\u0027t write a header row containing the column names to the output. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1788,6 +1850,7 @@
       "description": "Groups objects that contain the same value for specified properties.",
       "scriptBody": "",
       "cmdletName": "Group-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -1812,6 +1875,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet omits the members of a group from the results.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1825,6 +1889,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns the group as a hash table. The keys of the hash table are the property values by which the objects are grouped. The values of the hash table are the objects that have that property value. By itself, the **AsHashTable** parameter returns each hash table in which each key is an instance of the grouped object. When used with the **AsString** parameter, the keys in the hash table are strings. Beginning in PowerShell 7, to create case-sensitive hash tables, include **CaseSensitive** and **AsHashtable** in your command.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "HashTable"
           ],
@@ -1840,6 +1905,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet converts the hash table keys to strings. By default, the hash table keys are instances of the grouped object. This parameter is valid only when used with the **AsHashTable** parameter.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "HashTable"
           ],
@@ -1895,6 +1961,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet makes the grouping case-sensitive. Without this parameter, the property values of objects in a group might have different cases. Beginning in PowerShell 7, to create case-sensitive hash tables, include **CaseSensitive** and **AsHashtable** in your command.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1910,6 +1977,7 @@
       "description": "Creates table-like custom objects from the items in a character-separated value (CSV) file.",
       "scriptBody": "",
       "cmdletName": "Import-Csv",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1924,7 +1992,9 @@
         "DelimiterPath",
         "DelimiterLiteralPath",
         "CulturePath",
-        "CultureLiteralPath"
+        "CultureLiteralPath",
+        "Delimiter",
+        "UseCulture"
       ],
       "defaultParameterSet": "DelimiterPath",
       "supportedEditions": [
@@ -1997,6 +2067,7 @@
           "defaultValue": "",
           "description": "Uses the list separator for the current culture as the item delimiter. To find the list separator for a culture, use the following command: \u0060(Get-Culture).TextInfo.ListSeparator\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CulturePath",
             "CultureLiteralPath",
@@ -2055,6 +2126,7 @@
       "description": "Calculates the numeric properties of objects, and the characters, words, and lines in string objects, such as files o...",
       "scriptBody": "",
       "cmdletName": "Measure-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -2108,6 +2180,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays the standard deviation of the values of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2122,6 +2195,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays the sum of the values of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2137,6 +2211,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays all the statistics of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2151,6 +2226,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays the average value of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2166,6 +2242,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays the maximum value of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2181,6 +2258,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays the minimum value of the specified properties.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "GenericMeasure"
           ],
@@ -2196,6 +2274,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet counts the number of lines in the input objects. \u003E [!NOTE] \u003E The **Word**, **Char** and **Line** switches count _inside_ each input object, as well as _across_ \u003E input objects. See Example 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TextMeasure"
           ],
@@ -2211,6 +2290,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet counts the number of words in the input objects. \u003E [!NOTE] \u003E The **Word**, **Char** and **Line** switches count _inside_ each input object, as well as _across_ \u003E input objects. See Example 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TextMeasure"
           ],
@@ -2226,6 +2306,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet counts the number of characters in the input objects. \u003E [!NOTE] \u003E The **Word**, **Char** and **Line** switches count _inside_ each input object, as well as _across_ \u003E input objects. See Example 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TextMeasure"
           ],
@@ -2241,6 +2322,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet ignores white space in character counts. By default, white space is not ignored.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TextMeasure"
           ],
@@ -2258,6 +2340,7 @@
       "description": "Sends output to a file.",
       "scriptBody": "",
       "cmdletName": "Out-File",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -2344,6 +2427,7 @@
           "defaultValue": "",
           "description": "Adds the output to the end of an existing file.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2357,6 +2441,7 @@
           "defaultValue": "",
           "description": "Overrides the read-only attribute and overwrites an existing read-only file. The **Force** parameter doesn\u0027t override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2370,6 +2455,7 @@
           "defaultValue": "",
           "description": "**NoClobber** prevents an existing file from being overwritten and displays a message that the file already exists. By default, if a file exists in the specified path, \u0060Out-File\u0060 overwrites the file without warning.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2396,6 +2482,7 @@
           "defaultValue": "",
           "description": "Specifies that the content written to the file doesn\u0027t end with a newline character. The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2425,6 +2512,7 @@
       "description": "Selects objects or object properties.",
       "scriptBody": "",
       "cmdletName": "Select-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -2515,6 +2603,7 @@
           "defaultValue": "",
           "description": "Specifies that if a subset of the input objects has identical properties and values, only a single member of the subset should be selected. **Unique** selects values _after_ other filtering parameters are applied. This parameter is case-sensitive. As a result, strings that differ only in character casing are considered to be unique. Add the **CaseInsensitive** parameter to perform case-insensitive comparisons.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2528,6 +2617,7 @@
           "defaultValue": "",
           "description": "By default, when you use the **Unique** parameter the cmdlet uses case-sensitive comparisons. When you use this parameter, the cmdlet uses case-insensitive comparisons. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2601,6 +2691,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet turns off optimization. PowerShell runs commands in the order that they appear in the command pipeline and lets them generate all objects. By default, if you include a \u0060Select-Object\u0060 command with the **First** or **Index** parameters in a command pipeline, PowerShell stops the command that generates the objects as soon as the selected number of objects is generated. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultParameter",
             "IndexParameter"
@@ -2648,6 +2739,7 @@
       "description": "Finds text in strings and files.",
       "scriptBody": "",
       "cmdletName": "Select-String",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -3660,6 +3752,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to output only the matching strings, rather than **MatchInfo** objects. This behavior is most similar to the Unix \u0060grep\u0060 or Windows \u0060findstr.exe\u0060 commands. This parameter was introduced in PowerShell 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ObjectRaw",
             "FileRaw",
@@ -3680,6 +3773,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet uses a simple match rather than a regular expression match. In a simple match, \u0060Select-String\u0060 searches the input for the text in the **Pattern** parameter. It doesn\u0027t interpret the value of the **Pattern** parameter as a regular expression statement. Also, when **SimpleMatch** is used, the **Matches** property of the **MatchInfo** object returned is empty. \u003E [!NOTE] \u003E When this parameter is used with the **AllMatches** parameter, the **AllMatches** is ignored.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3693,6 +3787,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet matches are case-sensitive. By default, matches aren\u0027t case-sensitive.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3706,6 +3801,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet returns a simple response instead of a **MatchInfo** object. The returned value is \u0060$true\u0060 if the pattern is found or \u0060$null\u0060 if the pattern is not found.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Object",
             "File",
@@ -3723,6 +3819,7 @@
           "defaultValue": "",
           "description": "Only the first instance of matching text is returned from each input file. This is the most efficient way to retrieve a list of files that have contents matching the regular expression. By default, \u0060Select-String\u0060 returns a **MatchInfo** object for each match it finds.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3736,6 +3833,7 @@
           "defaultValue": "",
           "description": "By default, \u0060Select-String\u0060 highlights the string that matches the pattern you searched for with the **Pattern** parameter. The **NoEmphasis** parameter disables the highlighting. The emphasis uses negative colors based on your PowerShell background and text colors. For example, if your PowerShell colors are a black background with white text. The emphasis is a white background with black text. This parameter was introduced in PowerShell 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3774,6 +3872,7 @@
           "defaultValue": "",
           "description": "The **NotMatch** parameter finds text that doesn\u0027t match the specified pattern.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3787,6 +3886,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet searches for more than one match in each line of text. Without this parameter, \u0060Select-String\u0060 finds only the first match in each line of text. When \u0060Select-String\u0060 finds more than one match in a line of text, it still emits only one **MatchInfo** object for the line, but the **Matches** property of the object contains all the matches. \u003E [!NOTE] \u003E This parameter is ignored when used in combination with the **SimpleMatch** parameter. If you wish \u003E to return all matches and the pattern that you are searching for contains regular expression \u003E characters, you must escape those characters rather than using **SimpleMatch**. See \u003E [about_Regular_Expressions](../Microsoft.PowerShell.Core/About/about_Regular_Expressions.md) for \u003E more information about escaping regular expressions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3837,6 +3937,7 @@
       "description": "Sorts objects by property values.",
       "scriptBody": "",
       "cmdletName": "Sort-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -3864,6 +3965,7 @@
           "defaultValue": "",
           "description": "The sorted objects are delivered in the order they were received when the sort criteria are equal. This parameter was added in PowerShell v6.2.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Default"
           ],
@@ -3878,6 +3980,7 @@
           "defaultValue": "",
           "description": "Indicates that \u0060Sort-Object\u0060 sorts the objects in descending order. The default is ascending order. To sort multiple properties with different sort orders, use a hash table. For example, with a hash table you can sort one property in ascending order and another property in descending order.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3891,6 +3994,7 @@
           "defaultValue": "",
           "description": "Indicates that \u0060Sort-Object\u0060 eliminates duplicates and returns only the unique members of the collection. The first instance of a unique value is included in the sorted output. **Unique** is case-insensitive. Strings that only differ by character case are considered the same. For example, character and CHARACTER.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3978,6 +4082,7 @@
           "defaultValue": "",
           "description": "Indicates that the sort is case-sensitive. By default, sorts aren\u0027t case-sensitive.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3993,6 +4098,7 @@
       "description": "Saves command output in a file or variable and also sends it down the pipeline.",
       "scriptBody": "",
       "cmdletName": "Tee-Object",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -4070,6 +4176,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet appends the output to the specified file. Without this parameter, the new content replaces any existing content in the file without warning. This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "File"
           ],

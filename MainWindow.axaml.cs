@@ -327,6 +327,7 @@ public partial class MainWindow : AppWindow
     private async void OnRunClicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
+        if (!vm.HasProject) return;
 
         var script = GenerateScript(vm);
         if (string.IsNullOrWhiteSpace(script)) return;
@@ -438,6 +439,12 @@ public partial class MainWindow : AppWindow
             var json = await reader.ReadToEndAsync();
             ProjectSerializer.Deserialize(json, vm);
             vm.CurrentFilePath = file.TryGetLocalPath();
+
+            // Frame the loaded graph. Posted via the dispatcher so the canvas
+            // has finished its layout pass (Bounds would be 0 synchronously
+            // when the empty-state overlay was just dismissed).
+            Dispatcher.UIThread.Post(() => GraphCanvas.ZoomToFit(selectionOnly: false),
+                DispatcherPriority.Loaded);
         }
         catch (Exception ex)
         {
@@ -447,6 +454,7 @@ public partial class MainWindow : AppWindow
 
     private async void OnSavePblxClicked(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is GraphCanvasViewModel vm && !vm.HasProject) return;
         await SaveProjectAsync();
     }
 
@@ -493,6 +501,7 @@ public partial class MainWindow : AppWindow
     private async void OnExportPs1Clicked(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GraphCanvasViewModel vm) return;
+        if (!vm.HasProject) return;
 
         var script = GenerateScript(vm);
         if (string.IsNullOrWhiteSpace(script)) return;
@@ -561,6 +570,12 @@ public partial class MainWindow : AppWindow
         if (DataContext is not GraphCanvasViewModel vm) return;
         if (await ConfirmDiscardAsync())
             vm.NewGraph();
+    }
+
+    private void OnHelpClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+        vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
     }
 
     private async Task<bool> ConfirmDiscardAsync()
@@ -656,6 +671,49 @@ public partial class MainWindow : AppWindow
             p.IsDescriptionExpanded = !p.IsDescriptionExpanded;
             e.Handled = true;
         }
+    }
+
+    private async void OnBrowsePathClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not NodeParameter param) return;
+
+        // Seed the picker at the current value's folder when it looks resolvable;
+        // otherwise Avalonia picks a platform default. Skips the "where does ./
+        // resolve to?" guessing game the user called out as the core UX gap.
+        IStorageFolder? suggestedStart = null;
+        var existing = param.EffectiveValue;
+        if (!string.IsNullOrWhiteSpace(existing))
+        {
+            try
+            {
+                var full = Path.GetFullPath(existing);
+                var dir = Path.GetDirectoryName(full);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    suggestedStart = await StorageProvider.TryGetFolderFromPathAsync(dir);
+            }
+            catch
+            {
+                // Path.GetFullPath throws on invalid chars; fall back to default.
+            }
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = $"Select {param.Name}",
+            AllowMultiple = param.AllowsMultiplePaths,
+            SuggestedStartLocation = suggestedStart,
+        });
+
+        if (files.Count == 0) return;
+
+        var paths = files
+            .Select(f => f.TryGetLocalPath())
+            .Where(p => !string.IsNullOrEmpty(p))
+            .Cast<string>()
+            .ToList();
+        if (paths.Count == 0) return;
+
+        param.Value = string.Join(", ", paths);
     }
 
     private void OnQuickAddPanelPressed(object? sender, PointerPressedEventArgs e)

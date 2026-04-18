@@ -16,6 +16,21 @@ public class NodeTemplate
     public string CmdletName { get; set; } = "";
     public ContainerType ContainerType { get; set; } = ContainerType.None;
 
+    /// <summary>
+    /// Structural role. <see cref="NodeKind.Cmdlet"/> (default) spawns the full
+    /// V2 shape; <see cref="NodeKind.Value"/> spawns a compact single-output
+    /// literal producer and reads <see cref="ValueExpression"/>.
+    /// </summary>
+    public NodeKind Kind { get; set; } = NodeKind.Cmdlet;
+
+    /// <summary>
+    /// For <see cref="NodeKind.Value"/> templates: the PowerShell expression
+    /// the spawned node emits. May be a fixed literal (<c>$true</c>) or a
+    /// template containing <c>{0}</c>, substituted with the value of the
+    /// node's first parameter at codegen (e.g. <c>$env:{0}</c>).
+    /// </summary>
+    public string ValueExpression { get; set; } = "";
+
     /// <summary>V2: node has an ExecIn triangle pin. Default true.</summary>
     public bool HasExecIn { get; set; } = true;
 
@@ -74,6 +89,13 @@ public class ParameterDef
 
     /// <summary>V2: true = <c>[Parameter(ValueFromPipeline)]</c>. Primary-pipeline-target candidate.</summary>
     public bool IsPipelineInput { get; set; }
+
+    /// <summary>
+    /// V2: true = PowerShell <c>[switch]</c> parameter — presence-only, no value.
+    /// Rendered as a checkbox badge on the node, not a data-input pin, and
+    /// codegen emits bare <c>-Name</c> when set (vs <c>-Name $true</c> for a typed Bool).
+    /// </summary>
+    public bool IsSwitch { get; set; }
 
     /// <summary>
     /// V2: parameter sets this param belongs to. Empty = "all sets" (common params

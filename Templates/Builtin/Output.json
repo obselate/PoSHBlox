@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "Output",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Formats the output as a list of properties in which each property appears on a new line.",
       "scriptBody": "",
       "cmdletName": "Format-List",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -73,6 +74,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet sends errors through the pipeline. This parameter is rarely used, but can be used as a debugging aid when you are formatting expressions in a \u0060Format-List\u0060 command, and the expressions do not appear to be working.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -86,6 +88,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet displays errors at the command line. This parameter is rarely used, but can be used as a debugging aid when you are formatting expressions in a \u0060Format-List\u0060 command, and the expressions do not appear to be working.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -99,6 +102,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet displays all the error information. Use with the **DisplayError** or **ShowError** parameter. By default, when an error object is written to the error or display streams, only some error information is displayed. Also required when formatting certain .NET types. For more information, see the [Notes](#notes) section.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -145,6 +149,7 @@
       "description": "Formats the output as a table.",
       "scriptBody": "",
       "cmdletName": "Format-Table",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -167,6 +172,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet adjusts the column size and number of columns based on the width of the data. By default, the column size and number are determined by the view.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -180,6 +186,7 @@
           "defaultValue": "",
           "description": "Repeats displaying the header of a table after every screen full. The repeated header is useful when the output is piped to a pager such as \u0060less\u0060 or \u0060more\u0060 or paging with a screen reader.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -193,6 +200,7 @@
           "defaultValue": "",
           "description": "Omits the column headings from the table.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -206,6 +214,7 @@
           "defaultValue": "",
           "description": "Displays text that exceeds the column width on the next line. By default, text that exceeds the column width is truncated.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -258,6 +267,7 @@
           "defaultValue": "",
           "description": "This parameter sends errors through the pipeline. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -271,6 +281,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet displays errors on the command line. This parameter can be used as a debugging aid when you\u0027re formatting expressions in a \u0060Format-Table\u0060 command and need to troubleshoot the expressions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -284,6 +295,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet directs the cmdlet to display all the error information. Use with the **DisplayError** or **ShowError** parameter. By default, when an error object is written to the error or display streams, only some error information is displayed. Also required when formatting certain .NET types. For more information, see the [Notes](#notes) section.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -330,6 +342,7 @@
       "description": "Writes a debug message to the console.",
       "scriptBody": "",
       "cmdletName": "Write-Debug",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Message",
@@ -369,6 +382,7 @@
       "description": "Writes an object to the error stream.",
       "scriptBody": "",
       "cmdletName": "Write-Error",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Message",
@@ -600,6 +614,7 @@
       "description": "Writes customized output to a host.",
       "scriptBody": "",
       "cmdletName": "Write-Host",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Object",
@@ -636,6 +651,7 @@
           "defaultValue": "",
           "description": "The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -724,6 +740,7 @@
       "description": "Specifies how PowerShell handles information stream data for a command.",
       "scriptBody": "",
       "cmdletName": "Write-Information",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "MessageData",
@@ -776,6 +793,7 @@
       "description": "Writes the specified objects to the pipeline.",
       "scriptBody": "",
       "cmdletName": "Write-Output",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -813,6 +831,7 @@
           "defaultValue": "",
           "description": "By default, the \u0060Write-Output\u0060 cmdlet always enumerates its output. The **NoEnumerate** parameter suppresses the default behavior, and prevents \u0060Write-Output\u0060 from enumerating output. The **NoEnumerate** parameter has no effect if the command is wrapped in parentheses, because the parentheses force enumeration. For example, \u0060(Write-Output 1,2,3 -NoEnumerate)\u0060 still enumerates the array. The **NoEnumerate** parameter is only useful within a pipeline. Trying to see the effects of **NoEnumerate** in the console is problematic because PowerShell adds \u0060Out-Default\u0060 to the end of every command line, which results in enumeration. But if you pipe \u0060Write-Output -NoEnumerate\u0060 to another cmdlet, the downstream cmdlet receives the collection object, not the enumerated items of the collection.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -828,6 +847,7 @@
       "description": "Writes text to the verbose message stream.",
       "scriptBody": "",
       "cmdletName": "Write-Verbose",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Message",
@@ -867,6 +887,7 @@
       "description": "Writes a warning message.",
       "scriptBody": "",
       "cmdletName": "Write-Warning",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Message",
@@ -906,6 +927,7 @@
       "description": "Sends output to the command line.",
       "scriptBody": "",
       "cmdletName": "Out-Host",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -928,6 +950,7 @@
           "defaultValue": "",
           "description": "Indicates that \u0060Out-Host\u0060 displays one page of output at a time. The page size is determined by the characteristics of the host. After outputting the first page, the command waits for user input before the remaining pages are displayed. Press the \u003Ckbd\u003ESpacebar\u003C/kbd\u003E to display the next page of output or the \u003Ckbd\u003EEnter\u003C/kbd\u003E key to view the next line of output. Press \u003Ckbd\u003EQ\u003C/kbd\u003E to quit. Using **Paging** is similar to using the **more** command. \u003E [!NOTE] \u003E The **Paging** parameter isn\u0027t supported by the PowerShell ISE host.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -957,6 +980,7 @@
       "description": "Hides the output instead of sending it down the pipeline or displaying it.",
       "scriptBody": "",
       "cmdletName": "Out-Null",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",

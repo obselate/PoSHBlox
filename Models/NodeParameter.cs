@@ -29,6 +29,14 @@ public partial class NodeParameter : ObservableObject
     public bool IsConfigOnly { get; set; }
 
     /// <summary>
+    /// True = PowerShell <c>[switch]</c> parameter — presence-only, no value.
+    /// Switches skip data-input pin creation (they're checkboxes in the
+    /// properties panel, not wireable ports) and codegen emits bare <c>-Name</c>
+    /// when set vs omitting entirely when not, never <c>-Name $true</c>.
+    /// </summary>
+    public bool IsSwitch { get; set; }
+
+    /// <summary>
     /// Parameter sets this param belongs to. Empty = visible in every set
     /// (common params, legacy templates). Non-empty = visible only when
     /// the node's <see cref="GraphNode.ActiveParameterSet"/> is in this list.
@@ -101,10 +109,25 @@ public partial class NodeParameter : ObservableObject
     /// </summary>
     [ObservableProperty] private bool _isEffectivelyMandatory;
 
-    /// <summary>Composite visibility gate used by the properties-panel ItemTemplate.</summary>
-    public bool ShouldRenderInPanel => !IsArgument && IsInActiveSet;
+    /// <summary>
+    /// Composite visibility gate used by the properties-panel's main parameter
+    /// list. Switches are filtered out here so they only render in the dedicated
+    /// Switches section, not twice.
+    /// </summary>
+    public bool ShouldRenderInPanel => !IsArgument && !IsSwitch && IsInActiveSet;
 
-    partial void OnIsInActiveSetChanged(bool value) => OnPropertyChanged(nameof(ShouldRenderInPanel));
+    /// <summary>
+    /// Visibility gate for the dedicated Switches section. Mirrors
+    /// <see cref="ShouldRenderInPanel"/>'s argument/set filters but selects
+    /// exactly the switch params the other list excludes.
+    /// </summary>
+    public bool ShouldRenderAsSwitch => !IsArgument && IsSwitch && IsInActiveSet;
+
+    partial void OnIsInActiveSetChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShouldRenderInPanel));
+        OnPropertyChanged(nameof(ShouldRenderAsSwitch));
+    }
 
     /// <summary>Which node owns this parameter. Set by NodeFactory; null for loose ParameterDefs.</summary>
     public GraphNode? Owner { get; set; }
@@ -145,7 +168,7 @@ public partial class NodeParameter : ObservableObject
     {
         ParamType.String or ParamType.Path => "string",
         ParamType.Int => "int",
-        ParamType.Bool => "switch",
+        ParamType.Bool => IsSwitch ? "switch" : "bool",
         ParamType.StringArray => "string[]",
         ParamType.ScriptBlock => "scriptblock",
         ParamType.Credential => "PSCredential",
@@ -158,9 +181,38 @@ public partial class NodeParameter : ObservableObject
 
     // ── Type-based UI helpers ──────────────────────────────────
 
-    public bool IsBool => Type == ParamType.Bool;
+    /// <summary>
+    /// True for typed <c>[bool]</c> parameters only — switches (<see cref="IsSwitch"/>)
+    /// render as a separate checkbox group in the panel, not the inline Bool editor.
+    /// </summary>
+    public bool IsBool => Type == ParamType.Bool && !IsSwitch;
     public bool IsEnum => Type == ParamType.Enum && ValidValues.Length > 0;
-    public bool IsTextInput => !IsBool && !IsEnum;
+    public bool IsTextInput => !IsBool && !IsEnum && !IsSwitch;
+
+    /// <summary>
+    /// True when the properties-panel value editor should offer a Browse button
+    /// that launches a file picker. Matches catalog entries the user typically
+    /// fills with a filesystem path: <c>ParamType.Path</c> directly, or the
+    /// common path-named <c>string[]</c> params (<c>Import-Csv</c>'s <c>Path</c>
+    /// is <c>StringArray</c> because the cmdlet binds <c>string[]</c>). Registry
+    /// <c>Path</c> params share the same <c>ParamType.Path</c> classification
+    /// and also get the button — harmless false positive; user can cancel.
+    /// </summary>
+    public bool IsPathLike => Type == ParamType.Path
+        || (Type == ParamType.StringArray && IsPathLikeName(Name));
+
+    /// <summary>
+    /// Parameter accepts multiple paths at once (<c>string[]</c>). Tells the
+    /// picker to allow multi-select and the caller to join with commas, which
+    /// <see cref="ToPowerShellArg"/> already expands to a PS array literal.
+    /// </summary>
+    public bool AllowsMultiplePaths => IsPathLike && Type == ParamType.StringArray;
+
+    private static bool IsPathLikeName(string name) => name switch
+    {
+        "Path" or "LiteralPath" or "FilePath" or "OutFile" or "File" => true,
+        _ => false,
+    };
 
     /// <summary>
     /// Bool-typed wrapper for CheckBox binding.
@@ -203,7 +255,9 @@ public partial class NodeParameter : ObservableObject
     partial void OnValueChanged(string value)
     {
         OnPropertyChanged(nameof(EffectiveValue));
-        if (IsBool) OnPropertyChanged(nameof(BoolValue));
+        // Switches share the BoolValue accessor with typed bools (true/false
+        // → checked/unchecked), so their checkbox also needs a nudge on change.
+        if (IsBool || IsSwitch) OnPropertyChanged(nameof(BoolValue));
         if (IsEnum) OnPropertyChanged(nameof(SelectedEnumValue));
     }
 
@@ -231,25 +285,44 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            ParamType.String or ParamType.Path =>
-                $"-{Name} \"{val.Replace("\"", "`\"")}\"",
+            // Double-quoted: textbox content is wrapped as a PowerShell
+            // interpolated string. Users can embed $var or $(...) and get
+            // runtime expansion. The only characters that need escaping
+            // are backtick (the escape char itself) and the quote.
+            // NOTE: backtick must be escaped first, otherwise the
+            // subsequent " → `" replacement would itself be clobbered.
+            ParamType.String or ParamType.Path or ParamType.Enum =>
+                $"-{Name} \"{val.Replace("`", "``").Replace("\"", "`\"")}\"",
 
             ParamType.Int =>
                 $"-{Name} {val}",
 
-            ParamType.Bool =>
+            // Switch: presence-only. True → bare -Name; false → omit entirely.
+            // Typed [bool]: explicit $true/$false so cmdlets that distinguish
+            // (e.g. -Confirm:$false) get the literal they need.
+            ParamType.Bool when IsSwitch =>
                 val.Equals("true", StringComparison.OrdinalIgnoreCase) ? $"-{Name}" : "",
 
-            ParamType.StringArray =>
-                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+            ParamType.Bool =>
+                $"-{Name} ${val.ToLowerInvariant()}",
+
+            // Comma-separated input expands to a double-quoted array. Each
+            // element is escaped the same way as a String literal. A value
+            // like "A,B,C" must emit as @("A","B","C") — emitting it bare
+            // would make Select-Object treat it as one literal property name.
+            // Edge: items that themselves contain commas need a different
+            // input affordance (chip editor) — documented limitation.
+            ParamType.StringArray or ParamType.Collection =>
+                $"-{Name} @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s.Replace("`", "``").Replace("\"", "`\"")}\""))})",
 
             ParamType.ScriptBlock =>
                 $"-{Name} {{ {val} }}",
 
-            ParamType.Enum =>
-                $"-{Name} \"{val}\"",
-
-            _ => $"-{Name} \"{val}\""
+            // Any / Object / Credential / HashTable have no canonical literal
+            // form — the user's value is passed through as a raw PowerShell
+            // expression. Quoting these would break $cred references and
+            // @{...} hashtable literals.
+            _ => $"-{Name} {val}"
         };
     }
 
@@ -266,30 +339,30 @@ public partial class NodeParameter : ObservableObject
 
         return Type switch
         {
-            ParamType.String or ParamType.Path =>
-                $"{Name} = \"{val.Replace("\"", "`\"")}\"",
+            // Double-quoted literal — see ToPowerShellArg for the rationale.
+            ParamType.String or ParamType.Path or ParamType.Enum =>
+                $"{Name} = \"{val.Replace("`", "``").Replace("\"", "`\"")}\"",
 
             ParamType.Int =>
                 $"{Name} = {val}",
 
-            // Switches in splat form get explicit $true (no omit-when-false
-            // semantic like the inline form — if the value is 'false' we
-            // skipped above via the IsNullOrWhiteSpace guard catching empty,
-            // but an explicit "false" still emits; splat can legitimately
-            // carry false).
+            // Switches are presence-only: false → omit, true → $true. Typed
+            // [bool] parameters splat their explicit value so false survives.
+            ParamType.Bool when IsSwitch =>
+                val.Equals("true", StringComparison.OrdinalIgnoreCase) ? $"{Name} = $true" : "",
+
             ParamType.Bool =>
                 $"{Name} = ${val.ToLowerInvariant()}",
 
-            ParamType.StringArray =>
-                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s}\""))})",
+            ParamType.StringArray or ParamType.Collection =>
+                $"{Name} = @({string.Join(", ", val.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s.Replace("`", "``").Replace("\"", "`\"")}\""))})",
 
             ParamType.ScriptBlock =>
                 $"{Name} = {{ {val} }}",
 
-            ParamType.Enum =>
-                $"{Name} = \"{val}\"",
-
-            _ => $"{Name} = \"{val}\""
+            // Any / Object / Credential / HashTable: user value is a raw
+            // expression, not a literal — see ToPowerShellArg's matching case.
+            _ => $"{Name} = {val}"
         };
     }
 }

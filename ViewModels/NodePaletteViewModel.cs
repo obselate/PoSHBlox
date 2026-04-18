@@ -247,12 +247,16 @@ public partial class NodePaletteViewModel : ObservableObject
         // No filters — prepend a Recent pseudo-category when we have spawns this session.
         if (RecentCmdletNames.Count > 0)
         {
-            // Some cmdlets (e.g. New-Item) legitimately appear in multiple catalog
-            // categories; keep the first template seen for the Recent lookup so
-            // the same key doesn't throw on ToDictionary.
-            var byKey = allTemplates
-                .GroupBy(t => string.IsNullOrEmpty(t.CmdletName) ? t.Name : t.CmdletName)
-                .ToDictionary(g => g.Key, g => g.First());
+            // Builtin + Custom catalogs can legitimately define overlapping
+            // cmdlet entries (e.g. New-Item appears in more than one category's
+            // introspection output). First-wins keeps Recent stable and avoids
+            // ToDictionary's duplicate-key throw at spawn time.
+            var byKey = new Dictionary<string, NodeTemplate>();
+            foreach (var t in allTemplates)
+            {
+                var k = string.IsNullOrEmpty(t.CmdletName) ? t.Name : t.CmdletName;
+                if (!byKey.ContainsKey(k)) byKey[k] = t;
+            }
             var recent = RecentCmdletNames
                 .Select(k => byKey.TryGetValue(k, out var tpl) ? tpl : null)
                 .Where(t => t != null)

@@ -169,6 +169,12 @@ public class NodeGraphRenderer
 
     private void DrawNode(DrawingContext ctx, GraphNode node, NodePort? wireStartPort = null)
     {
+        if (node.IsValueNode)
+        {
+            DrawValueNode(ctx, node, wireStartPort);
+            return;
+        }
+
         double hh = GraphNode.HeaderHeight;
         double width = NodeLayout.GetEffectiveWidth(node);
         var rect = new Rect(node.X, node.Y, width, node.Height);
@@ -203,9 +209,10 @@ public class NodeGraphRenderer
             ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
-        // Title + category badge
+        // Title + badge. Match the container inset — exec pin column sits at
+        // X+16 ±8 one row below, so titles at +14 read as a column collision.
         var title = MakeText(node.Title, 13, FontWeight.Bold, GraphTheme.TextPrimary);
-        ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
+        ctx.DrawText(title, new Point(node.X + 32, node.Y + (hh - title.Height) / 2));
 
         // Collapse-state chevron on the header (right side, dim). Indicates the
         // node can be collapsed/expanded — wired to the C keyboard shortcut /
@@ -254,6 +261,42 @@ public class NodeGraphRenderer
         foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
     }
 
+    /// <summary>
+    /// Compact rendering for <see cref="NodeKind.Value"/> nodes: no header,
+    /// no exec pins — just a rounded pill with the resolved expression text
+    /// anchored left and a single data output pin on the right edge. Height
+    /// is fixed at <see cref="GraphNode.ValueNodeHeight"/>.
+    /// </summary>
+    private void DrawValueNode(DrawingContext ctx, GraphNode node, NodePort? wireStartPort)
+    {
+        double width = NodeLayout.GetEffectiveWidth(node);
+        double height = GraphNode.ValueNodeHeight;
+        var rect = new Rect(node.X, node.Y, width, height);
+        var typeColor = node.PrimaryDataOutput != null
+            ? GraphTheme.GetDataTypeColor(node.PrimaryDataOutput.DataType)
+            : GraphTheme.GetCategoryColor(node.Category);
+
+        // Shadow
+        ctx.DrawRectangle(BrushFor(GraphTheme.NodeShadow), null,
+            new RoundedRect(rect.Translate(new Vector(GraphTheme.NodeShadowOffset, GraphTheme.NodeShadowOffset)),
+                GraphTheme.NodeCornerRadius));
+
+        // Body — typed border so users can see at a glance what the pin emits
+        // (e.g. a $true node reads amber, a $PSScriptRoot reads path-green).
+        var borderColor = node.IsSelected ? GraphTheme.NodeSelectedBorder : typeColor;
+        double borderThickness = node.IsSelected ? 2.5 : 1.0;
+        ctx.DrawRectangle(BrushFor(GraphTheme.NodeBackground),
+            PenFor(borderColor, borderThickness),
+            new RoundedRect(rect, GraphTheme.NodeCornerRadius));
+
+        // Expression label — left-anchored, vertically centered.
+        var label = MakeText(node.ResolvedValueExpression, 12, FontWeight.SemiBold, GraphTheme.TextPrimary);
+        ctx.DrawText(label, new Point(node.X + 10, node.Y + (height - label.Height) / 2));
+
+        // Single output pin on the right edge.
+        foreach (var port in node.Outputs) DrawPort(ctx, node, port, wireStartPort);
+    }
+
     // ── Containers ─────────────────────────────────────────────
 
     private void DrawContainer(DrawingContext ctx, GraphNode node,
@@ -285,9 +328,11 @@ public class NodeGraphRenderer
             ctx.DrawRectangle(HeaderGradient(), null, headerRect);
         }
 
-        // Title + badge
+        // Title + badge. Start well clear of the ExecIn triangle, which extends
+        // from the node's left edge out to +24 (pin centered at +16, triangle
+        // ±8). 32 gives a small visual gap past the triangle tip.
         var title = MakeText(node.Title, 14, FontWeight.Bold, GraphTheme.TextPrimary);
-        ctx.DrawText(title, new Point(node.X + 14, node.Y + (hh - title.Height) / 2));
+        ctx.DrawText(title, new Point(node.X + 32, node.Y + (hh - title.Height) / 2));
 
         // Zones — highlight zone under cursor when dragging a node
         foreach (var zone in node.Zones)
@@ -507,6 +552,14 @@ public class NodeGraphRenderer
     /// </summary>
     public static Point GetPortPosition(GraphNode node, NodePort port)
     {
+        // Value nodes are single-row: their one data output sits on the right
+        // edge, vertically centered. No header, no exec row to offset for.
+        if (node.IsValueNode)
+        {
+            double vw = NodeLayout.GetEffectiveWidth(node);
+            return new Point(node.X + vw, node.Y + GraphNode.ValueNodeHeight / 2);
+        }
+
         double headerH = node.IsContainer ? GraphNode.ContainerHeaderHeight : GraphNode.HeaderHeight;
         double width = node.IsContainer ? node.ContainerWidth : NodeLayout.GetEffectiveWidth(node);
 

@@ -19,7 +19,7 @@ namespace PoSHBlox.Services;
 /// </summary>
 public static class ProjectSerializer
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new(PblxJsonContext.Default.Options)
     {
@@ -89,6 +89,8 @@ public static class ProjectSerializer
             Y = node.Y,
             Width = node.Width,
             IsCollapsed = node.IsCollapsed,
+            Kind = node.Kind.ToString(),
+            ValueExpression = node.ValueExpression,
             KnownParameterSets = node.KnownParameterSets,
             ActiveParameterSet = node.ActiveParameterSet,
             ContainerType = node.ContainerType.ToString(),
@@ -121,6 +123,7 @@ public static class ProjectSerializer
                 Value = p.Value,
                 IsArgument = p.IsArgument,
                 IsPipelineInput = p.IsPipelineInput,
+                IsSwitch = p.IsSwitch,
                 ParameterSets = p.ParameterSets,
                 MandatoryInSets = p.MandatoryInSets,
             });
@@ -151,7 +154,8 @@ public static class ProjectSerializer
         if (doc.Version < CurrentVersion)
         {
             Debug.WriteLine($"[ProjectSerializer] Migrating v{doc.Version} → v{CurrentVersion}.");
-            V1Migrator.Migrate(doc);
+            if (doc.Version < 2) V1Migrator.Migrate(doc);
+            if (doc.Version < 3) V2ToV3Migrator.Migrate(doc);
         }
         else if (doc.Version > CurrentVersion)
         {
@@ -190,9 +194,13 @@ public static class ProjectSerializer
                 Y = dto.Y,
                 Width = dto.Width,
                 IsCollapsed = dto.IsCollapsed,
+                ValueExpression = dto.ValueExpression,
                 KnownParameterSets = dto.KnownParameterSets,
                 ActiveParameterSet = dto.ActiveParameterSet,
             };
+
+            if (Enum.TryParse<NodeKind>(dto.Kind, ignoreCase: true, out var kind))
+                node.Kind = kind;
 
             if (Enum.TryParse<ContainerType>(dto.ContainerType, out var ct))
                 node.ContainerType = ct;
@@ -226,6 +234,7 @@ public static class ProjectSerializer
                     Value = pDto.Value,
                     IsArgument = pDto.IsArgument,
                     IsPipelineInput = pDto.IsPipelineInput,
+                    IsSwitch = pDto.IsSwitch,
                     ParameterSets = pDto.ParameterSets,
                     MandatoryInSets = pDto.MandatoryInSets,
                     Owner = node,

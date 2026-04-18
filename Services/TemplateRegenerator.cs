@@ -259,7 +259,7 @@ public static class TemplateRegenerator
 
         var catalog = new TemplateCatalogDto
         {
-            Version = 2,
+            Version = 3,
             Category = category,
             IntrospectedHosts = introspectedHosts,
         };
@@ -294,6 +294,7 @@ public static class TemplateRegenerator
                     Description = p.Description,
                     ValidValues = p.ValidValues ?? [],
                     IsPipelineInput = p.IsPipelineInput,
+                    IsSwitch = p.IsSwitch,
                     ParameterSets = p.ParameterSets,
                     MandatoryInSets = p.MandatoryInSets,
                     SupportedEditions = new List<string>(p.SupportedEditions),

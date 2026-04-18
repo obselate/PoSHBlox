@@ -952,6 +952,8 @@ public class NodeGraphCanvas : Control
         {
             var n = _vm.Nodes[i];
             if (n.IsContainer) continue;
+            // Value nodes have no header / chevron to hit.
+            if (n.IsValueNode) continue;
 
             double w = NodeLayout.GetEffectiveWidth(n);
             double cx = n.X + w - 24;

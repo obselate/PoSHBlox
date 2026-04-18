@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "Network / Remote",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Sends ICMP echo request packets, or pings, to one or more computers.",
       "scriptBody": "",
       "cmdletName": "Test-Connection",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "TargetName",
@@ -27,7 +28,10 @@
         "RepeatPing",
         "TraceRoute",
         "MtuSizeDetect",
-        "TcpPort"
+        "TcpPort",
+        "Default",
+        "Source",
+        "Quiet"
       ],
       "defaultParameterSet": "DefaultPing",
       "supportedEditions": [
@@ -41,6 +45,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to do a ping test. This is the default mode for the \u0060Test-Connection\u0060 cmdlet.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultPing",
             "RepeatPing"
@@ -56,6 +61,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to use the IPv4 protocol for the test.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultPing",
             "RepeatPing",
@@ -74,6 +80,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to use the IPv6 protocol for the test.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultPing",
             "RepeatPing",
@@ -92,6 +99,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to attempt to resolve the DNS name of the target. When used in conjunction with the **Traceroute** parameter, the DNS names of all intermediate hosts will also be retrieved, if possible.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultPing",
             "RepeatPing",
@@ -196,6 +204,7 @@
           "defaultValue": "",
           "description": "This parameter sets the **Don\u0027t Fragment** flag in the IP header. You can use this parameter with the **BufferSize** parameter to test the Path MTU size. For more information about Path MTU, see the [Path MTU Discovery](https://wikipedia.org/wiki/Path_MTU_Discovery) article in wikipedia.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "DefaultPing",
             "RepeatPing"
@@ -212,6 +221,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to send ping requests continuously. When the value of **TargetName** is an array of targets, the cmdlet repeats the ping requests for the first target only. It ignores the remaining targets. This parameter can\u0027t be used with the **Count** parameter.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "RepeatPing",
             "TcpPort"
@@ -229,6 +239,7 @@
           "defaultValue": "",
           "description": "The **Quiet** parameter returns a **Boolean** value. Using this parameter suppresses all errors. Each connection that\u0027s tested returns a **Boolean** value. If the **TargetName** parameter specifies multiple computers, an array of **Boolean** values is returned. If **any** ping to a given target succeeds, \u0060$true\u0060 is returned. If **all** pings to a given target fail, \u0060$false\u0060 is returned.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Quiet"
           ],
@@ -271,6 +282,7 @@
           "defaultValue": "",
           "description": "This parameter is used to discover the Path MTU size. The cmdlet returns a **PingReply#MTUSize** object that contains the Path MTU size to the target. For more information about Path MTU, see the [Path MTU Discovery](https://wikipedia.org/wiki/Path_MTU_Discovery) article in wikipedia.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "MtuSizeDetect"
           ],
@@ -288,6 +300,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to do a traceroute test. When this parameter is used, the cmdlet returns a \u0060TestConnectionCommand\u002BTraceStatus\u0060 object.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TraceRoute"
           ],
@@ -321,6 +334,7 @@
           "defaultValue": "",
           "description": "When you use the **Detailed** parameter, this cmdlet returns a detailed information about the status of the TCP connection attempts. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "TcpPort"
           ],
@@ -335,6 +349,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet runs as a background job. When you specify the AsJob parameter, the command immediately returns an object that represents the background job. You can continue to work in the session while the job finishes. To get the job results, use the \u0060Receive-Job\u0060 cmdlet. For more information about PowerShell background jobs, see about_Jobs (../Microsoft.PowerShell.Core/About/about_jobs.md)and about_Remote_Jobs (../Microsoft.PowerShell.Core/About/about_remote_jobs.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Source",
             "Default"
@@ -479,6 +494,7 @@
       "description": "Runs commands on local and remote computers.",
       "scriptBody": "",
       "cmdletName": "Invoke-Command",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -597,6 +613,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet uses the Secure Sockets Layer (SSL) protocol to establish a connection to the remote computer. By default, SSL isn\u0027t used. WS-Management encrypts all PowerShell content transmitted over the network. The **UseSSL** parameter is an additional protection that sends the data across an HTTPS, instead of HTTP. If you use this parameter, but SSL isn\u0027t available on the port that\u0027s used for the command, the command fails.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "FilePathComputerName"
@@ -695,6 +712,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet runs the command as a background job on a remote computer. Use this parameter to run commands that take an extensive time to finish. When you use the **AsJob** parameter, the command returns an object that represents the job, and then displays the command prompt. You can continue to work in the session while the job finishes. To manage the job, use the \u0060*-Job\u0060 cmdlets. To get the job results, use the \u0060Receive-Job\u0060 cmdlet. The **AsJob** parameter resembles using the \u0060Invoke-Command\u0060 cmdlet to run a \u0060Start-Job\u0060 cmdlet remotely. However, with **AsJob**, the job is created on the local computer, even though the job runs on a remote computer. The results of the remote job are automatically returned to the local computer. For more information about PowerShell background jobs, see [about_Jobs](About/about_Jobs.md) and [about_Remote_Jobs](About/about_Remote_Jobs.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "Session",
@@ -725,6 +743,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet runs a command or script in a disconnected session. When you use the **InDisconnectedSession** parameter, \u0060Invoke-Command\u0060 creates a persistent session on each remote computer, starts the command specified by the **ScriptBlock** or **FilePath** parameter, and then disconnects from the session. The commands continue to run in the disconnected sessions. **InDisconnectedSession** enables you to run commands without maintaining a connection to the remote sessions. And, because the session is disconnected before any results are returned, **InDisconnectedSession** makes sure that all command results are returned to the reconnected session, instead of being split between sessions. You can\u0027t use **InDisconnectedSession** with the **Session** parameter or the **AsJob** parameter. Commands that use **InDisconnectedSession** return a **PSSession** object that represents the disconnected session. They don\u0027t return the command output. To connect to the disconnected session, use the \u0060Connect-PSSession\u0060 or \u0060Receive-PSSession\u0060 cmdlets. To get the results of commands that ran in the session, use the \u0060Receive-PSSession\u0060 cmdlet. To run commands that generate output in a disconnected session, set the value of the **OutputBufferingMode** session option to **Drop**. If you intend to connect to the disconnected session, set the idle time-out in the session so that it provides sufficient time for you to connect before deleting the session. You can set the output buffering mode and idle time-out in the **SessionOption** parameter or in the \u0060$PSSessionOption\u0060 preference variable. For more information about session options, see \u0060New-PSSessionOption\u0060 and [about_Preference_Variables](About/about_preference_variables.md). For more information about the Disconnected Sessions feature, see [about_Remote_Disconnected_Sessions](About/about_Remote_Disconnected_Sessions.md). This parameter was introduced in PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "FilePathComputerName",
@@ -759,6 +778,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet omits the computer name of each object from the output display. By default, the name of the computer that generated the object appears in the display. This parameter affects only the output display. It doesn\u0027t change the object.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "Session",
@@ -847,6 +867,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet runs the specified command in the current scope. By default, \u0060Invoke-Command\u0060 runs commands in their own scope. This parameter is valid only in commands that are run in the current session, that is, commands that omit both the **ComputerName** and **Session** parameters. This parameter was introduced in PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "InProcess"
           ],
@@ -894,6 +915,7 @@
           "defaultValue": "",
           "description": "Allows redirection of this connection to an alternate Uniform Resource Identifier (URI). When you use the **ConnectionURI** parameter, the remote destination can return an instruction to redirect to a different URI. By default, PowerShell doesn\u0027t redirect connections, but you can use this parameter to allow it to redirect the connection. You can also limit the number of times the connection is redirected by changing the **MaximumConnectionRedirectionCount** session option value. Use the **MaximumRedirection** parameter of the \u0060New-PSSessionOption\u0060 cmdlet or set the **MaximumConnectionRedirectionCount** property of the \u0060$PSSessionOption\u0060 preference variable. The default value is 5.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Uri",
             "FilePathUri"
@@ -954,6 +976,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet adds an interactive security token to loopback sessions. The interactive token lets you run commands in the loopback session that get data from other computers. For example, you can run a command in the session that copies XML files from a remote computer to the local computer. A loopback session is a **PSSession** that originates and ends on the same computer. To create a loopback session, omit the **ComputerName** parameter or set its value to dot (\u0060.\u0060), localhost, or the name of the local computer. By default, loopback sessions are created using a network token, which might not provide sufficient permission to authenticate to remote computers. The **EnableNetworkAccess** parameter is effective only in loopback sessions. If you use **EnableNetworkAccess** when you create a session on a remote computer, the command succeeds, but the parameter is ignored. You can allow remote access in a loopback session using the **CredSSP** value of the **Authentication** parameter, which delegates the session credentials to other computers. To protect the computer from malicious access, disconnected loopback sessions that have interactive tokens, which are those created using **EnableNetworkAccess**, can be reconnected only from the computer on which the session was created. Disconnected sessions that use CredSSP authentication can be reconnected from other computers. For more information, see \u0060Disconnect-PSSession\u0060. This parameter was introduced in PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "FilePathComputerName",
@@ -972,6 +995,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet invokes a command as an Administrator.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ContainerId",
             "FilePathContainerId"
@@ -1069,6 +1093,7 @@
           "validValues": [
             "true"
           ],
+          "isSwitch": true,
           "parameterSets": [
             "SSHHost",
             "FilePathSSHHost"
@@ -1118,6 +1143,7 @@
           "defaultValue": "",
           "description": "Used to run the invoked command in debug mode in the remote PowerShell session.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ComputerName",
             "Session",
@@ -1252,6 +1278,7 @@
       "description": "Sends an HTTP or HTTPS request to a RESTful web service.",
       "scriptBody": "",
       "cmdletName": "Invoke-RestMethod",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Body",
@@ -1280,6 +1307,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should follow relation links. Some REST APIs support pagination via Relation Links per [RFC5988](https://tools.ietf.org/html/rfc5988#section-5). Instead of parsing the header to get the URL for the next page, you can have the cmdlet do this for you. To set how many times to follow relation links, use the **MaximumFollowRelLink** parameter. When using this switch, the cmdlet returns a collection of pages of results. Each page of results may contain multiple result items. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1328,6 +1356,7 @@
           "defaultValue": "",
           "description": "This parameter has been deprecated. Beginning with PowerShell 6.0.0, all Web requests use basic parsing only. This parameter is included for backwards compatibility only. When used, it has no effect on the operation of the cmdlet.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1393,6 +1422,7 @@
           "defaultValue": "",
           "description": "Allows sending of credentials and secrets over unencrypted connections. By default, supplying **Credential** or any **Authentication** option with a **Uri** that doesn\u0027t begin with \u0060https://\u0060 results in an error and the request aborts to prevent unintentionally communicating secrets in plain text over unencrypted connections. To override this behavior at your own risk, supply the **AllowUnencryptedAuthentication** parameter. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. It\u0027s provided only for compatibility \u003E with legacy systems that can\u0027t provide encrypted connections. Use at your own risk. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1435,6 +1465,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet uses the credentials of the current user to send the web request. This can\u0027t be used with **Authentication** or **Credential** and may not be supported on all platforms.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1474,6 +1505,7 @@
           "defaultValue": "",
           "description": "Skips certificate validation checks that include all validations such as expiration, revocation, trusted root authority, etc. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. This switch is only intended to be used \u003E against known hosts using a self-signed certificate for testing purposes. Use at your own risk. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1529,6 +1561,7 @@
           "defaultValue": "",
           "description": "Sets the **KeepAlive** value in the HTTP header to False. By default, **KeepAlive** is True. **KeepAlive** establishes a persistent connection to the server to facilitate subsequent requests.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1579,6 +1612,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should add headers to the request without validation. This switch should be used for sites that require header values that don\u0027t conform to standards. Specifying this switch disables validation to allow the value to be passed unchecked. When specified, all headers are added without validation. This switch disables validation for values passed to the **ContentType**, **Headers**, and **UserAgent** parameters. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1591,6 +1625,7 @@
           "defaultValue": "",
           "description": "Allows redirecting from HTTPS to HTTP. By default, any request that\u0027s redirected from HTTPS to HTTP results in an error and the request is aborted to prevent unintentionally communicating in plain text over unencrypted connections. To override this behavior at your own risk, use the **AllowInsecureRedirect** parameter. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1628,6 +1663,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should preserve the \u0060Authorization\u0060 header, when present, across redirections. By default, the cmdlet strips the \u0060Authorization\u0060 header before redirecting. Specifying this parameter disables this logic for cases where the header needs to be sent to the redirection location. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1698,6 +1734,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should preserve the method of the request across redirections. By default, the cmdlet changes the method to \u0060GET\u0060 when redirected. Specifying this parameter disables this logic to ensure that the intended method can be used with redirection. This feature was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1723,6 +1760,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet won\u0027t use a proxy to reach the destination. Use this to bypass the proxy configured in your internet settings or specified in the environment. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CustomMethodNoProxy",
             "StandardMethodNoProxy"
@@ -1773,6 +1811,7 @@
           "defaultValue": "",
           "description": "Uses the credentials of the current user to access the proxy server that is specified by the **Proxy** parameter. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "StandardMethod",
             "CustomMethod"
@@ -1873,6 +1912,7 @@
           "defaultValue": "",
           "description": "This parameter is valid only when the **OutFile** parameter is also used in the command. The intent is to have the results written to the file and to the pipeline.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1886,6 +1926,7 @@
           "defaultValue": "",
           "description": "Performs a best effort attempt to resume downloading a partial file. The **Resume** parameter requires the **OutFile** parameter. **Resume** only operates on the size of the local file and remote file and performs no other validation that the local file and the remote file are the same. If the local file size is smaller than the remote file size, then the cmdlet attempts to resume downloading the file and append the remaining bytes to the end of the file. If the local file size is the same as the remote file size, then no action is taken and the cmdlet assumes the download already completed. If the local file size is larger than the remote file size, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the remote server doesn\u0027t support download resuming, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the local file doesn\u0027t exist, then the local file is created and the entire remote file is downloaded. This behavior is the same as using **OutFile** without **Resume**. This feature was added in PowerShell 6.1.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1898,6 +1939,7 @@
           "defaultValue": "",
           "description": "This parameter causes the cmdlet to ignore HTTP error statuses and continue to process responses. The error responses are written to the pipeline just as if they were successful. This parameter was introduced in PowerShell 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1924,6 +1966,7 @@
       "description": "Gets content from a web page on the internet.",
       "scriptBody": "",
       "cmdletName": "Invoke-WebRequest",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Body",
@@ -1952,6 +1995,7 @@
           "defaultValue": "",
           "description": "This parameter has been deprecated. Beginning with PowerShell 6.0.0, all Web requests use basic parsing only. This parameter is included for backwards compatibility only and any use of it has no effect on the operation of the cmdlet.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2017,6 +2061,7 @@
           "defaultValue": "",
           "description": "Allows sending of credentials and secrets over unencrypted connections. By default, supplying **Credential** or any **Authentication** option with a **Uri** that doesn\u0027t begin with \u0060https://\u0060 results in an error and the request is aborted to prevent unintentionally communicating secrets in plain text over unencrypted connections. To override this behavior at your own risk, supply the **AllowUnencryptedAuthentication** parameter. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. It is provided only for compatibility \u003E with legacy systems that can\u0027t provide encrypted connections. Use at your own risk. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2059,6 +2104,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet uses the credentials of the current user to send the web request. This can\u0027t be used with **Authentication** or **Credential** and may not be supported on all platforms.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2098,6 +2144,7 @@
           "defaultValue": "",
           "description": "Skips certificate validation checks. This includes all validations such as expiration, revocation, trusted root authority, etc. \u003E [!WARNING] \u003E Using this parameter isn\u0027t secure and isn\u0027t recommended. This switch is only intended to be used \u003E against known hosts using a self-signed certificate for testing purposes. Use at your own risk. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2153,6 +2200,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet sets the **KeepAlive** value in the HTTP header to **False**. By default, **KeepAlive** is **True**. **KeepAlive** establishes a persistent connection to the server to facilitate subsequent requests.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2203,6 +2251,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should add headers to the request without validation. This switch should be used for sites that require header values that don\u0027t conform to standards. Specifying this switch disables validation to allow the value to be passed unchecked. When specified, all headers are added without validation. This switch disables validation for values passed to the **ContentType**, **Headers** and **UserAgent** parameters. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2215,6 +2264,7 @@
           "defaultValue": "",
           "description": "Allows redirecting from HTTPS to HTTP. By default, any request that is redirected from HTTPS to HTTP results in an error and the request is aborted to prevent unintentionally communicating in plain text over unencrypted connections. To override this behavior at your own risk, use the **AllowInsecureRedirect** parameter. This parameter was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2252,6 +2302,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should preserve the \u0060Authorization\u0060 header, when present, across redirections. By default, the cmdlet strips the \u0060Authorization\u0060 header before redirecting. Specifying this parameter disables this logic for cases where the header needs to be sent to the redirection location. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2322,6 +2373,7 @@
           "defaultValue": "",
           "description": "Indicates the cmdlet should preserve the method of the request across redirections. By default, the cmdlet changes the method to \u0060GET\u0060 when redirected. Specifying this parameter disables this logic to ensure that the intended method can be used with redirection. This feature was added in PowerShell 7.4.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2347,6 +2399,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet shouldn\u0027t use a proxy to reach the destination. When you need to bypass the proxy configured in the environment, use this switch. This feature was added in PowerShell 6.0.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "CustomMethodNoProxy",
             "StandardMethodNoProxy"
@@ -2397,6 +2450,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet uses the credentials of the current user to access the proxy server that is specified by the **Proxy** parameter. This parameter is valid only when the **Proxy** parameter is also used in the command. You can\u0027t use the **ProxyCredential** and **ProxyUseDefaultCredentials** parameters in the same command.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "StandardMethod",
             "CustomMethod"
@@ -2497,6 +2551,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet returns the results, in addition to writing them to a file. This parameter is valid only when the **OutFile** parameter is also used in the command.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2510,6 +2565,7 @@
           "defaultValue": "",
           "description": "Performs a best effort attempt to resume downloading a partial file. **Resume** requires **OutFile**. **Resume** only operates on the size of the local file and remote file and performs no other validation that the local file and the remote file are the same. If the local file size is smaller than the remote file size, then the cmdlet attempts to resume downloading the file and append the remaining bytes to the end of the file. If the local file size is the same as the remote file size, then no action is taken and the cmdlet assumes the download already complete. If the local file size is larger than the remote file size, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the remote server doesn\u0027t support download resuming, then the local file is overwritten and the entire remote file is re-downloaded. This behavior is the same as using **OutFile** without **Resume**. If the local file doesn\u0027t exist, then the local file is created and the entire remote file is downloaded. This behavior is the same as using **OutFile** without **Resume**. This feature was added in PowerShell 6.1.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2522,6 +2578,7 @@
           "defaultValue": "",
           "description": "This parameter causes the cmdlet to ignore HTTP error statuses and continue to process responses. The error responses are written to the pipeline just as if they were successful. This parameter was introduced in PowerShell 7.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2548,6 +2605,7 @@
       "description": "Gets the IP address configuration.",
       "scriptBody": "",
       "cmdletName": "Get-NetIPAddress",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "AssociatedIPInterface",
@@ -2784,6 +2842,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet includes addresses from all configured network compartments. If you do not specify this parameter, the cmdlet gets only addresses in the default network compartment.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Query (cdxml)"
           ],
@@ -2829,6 +2888,7 @@
           "defaultValue": "",
           "description": "Runs the cmdlet as a background job. Use this parameter to run commands that take a long time to complete.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Query (cdxml)"
           ],
@@ -2846,6 +2906,7 @@
       "description": "Test-NetConnection [[-ComputerName] \u003Cstring\u003E] [-TraceRoute] [-Hops \u003Cint\u003E] [-InformationLevel \u003Cstring\u003E] [\u003CCommonParame...",
       "scriptBody": "",
       "cmdletName": "Test-NetConnection",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "ComputerName",
@@ -2887,6 +2948,7 @@
           "defaultValue": "",
           "description": "",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ICMP"
           ],
@@ -2959,6 +3021,7 @@
           "defaultValue": "",
           "description": "",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NetRouteDiagnostics"
           ],
@@ -3024,6 +3087,7 @@
       "description": "Gets the basic network adapter properties.",
       "scriptBody": "",
       "cmdletName": "Get-NetAdapter",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [
@@ -3101,6 +3165,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet includes both visible and hidden network adapters in the operation. By default only visible network adapters are included. If a wildcard character is used in identifying a network adapter and this parameter has been specified, then the wildcard string is matched against both hidden and visible network adapters.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ByIfIndex",
             "ByInstanceID",
@@ -3118,6 +3183,7 @@
           "defaultValue": "",
           "description": "Indicates that the cmdlet gets all physical network adapters.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ByIfIndex",
             "ByInstanceID",
@@ -3169,6 +3235,7 @@
           "defaultValue": "",
           "description": "Runs the cmdlet as a background job. Use this parameter to run commands that take a long time to complete. The cmdlet immediately returns an object that represents the job and then displays the command prompt. You can continue to work in the session while the job completes. To manage the job, use the \u0060*-Job\u0060 cmdlets. To get the job results, use the Receive-Job (https://go.microsoft.com/fwlink/?LinkID=113372)cmdlet. For more information about Windows PowerShellr background jobs, see about_Jobs (https://go.microsoft.com/fwlink/?LinkID=113251).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ByIfIndex",
             "ByInstanceID",
@@ -3188,6 +3255,7 @@
       "description": "Performs a DNS name query resolution for the specified name.",
       "scriptBody": "",
       "cmdletName": "Resolve-DnsName",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Name",
@@ -3315,6 +3383,7 @@
           "defaultValue": "",
           "description": "Resolves this query using only the DNS protocol.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3328,6 +3397,7 @@
           "defaultValue": "",
           "description": "Resolves this query using only the local cache.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3341,6 +3411,7 @@
           "defaultValue": "",
           "description": "Sets the DNSSEC OK bit for this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3354,6 +3425,7 @@
           "defaultValue": "",
           "description": "Sets the DNSSEC checking-disabled bit for this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3367,6 +3439,7 @@
           "defaultValue": "",
           "description": "Skips the hosts file when resolving this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3380,6 +3453,7 @@
           "defaultValue": "",
           "description": "Resolves this query using only the LLMNR or NetBIOS protocols.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3393,6 +3467,7 @@
           "defaultValue": "",
           "description": "Allows falling back to the LLMNR protocol when resolving this query with DNS fails.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3406,6 +3481,7 @@
           "defaultValue": "",
           "description": "Resolves this query using only the LLMNR protocol.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3419,6 +3495,7 @@
           "defaultValue": "",
           "description": "Allows fallback to the NetBIOS protocol when resolving this query with DNS fails.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3432,6 +3509,7 @@
           "defaultValue": "",
           "description": "Specifies not to use IDN encoding logic for the query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3445,6 +3523,7 @@
           "defaultValue": "",
           "description": "Instructs the server not to use recursion when resolving this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3458,6 +3537,7 @@
           "defaultValue": "",
           "description": "Uses shorter timeouts for this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3471,6 +3551,7 @@
           "defaultValue": "",
           "description": "Uses only TCP for this query.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -3484,6 +3565,7 @@
           "defaultValue": "",
           "description": "",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [

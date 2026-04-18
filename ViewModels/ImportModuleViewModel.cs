@@ -21,9 +21,13 @@ public partial class ImportModuleViewModel : ObservableObject
 {
     [ObservableProperty] private string _searchText = "";
     [ObservableProperty] private AvailableModule? _selectedModule;
-    [ObservableProperty] private bool _isLoadingModules;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowModuleEmptyHint))]
+    private bool _isLoadingModules;
     [ObservableProperty] private string _categoryName = "";
-    [ObservableProperty] private bool _isScanning;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowCmdletEmptyHint))]
+    private bool _isScanning;
     [ObservableProperty] private string _statusMessage = "";
 
     /// <summary>Full, unfiltered module list as returned by DiscoverAsync.</summary>
@@ -34,11 +38,23 @@ public partial class ImportModuleViewModel : ObservableObject
 
     public ObservableCollection<SelectableCmdlet> DiscoveredCmdlets { get; } = new();
 
+    /// <summary>Shown when the module list is settled but empty — replaces the blank box with a hint.</summary>
+    public bool ShowModuleEmptyHint => !IsLoadingModules && FilteredModules.Count == 0;
+
+    /// <summary>Shown when no module has been scanned yet (or the scan returned nothing).</summary>
+    public bool ShowCmdletEmptyHint => !IsScanning && DiscoveredCmdlets.Count == 0;
+
     /// <summary>Host ids from the last successful scan — stamped into the saved catalog.</summary>
     private List<string> _lastScanHostIds = [];
 
     public ImportModuleViewModel()
     {
+        // Empty-state hints depend on collection counts too, not just the
+        // Is*ing flags — mirror CollectionChanged onto PropertyChanged for
+        // the derived bools so the overlay hides/shows when rows land.
+        FilteredModules.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ShowModuleEmptyHint));
+        DiscoveredCmdlets.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ShowCmdletEmptyHint));
+
         // Kick discovery immediately so the list is warming while the user
         // focuses the dialog. LoadModules handles its own errors.
         _ = LoadModulesAsync();

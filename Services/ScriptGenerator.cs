@@ -105,17 +105,21 @@ public class ScriptGenerator
     /// </summary>
     private void EmitExecScope(StringBuilder sb, List<GraphNode> scope, int indent)
     {
-        var scopeIds = scope.Select(n => n.Id).ToHashSet();
+        // Value nodes never generate statements — they only exist as inline
+        // references from the consumer. Exclude them from the exec walk so
+        // the "unreachable helper" pass below doesn't accidentally emit them.
+        var execScope = scope.Where(n => !n.IsValueNode).ToList();
+        var scopeIds = execScope.Select(n => n.Id).ToHashSet();
 
         // Roots: ordered to match document order for stable output.
-        var roots = scope.Where(n => IsExecRoot(n, scopeIds)).ToList();
+        var roots = execScope.Where(n => IsExecRoot(n, scopeIds)).ToList();
 
         foreach (var root in roots)
             WalkExec(sb, root, scopeIds, indent);
 
         // Catch any nodes unreachable via exec (e.g. disconnected helpers).
         // Emit them as standalone statements so the user sees them in output.
-        foreach (var n in scope)
+        foreach (var n in execScope)
         {
             if (_emitted.Contains(n.Id)) continue;
             WalkExec(sb, n, scopeIds, indent);
@@ -207,13 +211,35 @@ public class ScriptGenerator
         string tailVar = MakeVariableNameForNode(chain[^1]);
         foreach (var n in chain) _varMap[n.Id] = tailVar;
 
+        // If the head's primary-pipeline-target pin is wired to an upstream
+        // that *isn't* already chained in front of it (classic case: a Value
+        // node feeding Where-Object's InputObject), prepend that upstream as
+        // the pipeline's first element instead of binding it as -InputObject.
+        // -InputObject on filtering cmdlets treats the value as a single
+        // object — enumerators / collections don't iterate — so the only way
+        // Where / Select / Sort see rows is via the actual |-pipe.
+        string? pipelineHead = null;
+        bool headConsumesPipeInput = false;
+        var headPipeTarget = chain[0].PrimaryPipelineTarget;
+        if (headPipeTarget != null)
+        {
+            var upstream = FirstConnectionTargeting(headPipeTarget);
+            if (upstream != null && upstream.Source.Owner != null
+                && !chain.Contains(upstream.Source.Owner))
+            {
+                pipelineHead = ResolveUpstreamRef(upstream.Source);
+                headConsumesPipeInput = true;
+            }
+        }
+
         // Chain expression. Each node may emit a splat hashtable into the
         // preamble StringBuilder first; the inline part joins with `|`.
         var preamble = new StringBuilder();
         var parts = new List<string>();
+        if (pipelineHead != null) parts.Add(pipelineHead);
         for (int i = 0; i < chain.Count; i++)
         {
-            bool collapseInput = i > 0; // everyone but the head consumes | upstream
+            bool collapseInput = i > 0 || headConsumesPipeInput;
             parts.Add(BuildNodeExpression(chain[i], collapseInput, pad, preamble));
         }
         string pipeline = string.Join(" | ", parts);
@@ -328,6 +354,12 @@ public class ScriptGenerator
     private string ResolveUpstreamRef(NodePort sourcePort)
     {
         var owner = sourcePort.Owner!;
+
+        // Value nodes: emit the literal expression directly. No variable is
+        // introduced — the node itself never appears in the generated script.
+        if (owner.IsValueNode)
+            return owner.ResolvedValueExpression;
+
         if (owner.ContainerType == ContainerType.ForEach && sourcePort.Name == "Item")
         {
             if (_foreachVarMap.TryGetValue(owner.Id, out var named) && named != null)
@@ -581,9 +613,7 @@ public class ScriptGenerator
                     sb.AppendLine($"        [Parameter({string.Join(", ", attrs)})]");
 
                 var comma = i < arguments.Count - 1 ? "," : "";
-                var defaultVal = !string.IsNullOrWhiteSpace(arg.DefaultValue) && arg.Type != ParamType.Bool
-                    ? $" = \"{arg.DefaultValue}\""
-                    : "";
+                var defaultVal = FormatFunctionDefault(arg);
                 sb.AppendLine($"        [{arg.PowerShellTypeName}]${arg.Name}{defaultVal}{comma}");
                 if (i < arguments.Count - 1) sb.AppendLine();
             }
@@ -614,6 +644,34 @@ public class ScriptGenerator
 
         sb.AppendLine("}");
         sb.AppendLine();
+    }
+
+    /// <summary>
+    /// Format a function-argument default as a PowerShell literal of the
+    /// argument's declared type. Returns "" when the default is blank
+    /// (param emits without a default). Prior implementation always
+    /// double-quoted the default, which broke typed params: <c>[int]$n = "42"</c>
+    /// and <c>[scriptblock]$cb = "{ ... }"</c> are both wrong.
+    /// </summary>
+    private static string FormatFunctionDefault(NodeParameter arg)
+    {
+        var v = arg.DefaultValue;
+        if (string.IsNullOrWhiteSpace(v)) return "";
+
+        return arg.Type switch
+        {
+            ParamType.Int => $" = {v}",
+            ParamType.Bool => $" = ${v.ToLowerInvariant()}",
+            ParamType.ScriptBlock => $" = {{ {v} }}",
+            ParamType.StringArray or ParamType.Collection =>
+                $" = @({string.Join(", ", v.Split(',', StringSplitOptions.TrimEntries).Select(s => $"\"{s.Replace("`", "``").Replace("\"", "`\"")}\""))})",
+            // Any / Object / Credential / HashTable: pass through as raw expr.
+            ParamType.Any or ParamType.Object or ParamType.Credential or ParamType.HashTable =>
+                $" = {v}",
+            // String / Path / Enum: double-quoted literal. Allows $var and
+            // $(...) expansion at runtime; escapes backtick and quote.
+            _ => $" = \"{v.Replace("`", "``").Replace("\"", "`\"")}\"",
+        };
     }
 
     // ── Exec-graph helpers ─────────────────────────────────────

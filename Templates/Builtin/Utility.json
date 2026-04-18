@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "Utility / Date",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Gets the current date and time.",
       "scriptBody": "",
       "cmdletName": "Get-Date",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Date",
@@ -26,7 +27,9 @@
         "DateAndFormat",
         "DateAndUFormat",
         "UnixTimeSecondsAndFormat",
-        "UnixTimeSecondsAndUFormat"
+        "UnixTimeSecondsAndUFormat",
+        "net",
+        "UFormat"
       ],
       "defaultParameterSet": "DateAndFormat",
       "supportedEditions": [
@@ -222,6 +225,7 @@
           "defaultValue": "",
           "description": "Converts the date value to the equivalent time in UTC. This parameter was introduced in PowerShell 7.1.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -236,6 +240,7 @@
       "description": "Gets a random number, or selects objects randomly from a collection.",
       "scriptBody": "",
       "cmdletName": "Get-Random",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -344,6 +349,7 @@
           "defaultValue": "",
           "description": "Returns the entire collection in a randomized order.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ShuffleParameterSet"
           ],
@@ -362,6 +368,7 @@
       "description": "Measures the time it takes to run script blocks and cmdlets.",
       "scriptBody": "",
       "cmdletName": "Measure-Command",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -414,6 +421,7 @@
       "description": "Suspends the activity in a script or session for the specified period of time.",
       "scriptBody": "",
       "cmdletName": "Start-Sleep",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Seconds",
@@ -498,6 +506,7 @@
       "description": "Gets information about the current working location or a location stack.",
       "scriptBody": "",
       "cmdletName": "Get-Location",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [
@@ -553,6 +562,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet displays the locations added to the current location stack. You can add locations to stacks by using the \u0060Push-Location\u0060 cmdlet. To display the locations in a different location stack, use the **StackName** parameter. For information about location stacks, see the [Notes](#notes).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Stack"
           ],
@@ -583,6 +593,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -597,6 +608,7 @@
       "description": "Sets the current working location to a specified location.",
       "scriptBody": "",
       "cmdletName": "Set-Location",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -658,6 +670,7 @@
           "defaultValue": "",
           "description": "Returns a **PathInfo** object that represents the location. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -686,6 +699,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [

@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "Registry",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Clears the value of a property but does not delete the property.",
       "scriptBody": "",
       "cmdletName": "Clear-ItemProperty",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -89,6 +90,7 @@
           "defaultValue": "",
           "description": "Returns an object representing the item with which you are working. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -102,6 +104,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet deletes properties from items that cannot otherwise be accessed by the user. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -167,6 +170,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -181,6 +185,7 @@
       "description": "Gets the properties of a specified item.",
       "scriptBody": "",
       "cmdletName": "Get-ItemProperty",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -309,6 +314,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -323,6 +329,7 @@
       "description": "Creates a new item.",
       "scriptBody": "",
       "cmdletName": "New-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Value",
@@ -413,6 +420,7 @@
           "defaultValue": "",
           "description": "Forces this cmdlet to create an item that writes over an existing read-only item. Implementation varies from provider to provider. Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions. Beginning in PowerShell 7.4, this parameter also allows you to overwrite an existing Junction. Previously, this would fail with a \u0022cannot be removed because it is not empty\u0022 error.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -439,6 +447,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -453,6 +462,7 @@
       "description": "Creates a new property for an item and sets its value.",
       "scriptBody": "",
       "cmdletName": "New-ItemProperty",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [
@@ -554,6 +564,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to create a property on an object that cannot otherwise be accessed by the user. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -619,6 +630,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -633,6 +645,7 @@
       "description": "Deletes the property and its value from an item.",
       "scriptBody": "",
       "cmdletName": "Remove-ItemProperty",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -710,6 +723,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to remove a property of an object that cannot otherwise be accessed by the user. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -775,6 +789,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -789,6 +804,7 @@
       "description": "Creates or changes the value of a property of an item.",
       "scriptBody": "",
       "cmdletName": "Set-ItemProperty",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "InputObject",
@@ -918,6 +934,7 @@
           "defaultValue": "",
           "description": "Returns an object that represents the item property. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -931,6 +948,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to set a property on items that cannot otherwise be accessed by the user. Implementation varies by provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -996,6 +1014,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [

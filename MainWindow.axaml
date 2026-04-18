@@ -89,6 +89,21 @@
                 BorderThickness="0,0,0,1"
                 Padding="4,3">
             <DockPanel LastChildFill="False">
+                <!-- Right-docked help chip: toggles the keyboard cheatsheet.
+                     Declared first so it sits outermost-right; the host chip
+                     docks to its left. Shift+? also toggles it. -->
+                <Button DockPanel.Dock="Right"
+                        Click="OnHelpClicked"
+                        Margin="0,0,4,0" Padding="6,3" CornerRadius="3"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        Foreground="{DynamicResource TextSecondaryBrush}"
+                        BorderThickness="0"
+                        FontSize="11"
+                        ToolTip.Tip="Keyboard shortcuts (Shift+?)">
+                    <ui:SymbolIcon Symbol="Help" FontSize="14" VerticalAlignment="Center" />
+                </Button>
+
                 <!-- Right-docked status chip: active PowerShell host.
                      Declared before the left stack so it wins when space is tight. -->
                 <Button DockPanel.Dock="Right"
@@ -176,6 +191,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnSavePblxClicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Save as .pblx project (Ctrl+S)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
@@ -191,6 +207,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnExportPs1Clicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Export as .ps1 script (Ctrl+E)"
                         Background="{DynamicResource BgSaveTintBrush}"
                         Foreground="{DynamicResource TextFileBrush}">
@@ -206,6 +223,7 @@
                     </StackPanel>
                 </Button>
                 <Button Click="OnRunClicked" Padding="10,6" CornerRadius="4"
+                        IsEnabled="{Binding HasProject}"
                         ToolTip.Tip="Run generated script in a new PowerShell window (F5)"
                         Background="{DynamicResource BgRunTintBrush}"
                         Foreground="{DynamicResource TextRunBrush}">
@@ -498,6 +516,36 @@
                                                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,6" />
                                             </StackPanel>
 
+                                            <!-- Switches: PowerShell [switch] params are presence-only (-Force etc.)
+                                                 — they render here as a compact checkbox group rather than as
+                                                 wireable data pins. ShouldRenderAsSwitch filters the shared
+                                                 Parameters list to just switches in the active set. -->
+                                            <StackPanel IsVisible="{Binding SelectedNode.HasAnySwitch}" Margin="0,0,0,8">
+                                                <TextBlock Text="SWITCHES" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                           Margin="0,2,0,4" />
+                                                <ItemsControl ItemsSource="{Binding SelectedNode.Parameters}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox IsVisible="{Binding ShouldRenderAsSwitch}"
+                                                                      IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                      Content="{Binding Name}"
+                                                                      ToolTip.Tip="{Binding Description}"
+                                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                      FontSize="12"
+                                                                      Padding="6,2"
+                                                                      Margin="0,0,12,2"
+                                                                      VerticalContentAlignment="Center" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
                                             <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Margin="0,2,0,4" />
@@ -611,15 +659,28 @@
                                                                           HorizontalAlignment="Stretch"
                                                                           HorizontalContentAlignment="Left"
                                                                           VerticalContentAlignment="Center" />
-                                                                <!-- Everything else → TextBox -->
-                                                                <TextBox Text="{Binding Value, Mode=TwoWay}"
-                                                                         Watermark="{Binding DefaultValue}"
-                                                                         IsVisible="{Binding IsTextInput}"
-                                                                         Background="{DynamicResource BgPrimaryBrush}"
-                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                         BorderBrush="{DynamicResource BorderPrimaryBrush}"
-                                                                         Padding="8,5" CornerRadius="3"
-                                                                         FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                                <!-- Everything else → TextBox, with a Browse button for path-like params. -->
+                                                                <DockPanel IsVisible="{Binding IsTextInput}" LastChildFill="True">
+                                                                    <Button DockPanel.Dock="Right"
+                                                                            Content="..."
+                                                                            IsVisible="{Binding IsPathLike}"
+                                                                            Click="OnBrowsePathClicked"
+                                                                            ToolTip.Tip="Browse for a file"
+                                                                            Margin="4,0,0,0"
+                                                                            Padding="8,4" CornerRadius="3"
+                                                                            FontSize="12"
+                                                                            Background="{DynamicResource BgSecondaryBrush}"
+                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                            BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                            BorderThickness="1" />
+                                                                    <TextBox Text="{Binding Value, Mode=TwoWay}"
+                                                                             Watermark="{Binding DefaultValue}"
+                                                                             Background="{DynamicResource BgPrimaryBrush}"
+                                                                             Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                             BorderBrush="{DynamicResource BorderPrimaryBrush}"
+                                                                             Padding="8,5" CornerRadius="3"
+                                                                             FontFamily="{DynamicResource FontMono}" FontSize="12" />
+                                                                </DockPanel>
                                                             </StackPanel>
                                                         </StackPanel>
                                                     </DataTemplate>
@@ -700,7 +761,7 @@
                                                 </ItemsControl>
                                             </StackPanel>
 
-                                            <StackPanel IsVisible="{Binding !SelectedNode.IsCmdletNode}">
+                                            <StackPanel IsVisible="{Binding SelectedNode.IsScriptNode}">
                                                 <Border Height="1" Background="{DynamicResource BorderPrimaryBrush}" Margin="0,4" />
 
                                                 <TextBlock Text="SCRIPT BODY" FontSize="11" FontWeight="SemiBold"
@@ -721,7 +782,37 @@
                             </DockPanel>
                         </Border>
 
-                        <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
+                        <Grid>
+                            <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
+
+                            <!-- Empty-state overlay. Visible until the user clicks "Create
+                                 new project", which calls NewGraphCommand and flips HasProject
+                                 true. Background matches the canvas so the hand-off is seamless. -->
+                            <Border IsVisible="{Binding !HasProject}"
+                                    Background="{DynamicResource BgPrimaryBrush}">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14">
+                                    <TextBlock Text="Create a new PoSHBlox project"
+                                               HorizontalAlignment="Center"
+                                               FontSize="22" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Start with a blank canvas, or open an existing .pblx."
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <Button HorizontalAlignment="Center"
+                                            Padding="16,8" CornerRadius="4"
+                                            Command="{Binding NewGraphCommand}"
+                                            Background="{DynamicResource BgSaveTintBrush}"
+                                            Foreground="{DynamicResource TextFileBrush}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <ui:SymbolIcon Symbol="Add" FontSize="16" VerticalAlignment="Center" />
+                                            <TextBlock Text="Create project" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </DockPanel>
                 </SplitView.Content>
             </SplitView>

@@ -19,6 +19,42 @@ public partial class GraphNode : ObservableObject
     public bool IsCmdletNode => !string.IsNullOrEmpty(CmdletName);
 
     /// <summary>
+    /// Structural role of the node. <see cref="NodeKind.Cmdlet"/> is the
+    /// full V2 shape; <see cref="NodeKind.Value"/> is a compact single-output
+    /// literal producer (see <c>values.json</c> catalog).
+    /// </summary>
+    public NodeKind Kind { get; set; } = NodeKind.Cmdlet;
+    public bool IsValueNode => Kind == NodeKind.Value;
+
+    /// <summary>True for free-form script-body nodes — not a cmdlet wrapper and not a value literal.</summary>
+    public bool IsScriptNode => !IsCmdletNode && !IsValueNode;
+
+    /// <summary>
+    /// For <see cref="NodeKind.Value"/> nodes: the PowerShell expression this
+    /// node emits. May be a fixed literal (<c>$true</c>, <c>$PSScriptRoot</c>)
+    /// or a template containing <c>{0}</c>, which is substituted with
+    /// <c>Parameters[0].EffectiveValue</c> at codegen / render time (enables
+    /// parametric nodes like <c>$env:{0}</c>).
+    /// </summary>
+    public string ValueExpression { get; set; } = "";
+
+    /// <summary>
+    /// Resolve <see cref="ValueExpression"/> against the node's first parameter
+    /// (if any) for rendering and codegen. Fixed value nodes fall through with
+    /// no substitution.
+    /// </summary>
+    public string ResolvedValueExpression
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(ValueExpression)) return "";
+            if (!ValueExpression.Contains("{0}")) return ValueExpression;
+            var arg = Parameters.Count > 0 ? Parameters[0].EffectiveValue : "";
+            return ValueExpression.Replace("{0}", arg ?? "");
+        }
+    }
+
+    /// <summary>
     /// User-defined output variable name. If set, the node's output is stored as $ThisName.
     /// If blank, auto-generated from Title + short ID when a variable is needed.
     /// </summary>
@@ -44,8 +80,32 @@ public partial class GraphNode : ObservableObject
     /// </summary>
     public string[] KnownParameterSets { get; set; } = [];
 
-    /// <summary>Currently-active parameter set. Empty when <see cref="KnownParameterSets"/> is empty.</summary>
-    [ObservableProperty] private string _activeParameterSet = "";
+    /// <summary>
+    /// Currently-active parameter set. Empty only when <see cref="KnownParameterSets"/>
+    /// is empty. The setter rejects empty writes when the node has known sets —
+    /// Avalonia's ComboBox can TwoWay-write an empty SelectedItem back during
+    /// DataContext transitions (reselecting the node after deselecting clears
+    /// the ItemsSource briefly, which clears SelectedItem, which propagates
+    /// back to this property). Without the guard, clicking off and back onto
+    /// a node silently erased the user's explicit set choice.
+    /// </summary>
+    public string ActiveParameterSet
+    {
+        get => _activeParameterSet;
+        set
+        {
+            if (string.IsNullOrEmpty(value) && KnownParameterSets.Length > 0) return;
+            if (SetProperty(ref _activeParameterSet, value))
+            {
+                // Active-set changes flip visibility + height the same way collapse does.
+                OnPropertyChanged(nameof(Height));
+                OnPropertyChanged(nameof(VisibleDataInputs));
+                OnPropertyChanged(nameof(HiddenDataInputCount));
+                OnPropertyChanged(nameof(HasAnySwitch));
+            }
+        }
+    }
+    private string _activeParameterSet = "";
 
     /// <summary>True when the cmdlet declares more than one set — drives the picker's visibility.</summary>
     public bool HasMultipleSets => KnownParameterSets.Length > 1;
@@ -54,6 +114,21 @@ public partial class GraphNode : ObservableObject
     public ObservableCollection<NodePort> Inputs { get; } = new();
     public ObservableCollection<NodePort> Outputs { get; } = new();
     public ObservableCollection<NodeParameter> Parameters { get; } = new();
+
+    /// <summary>
+    /// True when any parameter in the active set is a switch — gates the
+    /// properties panel's dedicated Switches section so it stays hidden on
+    /// nodes that don't expose any.
+    /// </summary>
+    public bool HasAnySwitch => Parameters.Any(p => p.ShouldRenderAsSwitch);
+
+    /// <summary>
+    /// Raised by the VM after it flips per-param <see cref="NodeParameter.IsInActiveSet"/>
+    /// so the Switches-section visibility binding re-evaluates. The setter on
+    /// <see cref="ActiveParameterSet"/> can't fire this eagerly because the
+    /// child params haven't been refreshed yet at that point.
+    /// </summary>
+    public void NotifyHasAnySwitchChanged() => OnPropertyChanged(nameof(HasAnySwitch));
 
     /// <summary>
     /// Validation findings attached to this node. Populated by the VM from
@@ -83,6 +158,9 @@ public partial class GraphNode : ObservableObject
     // ── Layout constants ───────────────────────────────────────
     public const double HeaderHeight = 34;
     public const double PortSpacing = 26;
+
+    /// <summary>Fixed body height for <see cref="NodeKind.Value"/> nodes — one row, no header.</summary>
+    public const double ValueNodeHeight = 30;
 
     /// <summary>Height of the dedicated exec-pin row that sits between the header and data rows.</summary>
     public const double ExecRowHeight = 20;
@@ -193,14 +271,6 @@ public partial class GraphNode : ObservableObject
         return IsDataInputVisibleWhenCollapsed(port);
     }
 
-    partial void OnActiveParameterSetChanged(string value)
-    {
-        // Active-set changes flip visibility + height the same way collapse does.
-        OnPropertyChanged(nameof(Height));
-        OnPropertyChanged(nameof(VisibleDataInputs));
-        OnPropertyChanged(nameof(HiddenDataInputCount));
-    }
-
     // ── Computed layout properties ─────────────────────────────
     /// <summary>
     /// Height sized to the parameter-row count. Exec pins sit in the header so
@@ -211,14 +281,16 @@ public partial class GraphNode : ObservableObject
 
     public double Height => IsContainer
         ? ContainerHeight
-        : Math.Max(
-            HeaderHeight
-              + (HasExecRow ? ExecRowHeight : 0)
-              + PortSpacing
-              + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
-              + PortSpacing
-              + (HiddenDataInputCount > 0 ? PortSpacing : 0),
-            HeaderHeight + PortSpacing * 2);
+        : IsValueNode
+            ? ValueNodeHeight
+            : Math.Max(
+                HeaderHeight
+                  + (HasExecRow ? ExecRowHeight : 0)
+                  + PortSpacing
+                  + Math.Max(VisibleDataInputs.Count(), DataOutputs.Count()) * PortSpacing
+                  + PortSpacing
+                  + (HiddenDataInputCount > 0 ? PortSpacing : 0),
+                HeaderHeight + PortSpacing * 2);
 
     /// <summary>
     /// Reactive re-layout hook: when IsCollapsed flips, the layout-derived
@@ -334,7 +406,12 @@ public partial class GraphNode : ObservableObject
 
     /// <summary>
     /// Recalculate zone rectangles based on current container size.
-    /// Single-zone containers fill the body; dual-zone containers split side by side.
+    /// Single-zone containers fill the body; dual-zone splits side by side;
+    /// three-zone splits as a 70/30 vertical stack — zones[0] and zones[1]
+    /// side-by-side in the top band, zones[2] full-width below. That matches
+    /// Try/Catch/Finally semantics: Try and Catch are parallel exception
+    /// paths, Finally runs after either and deserves its own row. Finally's
+    /// smaller share reflects that it's frequently empty.
     /// </summary>
     public void RecalcZoneLayout()
     {
@@ -352,16 +429,33 @@ public partial class GraphNode : ObservableObject
             z.Width = ContainerWidth - pad * 2;
             z.Height = bodyH;
         }
-        else
+        else if (Zones.Count == 2)
         {
             double halfW = (ContainerWidth - pad * 3) / 2;
-            for (int i = 0; i < Math.Min(Zones.Count, 2); i++)
+            for (int i = 0; i < 2; i++)
             {
                 Zones[i].OffsetX = pad + i * (halfW + pad);
                 Zones[i].OffsetY = bodyTop;
                 Zones[i].Width = halfW;
                 Zones[i].Height = bodyH;
             }
+        }
+        else
+        {
+            double topH = (bodyH - pad) * 0.70;
+            double bottomH = (bodyH - pad) * 0.30;
+            double halfW = (ContainerWidth - pad * 3) / 2;
+            for (int i = 0; i < 2; i++)
+            {
+                Zones[i].OffsetX = pad + i * (halfW + pad);
+                Zones[i].OffsetY = bodyTop;
+                Zones[i].Width = halfW;
+                Zones[i].Height = topH;
+            }
+            Zones[2].OffsetX = pad;
+            Zones[2].OffsetY = bodyTop + topH + pad;
+            Zones[2].Width = ContainerWidth - pad * 2;
+            Zones[2].Height = bottomH;
         }
     }
 }

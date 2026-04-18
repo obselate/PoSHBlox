@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "Security",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Converts a secure string to an encrypted standard string.",
       "scriptBody": "",
       "cmdletName": "ConvertFrom-SecureString",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "SecureString",
@@ -52,6 +53,7 @@
           "defaultValue": "",
           "description": "When set, \u0060ConvertFrom-SecureString\u0060 will convert secure strings to the decrypted plaintext string as output. This parameter was added in PowerShell 7.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "AsPlainText"
           ],
@@ -96,6 +98,7 @@
       "description": "Converts plain text or encrypted strings to secure strings.",
       "scriptBody": "",
       "cmdletName": "ConvertTo-SecureString",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "String",
@@ -136,6 +139,7 @@
           "defaultValue": "",
           "description": "Specifies a plain text string to convert to a secure string. The secure string cmdlets help protect confidential text. The text is encrypted for privacy and is deleted from computer memory after it is used. If you use this parameter to provide plain text as input, the system cannot protect that input in this manner.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "PlainText"
           ],
@@ -150,6 +154,7 @@
           "defaultValue": "",
           "description": "Beginning in PowerShell 7, The **Force** parameter is no longer required when using the **AsPlainText** parameter. While the parameter is not used, it was not removed to provide compatibility with earlier versions of PowerShell.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "PlainText"
           ],
@@ -194,6 +199,7 @@
       "description": "Gets a credential object based on a user name and password.",
       "scriptBody": "",
       "cmdletName": "Get-Credential",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [

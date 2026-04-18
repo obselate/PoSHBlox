@@ -152,6 +152,12 @@ public class DiscoveredParameter
     /// <summary>V2: <c>[Parameter(ValueFromPipeline)]</c> — promotes the paired pin to primary pipeline target.</summary>
     public bool IsPipelineInput { get; set; }
 
+    /// <summary>
+    /// True = PowerShell <c>[switch]</c> parameter (ParameterType is SwitchParameter).
+    /// Downstream: no data-input pin, renders as checkbox badge, codegen emits bare <c>-Name</c>.
+    /// </summary>
+    public bool IsSwitch { get; set; }
+
     /// <summary>Sets this param belongs to (empty = all sets).</summary>
     public List<string> ParameterSets { get; set; } = [];
 

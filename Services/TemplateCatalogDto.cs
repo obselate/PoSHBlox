@@ -4,7 +4,13 @@ namespace PoSHBlox.Services;
 
 public class TemplateCatalogDto
 {
-    public int Version { get; set; } = 2;
+    /// <summary>
+    /// Catalog schema version. Bumped to 3 when parameters gained the
+    /// <see cref="ParameterDef.IsSwitch"/> flag — loader migrates v≤2 catalogs
+    /// by treating every Bool param as a switch (the dominant case for cmdlet
+    /// bools, and how they were serialized before the split).
+    /// </summary>
+    public int Version { get; set; } = 3;
     public string Category { get; set; } = "";
 
     /// <summary>

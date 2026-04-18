@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "category": "File / Folder",
   "introspectedHosts": [
     "pwsh-7.6.0",
@@ -12,6 +12,7 @@
       "description": "Adds content to the specified items, such as adding words to a file.",
       "scriptBody": "",
       "cmdletName": "Add-Content",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Value",
@@ -53,6 +54,7 @@
           "defaultValue": "",
           "description": "Returns an object representing the added content. By default, this cmdlet doesn\u0027t generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -141,6 +143,7 @@
           "defaultValue": "",
           "description": "Overrides the read-only attribute, allowing you to add content to a read-only file. For example, **Force** overrides the read-only attribute but it doesn\u0027t change file permissions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -167,6 +170,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet doesn\u0027t add a new line or carriage return to the content. The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -206,6 +210,7 @@
           "defaultValue": "",
           "description": "Specifies that the content should be read as a stream of bytes. This parameter was introduced in PowerShell 6.0. A warning occurs when you use the **AsByteStream** parameter with the **Encoding** parameter. The **AsByteStream** parameter ignores any encoding and the output is returned as a stream of bytes.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -231,6 +236,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -245,6 +251,7 @@
       "description": "Deletes the contents of an item, but does not delete the item.",
       "scriptBody": "",
       "cmdletName": "Clear-Content",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [
@@ -345,6 +352,7 @@
           "defaultValue": "",
           "description": "Forces the command to run without asking for user confirmation.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -384,6 +392,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -398,6 +407,7 @@
       "description": "Copies an item from one location to another.",
       "scriptBody": "",
       "cmdletName": "Copy-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -474,6 +484,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet preserves container objects during the copy operation. By default, the **Container** parameter is set to **True**.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -487,6 +498,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet copies items that can\u0027t otherwise be changed, such as copying over a read-only file or alias.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -539,6 +551,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet does a recursive copy.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -552,6 +565,7 @@
           "defaultValue": "true",
           "description": "Returns an object that represents the item with which you\u0027re working. By default, this cmdlet doesn\u0027t generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -604,6 +618,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -618,6 +633,7 @@
       "description": "Gets the items and child items in one or more specified locations.",
       "scriptBody": "",
       "cmdletName": "Get-ChildItem",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -717,6 +733,7 @@
           "defaultValue": "",
           "description": "Gets the items in the specified locations and in all child items of the locations.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -743,6 +760,7 @@
           "defaultValue": "",
           "description": "Allows the cmdlet to get items that otherwise can\u0027t be accessed by the user, such as hidden or system files. The **Force** parameter doesn\u0027t override security restrictions. Implementation varies by provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -756,6 +774,7 @@
           "defaultValue": "",
           "description": "Gets only the names of the items in the location. The output is a string object that can be sent down the pipeline to other commands. The names returned are relative to the value of the **Path** parameter.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -782,6 +801,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. By default, the \u0060Get-ChildItem\u0060 cmdlet displays symbolic links to directories found during recursion, but doesn\u0027t recurse into them. Use the **FollowSymlink** parameter to search the directories that target those symbolic links. The **FollowSymlink** is a dynamic parameter and is supported only in the **FileSystem** provider. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -795,6 +815,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get a list of directories, use the **Directory** parameter or the **Attributes** parameter with the **Directory** property. You can use the **Recurse** parameter with **Directory**.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -808,6 +829,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get a list of files, use the **File** parameter. You can use the **Recurse** parameter with **File**.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -821,6 +843,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get only hidden items, use the **Hidden** parameter or the **Attributes** parameter with the **Hidden** property. By default, \u0060Get-ChildItem\u0060 doesn\u0027t display hidden items. Use the **Force** parameter to get hidden items.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -834,6 +857,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. To get only read-only items, use the **ReadOnly** parameter or the **Attributes** parameter **ReadOnly** property.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -847,6 +871,7 @@
           "defaultValue": "",
           "description": "\u003E [!NOTE] \u003E This parameter is only available in the \u003E [FileSystem](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md) provider. Gets only system files and directories. To get only system files and folders, use the **System** parameter or **Attributes** parameter **System** property.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -860,6 +885,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -874,6 +900,7 @@
       "description": "Gets the content of the item at the specified location.",
       "scriptBody": "",
       "cmdletName": "Get-Content",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "dataOutputs": [
@@ -1013,6 +1040,7 @@
           "defaultValue": "",
           "description": "**Force** can override a read-only attribute or create directories to complete a file path. The **Force** parameter doesn\u0027t attempt to change file permissions or override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1052,6 +1080,7 @@
           "defaultValue": "",
           "description": "Causes the cmdlet to wait indefinitely, keeping the file open, until interrupted. While waiting, \u0060Get-Content\u0060 checks the file once per second and outputs new lines if present. When used with the **TotalCount** parameter, \u0060Get-Content\u0060 waits until the specified number of lines are available in the specified file. For example, if you specify a **TotalCount** of 10 and the file already has 10 or more lines, \u0060Get-Content\u0060 returns the 10 lines and exits. If the file has fewer than 10 lines, \u0060Get-Content\u0060 outputs each line as it arrives, but waits until the tenth line arrives before exiting. You can interrupt **Wait** by pressing \u003Ckbd\u003ECtrl\u003C/kbd\u003E\u002B\u003Ckbd\u003EC\u003C/kbd\u003E. Deleting the file causes a non-terminating error that also interrupts the waiting. **Wait** is a dynamic parameter that the FileSystem provider adds to the \u0060Get-Content\u0060 cmdlet. This parameter works only in file system drives. **Wait** can\u0027t be combined with **Raw**.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1065,6 +1094,7 @@
           "defaultValue": "",
           "description": "Ignores newline characters and returns the entire contents of a file in one string with the newlines preserved. By default, newline characters in a file are used as delimiters to separate the input into an array of strings. This parameter was introduced in PowerShell 3.0. **Raw** is a dynamic parameter that the **FileSystem** provider adds to the \u0060Get-Content\u0060 cmdlet This parameter works only in file system drives.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1104,6 +1134,7 @@
           "defaultValue": "",
           "description": "Specifies that the content should be read as a stream of bytes. The **AsByteStream** parameter was introduced in Windows PowerShell 6.0. A warning occurs when you use the **AsByteStream** parameter with the **Encoding** parameter. The **AsByteStream** parameter ignores any encoding and the output is returned as a stream of bytes. When reading from and writing to binary files, use the **AsByteStream** parameter and a value of 0 for the **ReadCount** parameter. A **ReadCount** value of 0 reads the entire file in a single read operation. The default **ReadCount** value, 1, reads one byte in each read operation and converts each byte into a separate object. Piping single-byte output to \u0060Set-Content\u0060 causes errors unless you use the **AsByteStream** parameter with \u0060Set-Content\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1129,6 +1160,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1143,6 +1175,7 @@
       "description": "Gets the item at the specified location.",
       "scriptBody": "",
       "cmdletName": "Get-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1245,6 +1278,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet gets items that can\u0027t otherwise be accessed, such as hidden items. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1284,6 +1318,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1298,6 +1333,7 @@
       "description": "Moves an item from one location to another.",
       "scriptBody": "",
       "cmdletName": "Move-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1374,6 +1410,7 @@
           "defaultValue": "",
           "description": "Forces the command to run without asking for user confirmation. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1426,6 +1463,7 @@
           "defaultValue": "true",
           "description": "Returns an object representing the moved item. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1452,6 +1490,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1466,6 +1505,7 @@
       "description": "Creates a new item.",
       "scriptBody": "",
       "cmdletName": "New-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Value",
@@ -1556,6 +1596,7 @@
           "defaultValue": "",
           "description": "Forces this cmdlet to create an item that writes over an existing read-only item. Implementation varies from provider to provider. Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions. Beginning in PowerShell 7.4, this parameter also allows you to overwrite an existing Junction. Previously, this would fail with a \u0022cannot be removed because it is not empty\u0022 error.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1582,6 +1623,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1596,6 +1638,7 @@
       "description": "Deletes the specified items.",
       "scriptBody": "",
       "cmdletName": "Remove-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1698,6 +1741,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet deletes the items in the specified locations and in all child items of the locations. The **Recurse** parameter might not delete all subfolders or all child items. This is a known issue. \u003E [!NOTE] \u003E This behavior was fixed in Windows versions 1909 and newer.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1711,6 +1755,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to remove items that can\u0027t otherwise be changed, such as hidden or read-only files or read-only aliases or variables. The cmdlet can\u0027t remove constant aliases or variables. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1750,6 +1795,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md)",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1764,6 +1810,7 @@
       "description": "Renames an item in a PowerShell provider namespace.",
       "scriptBody": "",
       "cmdletName": "Rename-Item",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1841,6 +1888,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to rename items that can\u0027t otherwise be changed, such as hidden or read-only files or read-only aliases or variables. The cmdlet can\u0027t change constant aliases or variables. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). Even using the **Force** parameter, the cmdlet can\u0027t override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1854,6 +1902,7 @@
           "defaultValue": "",
           "description": "Returns an object that represents the item to the pipeline. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1880,6 +1929,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -1894,6 +1944,7 @@
       "description": "Resolves the wildcard characters in a path, and displays the path contents.",
       "scriptBody": "",
       "cmdletName": "Resolve-Path",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -1957,6 +2008,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns a relative path.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "Path",
             "LiteralPath"
@@ -1985,6 +2037,7 @@
           "defaultValue": "",
           "description": "Allows the cmdlet to get items that otherwise can\u0027t be accessed by the user, such as hidden or system files. The **Force** parameter doesn\u0027t override security restrictions. Implementation varies among providers. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). This parameter was added in PowerShell 7.5-preview.5.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2010,6 +2063,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2024,6 +2078,7 @@
       "description": "Writes new content or replaces existing content in a file.",
       "scriptBody": "",
       "cmdletName": "Set-Content",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Value",
@@ -2065,6 +2120,7 @@
           "defaultValue": "",
           "description": "Returns an object that represents the content. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2153,6 +2209,7 @@
           "defaultValue": "",
           "description": "Forces the cmdlet to set the contents of a file, even if the file is read-only. Implementation varies from provider to provider. For more information, see [about_Providers](../Microsoft.PowerShell.Core/About/about_Providers.md). The **Force** parameter does not override security restrictions.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2179,6 +2236,7 @@
           "defaultValue": "",
           "description": "This is a dynamic parameter made available by the **FileSystem** provider. For more information, see [about_FileSystem_Provider](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md). The string representations of the input objects are concatenated to form the output. No spaces or newlines are inserted between the output strings. No newline is added after the last output string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2218,6 +2276,7 @@
           "defaultValue": "",
           "description": "This is a dynamic parameter made available by the **FileSystem** provider. For more information, see [about_FileSystem_Provider](../Microsoft.PowerShell.Core/About/about_FileSystem_Provider.md). Specifies that the content should be written as a stream of bytes. This parameter was introduced in PowerShell 6.0. A warning occurs when you use the **AsByteStream** parameter with the **Encoding** parameter. The **AsByteStream** parameter ignores any encoding and the output is written as a stream of bytes.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2243,6 +2302,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2257,6 +2317,7 @@
       "description": "Determines whether all elements of a path exist.",
       "scriptBody": "",
       "cmdletName": "Test-Path",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -2376,6 +2437,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet tests the syntax of the path, regardless of whether the elements of the path exist. This cmdlet returns \u0060$true\u0060 if the path syntax is valid and \u0060$false\u0060 if it\u0027s not. If the path being tested includes a drive specification, the cmdlet returns false when the drive does not exist. PowerShell returns false because it doesn\u0027t know which drive provider to test. \u003E [!NOTE] \u003E A breaking change in the Path APIs was introduced in .NET 2.1. Those methods no longer check for \u003E invalid path characters. This change caused a regression in PowerShell where the **IsValid** check \u003E no longer tests for invalid characters. The regression will be addressed in a future release. For \u003E more information, see \u003E [Breaking changes in .NET Core 2.1](/dotnet/core/compatibility/2.1#path-apis-dont-throw-an-exception-for-invalid-characters).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2428,6 +2490,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md)",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2442,6 +2505,7 @@
       "description": "Combines a path and a child path into a single path.",
       "scriptBody": "",
       "cmdletName": "Join-Path",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -2505,6 +2569,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet should attempt to resolve the joined path from the current provider. - If you use wildcards, the cmdlet returns all paths that match the joined path. - If you don\u0027t use wildcards, the cmdlet returns an error if the path doesn\u0027t exist.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2531,6 +2596,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2545,6 +2611,7 @@
       "description": "Returns the specified part of a path.",
       "scriptBody": "",
       "cmdletName": "Split-Path",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -2627,6 +2694,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns only the qualifier of the specified path. For the FileSystem or Registry providers, the qualifier is the drive of the provider path, such as \u0060C:\u0060 or \u0060HKCU:\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "QualifierSet"
           ],
@@ -2645,6 +2713,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns the path without the qualifier. For the FileSystem or registry providers, the qualifier is the drive of the provider path, such as \u0060C:\u0060 or \u0060HKCU:\u0060. For example, in the path \u0060C:\\Test\\Logs\\Pass1.log\u0060, it returns only \u0060\\Test\\Logs\\Pass1.log\u0060.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "NoQualifierSet"
           ],
@@ -2662,6 +2731,7 @@
           "defaultValue": "",
           "description": "\u0060Split-Path\u0060 returns only the parent container portion of the path string supplied. If the **Path** string doesn\u0027t contain a parent container, \u0060Split-Path\u0060 returns an empty string.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ParentSet"
           ],
@@ -2678,6 +2748,7 @@
           "defaultValue": "",
           "description": "When using the **Leaf** parameter, \u0060Split-Path\u0060 returns only the last item in the path string supplied, regardless whether that item is a file or a directory.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "LeafSet"
           ],
@@ -2696,6 +2767,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns only base name of the leaf. For example, in the path \u0060C:\\Test\\Logs\\Pass1.log\u0060, it returns only \u0060Pass1\u0060. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "LeafBaseSet"
           ],
@@ -2713,6 +2785,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns only the extension of the leaf. For example, in the path \u0060C:\\Test\\Logs\\Pass1.log\u0060, it returns only \u0060.log\u0060. This parameter was introduced in PowerShell 6.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ExtensionSet"
           ],
@@ -2729,6 +2802,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet displays the items that are referenced by the resulting split path instead of displaying the path elements.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2743,6 +2817,7 @@
           "defaultValue": "",
           "description": "Indicates that this cmdlet returns \u0060$true\u0060 if the path is absolute and \u0060$false\u0060 if it\u0027s relative. On Windows, an absolute path string must start with a provider drive specifier, like \u0060C:\u0060 or \u0060HKCU:\u0060. A relative path starts with a dot (\u0060.\u0060) or a dot-dot (\u0060..\u0060).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "IsAbsoluteSet"
           ],
@@ -2773,6 +2848,7 @@
           "defaultValue": "",
           "description": "Includes the command in the active transaction. This parameter is valid only when a transaction is in progress. For more information, see about_Transactions (../Microsoft.PowerShell.Core/About/about_Transactions.md).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2787,6 +2863,7 @@
       "description": "Gets the security descriptor for a resource, such as a file or registry key.",
       "scriptBody": "",
       "cmdletName": "Get-Acl",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "Path",
@@ -2860,6 +2937,7 @@
           "defaultValue": "",
           "description": "Gets the audit data for the security descriptor from the system access control list (SACL).",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
@@ -2910,6 +2988,7 @@
       "description": "Changes the security descriptor of a specified item, such as a file or a registry key.",
       "scriptBody": "",
       "cmdletName": "Set-Acl",
+      "valueExpression": "",
       "hasExecIn": true,
       "hasExecOut": true,
       "primaryPipelineParameter": "AclObject",
@@ -3009,6 +3088,7 @@
           "defaultValue": "",
           "description": "Removes the central access policy from the specified item. Beginning in Windows Server 2012, administrators can use Active Directory and Group Policy to set central access policies for users and groups. For more information, see [Dynamic Access Control: Scenario Overview](/windows-server/identity/solution-guides/dynamic-access-control--scenario-overview). This parameter was introduced in Windows PowerShell 3.0.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [
             "ByPath",
             "ByLiteralPath"
@@ -3024,6 +3104,7 @@
           "defaultValue": "",
           "description": "Returns an object that represents the security descriptor that was changed. By default, this cmdlet does not generate any output.",
           "validValues": [],
+          "isSwitch": true,
           "parameterSets": [],
           "mandatoryInSets": [],
           "supportedEditions": [
