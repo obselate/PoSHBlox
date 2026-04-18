@@ -41,7 +41,7 @@ function Nav() {
           <a href="#what" style={{ fontSize: "14px", fontWeight: "600" }}>What</a>
           <a href="#how" style={{ fontWeight: "600", fontSize: "14px" }}>How</a>
           <a href="#features" style={{ fontSize: "14px", fontWeight: "600" }}>Features</a>
-          <a href={GITHUB_URL} style={{ fontSize: "1px", fontWeight: "600" }}>GitHub</a>
+          <a href={GITHUB_URL} style={{ fontSize: "14px", fontWeight: "600" }}>GitHub</a>
         </div>
         <a href={GITHUB_URL + '/releases'} className="nav-cta">
           <Icon name="download" size={12} /> Download
@@ -160,7 +160,7 @@ function WhatItIs() {
     <section className="panel page" id="what">
       <div className="section-label"><span className="tag-num">01</span> WHAT IS POSHBLOX</div>
       <h2 className="section-title">Building blocks for PowerShell.</h2>
-      <p className="section-lede" style={{ width: "600px" }}>
+      <p className="section-lede">
         PoSHBlox is a visual way to learn PowerShell and a modern replacement for the
         retired <code>PowerShell ISE</code>. See the pipeline before you write it — every node
         is a real cmdlet, every wire is a real parameter bind.
@@ -196,7 +196,7 @@ function HowItWorks() {
     <section className="panel page" id="how">
       <div className="section-label"><span className="tag-num">02</span> HOW IT WORKS</div>
       <h2 className="section-title">Three verbs. In order.</h2>
-      <p className="section-lede" style={{ width: "640px" }}>
+      <p className="section-lede">
         Build the graph, run it to see the result, then export to a real
         <code> .ps1</code> file you can save, share, or run from the terminal.
       </p>
@@ -266,14 +266,7 @@ function Features() {
 function DownloadCTA() {
   return (
     <section className="panel page" style={{ marginTop: 40 }}>
-      <div style={{
-        border: '1px solid var(--teal-700)',
-        background: 'linear-gradient(180deg, rgba(46, 84, 77, 0.4) 0%, rgba(13, 30, 48, 0.4) 100%)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '40px',
-        display: 'grid', gridTemplateColumns: '1.2fr auto', gap: 40,
-        alignItems: 'center'
-      }}>
+      <div className="download-cta">
         <div>
           <div className="section-label" style={{ color: 'var(--teal-400)' }}>
             <span style={{ color: 'var(--teal-400)' }}>→</span> GET IT
@@ -285,7 +278,7 @@ function DownloadCTA() {
             Windows x64 release zip
           </p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 240 }}>
+        <div className="download-cta-buttons">
           <a href={GITHUB_URL + '/releases/latest'} className="btn btn-run" style={{ justifyContent: 'center' }}>
             <Icon name="download" size={14} /> PoSHBlox-{VERSION}-win-x64.exe
           </a>

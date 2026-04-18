@@ -521,6 +521,56 @@
   .mini-pin.out .mini-pin-dot { right: -6px; }
   .mini-pin.out { flex-direction: row; }
   .mini-pin-dot.connected { background: currentColor; border-color: currentColor; }
+
+  /* ——— Download CTA ——— */
+  .download-cta {
+    border: 1px solid var(--teal-700);
+    background: linear-gradient(180deg, rgba(46, 84, 77, 0.4) 0%, rgba(13, 30, 48, 0.4) 100%);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    display: grid; grid-template-columns: minmax(0, 1.2fr) auto; gap: 40px;
+    align-items: center;
+  }
+  .download-cta-buttons {
+    display: flex; flex-direction: column; gap: 10px; min-width: 240px;
+  }
+  .download-cta-buttons .btn { white-space: nowrap; }
+
+  /* ——— Tablet / narrow (≤900px) ——— */
+  /* Hero graph nodes span ~650px natural width; scale so they fit the column
+     once the hero has stacked to one column. */
+  @media (max-width: 900px) {
+    .hero-graph {
+      transform: scale(0.72);
+      transform-origin: 0 0;
+      width: calc(100% / 0.72);
+      height: calc(100% / 0.72);
+    }
+  }
+
+  /* ——— Mobile (≤640px) ——— */
+  @media (max-width: 640px) {
+    .page { padding: 0 20px; }
+    .nav-inner { padding: 0 20px; gap: 16px; }
+    .nav-links { display: none; }
+    .hero { padding: 40px 20px 24px; gap: 24px; }
+    .hero-visual { min-height: 360px; }
+    .hero-graph {
+      transform: scale(0.52);
+      width: calc(100% / 0.52);
+      height: calc(100% / 0.52);
+    }
+    .download-cta {
+      grid-template-columns: 1fr; gap: 24px; padding: 24px;
+    }
+    .download-cta-buttons { min-width: 0; }
+    .download-cta-buttons .btn {
+      white-space: normal; word-break: break-word; height: auto;
+      padding: 10px 14px; line-height: 1.3;
+    }
+    .foot-inner { padding: 0 20px; }
+    .foot-bar { padding: 20px 20px 0; }
+  }
 </style>
 </head>
 <body>
