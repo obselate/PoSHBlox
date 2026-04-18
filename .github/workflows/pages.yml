@@ -1,0 +1,55 @@
+name: Deploy Pages
+
+# Pages source must be set to "GitHub Actions" in repo Settings → Pages.
+# This workflow stages web/ + a curated subset of Assets/ into _site,
+# so site layout and app assets stay single-source without duplication.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'Assets/Fonts/**'
+      - 'Assets/poshblox.ico'
+      - 'Assets/poshblox-icon.png'
+      - 'Assets/poshblox-og.png'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage site
+        run: |
+          mkdir -p _site/Assets/Fonts
+          cp -a web/. _site/
+          cp Assets/Fonts/JetBrainsMono-Regular.ttf \
+             Assets/Fonts/JetBrainsMono-SemiBold.ttf \
+             Assets/Fonts/JetBrainsMono-Bold.ttf \
+             _site/Assets/Fonts/
+          cp Assets/poshblox.ico \
+             Assets/poshblox-icon.png \
+             Assets/poshblox-og.png \
+             _site/Assets/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
