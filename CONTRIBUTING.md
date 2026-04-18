@@ -1,7 +1,7 @@
 # Contributing to PoSHBlox
 
-Thanks for being here. Cmdlet templates, codegen fixes, bug reports, UX
-polish — everything helps.
+Thanks for being here. Catalog extensions, codegen fixes, bug reports,
+UX polish — everything helps.
 
 ## Getting Started
 
@@ -45,49 +45,27 @@ PoSHBlox/
 
 ## How to Contribute
 
-### The Easiest Way: Add Cmdlet Templates
+### Extend the shipped catalog
 
-You don't need to know C# to contribute cmdlet templates. Templates are
-JSON. If you can write PowerShell, you can write a template.
+Adding modules that ship to every user is the highest-leverage
+contribution that doesn't require C#. You edit one JSON file, run one
+command, open a PR.
 
-#### Option A (recommended): Use **+ Import** in the palette
-
-1. Click **`+ Import`** in the Node Palette
-2. Pick a module name (`ActiveDirectory`, `SqlServer`, …)
-3. Click **Scan** — PoSHBlox introspects cmdlets and parameters from your
-   installed PowerShell host (pwsh 7+ preferred, 5.1 fallback)
-4. Select cmdlets, set a category name, save
-5. The resulting `.json` lands in `Templates/Custom/` and shows up in the
-   palette on next launch
-
-Share the generated file — that's the whole workflow.
-
-#### Option B: Hand-author a `.json` in `Templates/Custom/`
-
-Schema version 3. Minimal shape:
+`scripts/builtin-catalog.json` is the reference manifest that drives
+`Templates/Builtin/*.json`. Each `target` says: which output file,
+which category label, which PowerShell modules (and optionally which
+specific cmdlets) should populate it.
 
 ```json
 {
-  "version": 3,
-  "category": "My Custom Tools",
-  "templates": [
+  "targets": [
     {
-      "name": "Invoke-MyTool",
-      "cmdletName": "Invoke-MyTool",
-      "description": "Runs my custom tool",
-      "hasExecIn": true,
-      "hasExecOut": true,
-      "primaryPipelineParameter": "Target",
-      "dataOutputs": [
-        { "name": "Out", "isPrimary": true }
-      ],
-      "parameters": [
+      "outputFile": "Templates/Builtin/NetworkRemote.json",
+      "category": "Network / Remote",
+      "sources": [
         {
-          "name": "Target",
-          "type": "String",
-          "isMandatory": true,
-          "isPipelineInput": true,
-          "description": "Target host or path"
+          "module": "Microsoft.PowerShell.Utility",
+          "cmdlets": ["Invoke-WebRequest", "Invoke-RestMethod"]
         }
       ]
     }
@@ -95,59 +73,17 @@ Schema version 3. Minimal shape:
 }
 ```
 
-Restart PoSHBlox to pick it up.
+To contribute: add a new target, or extend an existing one's `sources`
+/ `cmdlets` list, then regenerate (see below). PR both the manifest
+edit and the regenerated `Templates/Builtin/*.json`. The introspector
+fills in parameter sets, editions, pipeline flags, and descriptions
+from the live module — you don't need to understand the output schema.
 
-#### Template Field Reference
-
-**Top-level template fields:**
-
-| Field | What it does |
-|-------|-------------|
-| `cmdletName` | Cmdlet to invoke. Empty = script-body node (see below). |
-| `containerType` | `None`, `IfElse`, `ForEach`, `TryCatch`, `While`, `Function`, `Label`. |
-| `hasExecIn` / `hasExecOut` | Triangle exec pins. Terminal nodes (sinks) typically set `hasExecOut: false`. |
-| `dataOutputs` | List of `{ "name": "...", "type": "...", "isPrimary": true }`. Omit to get one primary `Out` of type `Any`. |
-| `primaryPipelineParameter` | Name of the parameter whose input pin collapses `A \| B`. If omitted, the first param with `isPipelineInput: true` wins. |
-| `knownParameterSets` / `defaultParameterSet` | Parameter-set metadata for multi-set cmdlets. Optional. |
-| `scriptBody` | Raw PowerShell. Used when `cmdletName` is empty. |
-
-**Parameter types** (`type` field, case-sensitive):
-
-| Type | PowerShell equivalent | UI |
-|------|----------------------|-----|
-| `String` / `Path` / `Enum` | `[string]` (quoted) | TextBox / picker / ComboBox |
-| `Int` | `[int]` | TextBox |
-| `Bool` | `[bool]` or `[switch]` (use `"isSwitch": true`) | CheckBox |
-| `StringArray` | `[string[]]` | TextBox (comma-separated → `@("a","b")`) |
-| `Collection` | `[object[]]` | TextBox (comma-separated) |
-| `ScriptBlock` | `[scriptblock]` | Multi-line TextBox (wrapped in `{ … }`) |
-| `Credential` | `[PSCredential]` | TextBox (raw pass-through — use `$cred`) |
-| `HashTable` | `[hashtable]` | TextBox (raw pass-through — use `@{...}`) |
-| `Object` / `Any` | untyped | TextBox (raw pass-through) |
-
-**Parameter flags:**
-
-- `isMandatory` — adds red asterisk + blocks run
-- `isSwitch` — presence-only; emits bare `-Name` when set
-- `isPipelineInput` — `[Parameter(ValueFromPipeline)]`; a candidate for the pipeline-collapse pass
-- `parameterSets` / `mandatoryInSets` — which sets this param belongs to (empty = common)
-- `validValues` — drives the `Enum` ComboBox
-- `defaultValue` — pre-fills the editor
-
-**Script-body nodes:** Leave `cmdletName` empty, put code in `scriptBody`.
-The node executes that literal instead of calling a named cmdlet.
-
-#### Gotchas
-
-- Strings in textboxes codegen as double-quoted literals: `"value"` with
-  `$var`/`$(...)` expansion and `` ` ``/`"` escaping. If you need raw
-  expressions (piping a variable into a param), wire the pin instead of
-  typing into the textbox.
-- Malformed JSON is skipped silently at load — check the debug trace if a
-  file doesn't show up. `Tools/Audit-Templates.ps1` will flag most issues.
-- The introspection-based Import dialog populates parameter sets, editions,
-  and pipeline flags correctly. Hand-authored templates only get what you
-  write.
+> **Not a contribution path:** the **+ Import** button in the palette.
+> That's a local feature — the machine-generated JSON lands in
+> `Templates/Custom/` and works on your machine. For anything
+> everyone should get, the manifest is the source of truth. Don't
+> copy `Templates/Custom/*.json` into a PR.
 
 ### Found a Bug?
 
@@ -241,36 +177,25 @@ One feature or fix per PR.
 
 ## Areas Where Help Is Needed
 
-- More cmdlet templates — especially Az, AWS, Exchange, VMware
+- Shipped-catalog expansion — add popular modules (Az, AWS, Exchange, VMware) as new targets in `scripts/builtin-catalog.json`
 - Codegen edge cases — nested pipelines, advanced parameter sets
 - UX polish — auto-arrange, minimap, undo/redo
 - Import dialog — module picker from `Get-Module -ListAvailable`, progress for large modules, cross-platform support
-- Template validation — useful error messages instead of silent skips
+- Catalog validation — richer errors from `Tools/Audit-Templates.ps1` (and ideally surface them in-app instead of silent skips)
 - Tutorial content, wiki pages
-- Unit tests around codegen / template loading
+- Unit tests around codegen and catalog loading
 - Bug reports — just using the tool and telling us what breaks is genuinely valuable
-
-## Sharing Templates
-
-Built a useful pack?
-
-1. Copy your `.json` from `Templates/Custom/`
-2. Share however you like — GitHub, Discord, email
-3. Recipient drops it in their `Templates/Custom/`
-4. Shows up in their palette on next launch
-
-No compilation, no PR required (though we'd love to ship good community
-packs in `Templates/Builtin/`).
 
 ## AI-Assisted Contributions
 
-Using AI tools (Copilot, Claude, ChatGPT, whatever) to help write code or
-templates is fine. We're not going to gatekeep how you produce your work.
+Using AI tools (Copilot, Claude, ChatGPT, whatever) to help write code,
+manifest entries, or docs is fine. We're not going to gatekeep how you
+produce your work.
 
 **The catch:** you own what you submit. AI-generated code must be
 reviewed, understood, and tested by you. "The AI wrote it" isn't a
-defense for broken code or nonsensical parameter definitions. AI is a
-tool, not an author.
+defense for broken code or a manifest entry that points at a module
+that doesn't exist. AI is a tool, not an author.
 
 ## Questions?
 
