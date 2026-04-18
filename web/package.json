@@ -1,0 +1,10 @@
+{
+  "name": "poshblox-site",
+  "private": true,
+  "scripts": {
+    "build": "esbuild App.jsx HeroCanvas.jsx StepVisuals.jsx --loader:.jsx=jsx --outdir=dist --jsx-factory=React.createElement --jsx-fragment=React.Fragment --minify --target=es2020"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

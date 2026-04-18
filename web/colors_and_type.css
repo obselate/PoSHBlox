@@ -14,35 +14,35 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../Assets/Fonts/JetBrainsMono-Regular.ttf") format("truetype");
+  src: url("Assets/Fonts/JetBrainsMono-Regular.ttf") format("truetype");
 }
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 500;          /* no 500 shipped — fall back to 600 */
   font-display: swap;
-  src: url("../Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
+  src: url("Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
 }
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("../Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
+  src: url("Assets/Fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
 }
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("../Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
+  src: url("Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
 }
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 800;          /* no 800 shipped — synthesised from 700 */
   font-display: swap;
-  src: url("../Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
+  src: url("Assets/Fonts/JetBrainsMono-Bold.ttf") format("truetype");
 }
 
 :root {
