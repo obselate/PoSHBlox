@@ -74,6 +74,14 @@ public partial class GraphCanvasViewModel : ObservableObject
     // ── Project state ─────────────────────────────────────────
     [ObservableProperty] private string? _currentFilePath;
     [ObservableProperty] private bool _isDirty;
+
+    /// <summary>
+    /// False on app launch → the empty-state overlay is shown in place of
+    /// the canvas. Flips true when the user clicks "Create new project",
+    /// opens an existing .pblx, or otherwise takes any explicit action.
+    /// </summary>
+    [ObservableProperty] private bool _hasProject;
+
     private DateTime? _projectCreatedUtc;
     private bool _suppressDirty;
 
@@ -98,7 +106,9 @@ public partial class GraphCanvasViewModel : ObservableObject
         // the registry on its own.
         PowerShellHostRegistry.ActiveHostChanged += RefreshHostCompatOnAllParams;
 
-        SeedExampleGraph();
+        // First-run canvas is blank — the view overlays an empty-state
+        // CTA bound to !HasProject. The user clicks Create, which calls
+        // NewGraph() and flips HasProject, dismissing the overlay.
         RefreshWiredState();
         RefreshParameterSetVisibility();
         RefreshValidation();
@@ -221,6 +231,7 @@ public partial class GraphCanvasViewModel : ObservableObject
         _suppressDirty = false;
         Undo.Clear();
         IsDirty = false;
+        HasProject = true;
     }
 
     [RelayCommand]
@@ -921,6 +932,7 @@ public partial class GraphCanvasViewModel : ObservableObject
     {
         _suppressDirty = true;
         _projectCreatedUtc = doc.Metadata.CreatedUtc;
+        HasProject = true;
         ProjectSerializer.RebuildGraph(doc, this);
         // Backfill KnownParameterSets / ActiveParameterSet on every loaded node
         // from the template catalog. Covers V1 files (field didn't exist) and
@@ -1162,56 +1174,5 @@ public partial class GraphCanvasViewModel : ObservableObject
         RefreshParameterSetVisibility();
         RefreshValidation();
         Palette.SyncFunctionTemplates();
-    }
-
-    // ── Example graph seed ─────────────────────────────────────
-
-    private void SeedExampleGraph()
-    {
-        var getProcess = NodeFactory.CreateFromTemplate(new NodeTemplate
-        {
-            Name = "Get-Process",
-            Category = "Process / Service",
-            CmdletName = "Get-Process",
-            HasExecIn = false,
-            DataOutputs =
-            [
-                new DataOutputDef { Name = "Processes", Type = ParamType.Collection, IsPrimary = true },
-            ],
-            Parameters =
-            [
-                new ParameterDef { Name = "Name", Type = ParamType.String, Description = "Process name filter" },
-            ],
-        }, x: 100, y: 150);
-
-        var sort = NodeFactory.CreateFromTemplate(new NodeTemplate
-        {
-            Name = "Sort-Object",
-            Category = "String / Data",
-            CmdletName = "Sort-Object",
-            PrimaryPipelineParameter = "InputObject",
-            DataOutputs =
-            [
-                new DataOutputDef { Name = "Sorted", Type = ParamType.Collection, IsPrimary = true },
-            ],
-            Parameters =
-            [
-                new ParameterDef { Name = "InputObject", Type = ParamType.Collection, IsPipelineInput = true,
-                                   Description = "Upstream data via pipeline" },
-                new ParameterDef { Name = "Property", Type = ParamType.String, IsMandatory = true,
-                                   DefaultValue = "CPU", Description = "Property to sort by" },
-                new ParameterDef { Name = "Descending", Type = ParamType.Bool, IsSwitch = true,
-                                   DefaultValue = "true", Description = "Sort descending" },
-            ],
-        }, x: 400, y: 150);
-
-        Nodes.Add(getProcess);
-        Nodes.Add(sort);
-
-        // Wire the exec flow and the primary data pipe.
-        if (getProcess.ExecOutPort != null && sort.ExecInPort != null)
-            AddConnection(getProcess.ExecOutPort, sort.ExecInPort);
-        if (getProcess.PrimaryDataOutput != null && sort.PrimaryPipelineTarget != null)
-            AddConnection(getProcess.PrimaryDataOutput, sort.PrimaryPipelineTarget);
     }
 }

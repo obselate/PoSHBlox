@@ -47,6 +47,15 @@ cd PoSHBlox
 dotnet run
 ```
 
+### Try a sample
+
+The repo ships with a handful of ready-to-open `.pblx` files under
+`Samples/`. From the running app, **Open** one (or Ctrl+O) to see a
+working graph — 01-csv-cleanup, 02-show-psversion, 03-safe-env, and
+04-filesize-compare are progressively more involved. Hit **Run** to
+execute, or toggle the script preview (Ctrl+P) to see the generated
+PowerShell.
+
 ### Publish
 
 Build a self-contained single-file executable:

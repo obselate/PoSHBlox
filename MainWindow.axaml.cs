@@ -563,6 +563,12 @@ public partial class MainWindow : AppWindow
             vm.NewGraph();
     }
 
+    private void OnHelpClicked(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GraphCanvasViewModel vm) return;
+        vm.IsCheatSheetOpen = !vm.IsCheatSheetOpen;
+    }
+
     private async Task<bool> ConfirmDiscardAsync()
     {
         if (DataContext is not GraphCanvasViewModel vm || !vm.IsDirty)

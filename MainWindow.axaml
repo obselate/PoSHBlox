@@ -89,6 +89,21 @@
                 BorderThickness="0,0,0,1"
                 Padding="4,3">
             <DockPanel LastChildFill="False">
+                <!-- Right-docked help chip: toggles the keyboard cheatsheet.
+                     Declared first so it sits outermost-right; the host chip
+                     docks to its left. Shift+? also toggles it. -->
+                <Button DockPanel.Dock="Right"
+                        Click="OnHelpClicked"
+                        Margin="0,0,4,0" Padding="6,3" CornerRadius="3"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        Foreground="{DynamicResource TextSecondaryBrush}"
+                        BorderThickness="0"
+                        FontSize="11"
+                        ToolTip.Tip="Keyboard shortcuts (Shift+?)">
+                    <ui:SymbolIcon Symbol="Help" FontSize="14" VerticalAlignment="Center" />
+                </Button>
+
                 <!-- Right-docked status chip: active PowerShell host.
                      Declared before the left stack so it wins when space is tight. -->
                 <Button DockPanel.Dock="Right"
@@ -764,7 +779,37 @@
                             </DockPanel>
                         </Border>
 
-                        <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
+                        <Grid>
+                            <ctrl:NodeGraphCanvas x:Name="GraphCanvas" DataContext="{Binding}" />
+
+                            <!-- Empty-state overlay. Visible until the user clicks "Create
+                                 new project", which calls NewGraphCommand and flips HasProject
+                                 true. Background matches the canvas so the hand-off is seamless. -->
+                            <Border IsVisible="{Binding !HasProject}"
+                                    Background="{DynamicResource BgPrimaryBrush}">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14">
+                                    <TextBlock Text="Create a new PoSHBlox project"
+                                               HorizontalAlignment="Center"
+                                               FontSize="22" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Start with a blank canvas, or open an existing .pblx."
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <Button HorizontalAlignment="Center"
+                                            Padding="16,8" CornerRadius="4"
+                                            Command="{Binding NewGraphCommand}"
+                                            Background="{DynamicResource BgSaveTintBrush}"
+                                            Foreground="{DynamicResource TextFileBrush}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <ui:SymbolIcon Symbol="Add" FontSize="16" VerticalAlignment="Center" />
+                                            <TextBlock Text="Create project" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </DockPanel>
                 </SplitView.Content>
             </SplitView>
