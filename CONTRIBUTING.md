@@ -1,6 +1,6 @@
 # Contributing to PoSHBlox
 
-Thanks for being here. Whether you're adding a cmdlet template, improving the code generation engine, fixing bugs, or just telling us what's broken — every contribution matters.
+Thanks for being here. Whether you're adding a cmdlet template, improving the code generation engine, fixing bugs, or just telling me what's broken — every contribution matters.
 
 ## Getting Started
 
